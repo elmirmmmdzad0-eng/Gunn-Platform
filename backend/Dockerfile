@@ -2,12 +2,13 @@
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 COPY . .
-RUN mvn clean package -DskipTests
+# Maven-ə deyirik ki, 'backend' qovluğunun içinə girib pom.xml-i ordan oxusun
+RUN mvn -f backend/pom.xml clean package -DskipTests
 
 # 2. Mərhələ: Layihəni işə salmaq (Run)
-# Burada hamı tərəfindən qəbul edilən rəsmi Eclipse Temurin obrazından istifadə edirik
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+# Hazır olan jar faylını backend-in hədəf qovluğundan bura köçürürük
+COPY --from=build /app/backend/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
