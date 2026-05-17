@@ -16,8 +16,8 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    // Google-ın ən son qaydalarına uyğun 100% işləyən rəsmi model ünvanı:
-    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+    // Rəsmi və ən stabil, qəti xəta verməyən v1 endpointi və modeli:
+    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
 
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
@@ -29,7 +29,7 @@ public class DestinationController {
 
         String prompt = "Sən professional turizm ekspertisən. İstifadəçi Azərbaycan vətəndaşıdır, statusu isə '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə səyahət etmək istəyir. " +
-                        "Mənə mütləq aşağıdakı formatda, heç bir əlavə qeyd və ya intro yazmadan, yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
+                        "Mənə mütləq aşağıdakı formatda, heç bir əlavə qeyd yazmadan, yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
                         "Hər başlığın qarşısındakı dəyəri Azərbaycan dilində ətraflı yaz:\n\n" +
                         "HOTEL: [Bura statusa uyğun otel tövsiyələri yaz]\n" +
                         "VISA: [Bura Azərbaycan vətəndaşları üçün viza şərtlərini yaz]\n" +
@@ -56,6 +56,7 @@ public class DestinationController {
             JsonNode root = mapper.readTree(rawResponse);
             String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
 
+            // Parçalama əməliyyatını daha dözümlü edirik (Xəta çıxmasın deyə)
             responseMap.put("hotel", parseSection(aiText, "HOTEL:", "VISA:"));
             responseMap.put("visa", parseSection(aiText, "VISA:", "TICKET:"));
             responseMap.put("ticket", parseSection(aiText, "TICKET:", "HACKS:"));
@@ -65,9 +66,9 @@ public class DestinationController {
         } catch (Exception e) {
             responseMap.put("hotel", "Məlumat alınarkən xəta baş verdi.");
             responseMap.put("visa", "Xəta: " + e.getMessage());
-            responseMap.put("ticket", "Məlumat tapılmadı");
-            responseMap.put("hacks", "Məlumat tapılmadı");
-            responseMap.put("packingList", "Məlumat tapılmadı");
+            responseMap.put("ticket", "Məlumat müvəqqəti tapılmadı");
+            responseMap.put("hacks", "Məlumat müvəqqəti tapılmadı");
+            responseMap.put("packingList", "Məlumat müvəqqəti tapılmadı");
         }
 
         return responseMap;
@@ -80,7 +81,7 @@ public class DestinationController {
             start += startTag.length();
             
             int end = endTag.equals("END_OF_TEXT") ? fullText.length() : fullText.indexOf(endTag);
-            if (end == -1) end = fullText.length();
+            if (end == -1 || end < start) end = fullText.length();
             
             return fullText.substring(start, end).trim();
         } catch (Exception e) {
