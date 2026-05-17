@@ -50,42 +50,62 @@ public class DestinationController {
                         "HACKS: [Səyahət fəndləri]\n" +
                         "PACKING: [Çamadan əşya siyahısı]";
 
+        // Google-un rəsmi olaraq pulsuz tier üçün stabil saxladığı ən doğru url strukturu
+        String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
+        
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            // Pulsuz tier üçün ən stabil və keçərli keçid (v1beta)
-            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
-            URI uri = URI.create(urlString);
-
-            Map<String, Object> textMap = new HashMap<>();
-            textMap.put("text", prompt);
-
-            Map<String, Object> partsMap = new HashMap<>();
-            partsMap.put("parts", new Object[]{textMap});
-
-            Map<String, Object> contentsMap = new HashMap<>();
-            contentsMap.put("contents", new Object[]{partsMap});
-
-            String rawResponse = restTemplate.postForObject(uri, contentsMap, String.class);
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(rawResponse);
-            String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
-
-            responseMap.put("hotel", parseSection(aiText, "HOTEL:", "VISA:"));
-            responseMap.put("visa", parseSection(aiText, "VISA:", "TICKET:"));
-            responseMap.put("ticket", parseSection(aiText, "TICKET:", "HACKS:"));
-            responseMap.put("hacks", parseSection(aiText, "HACKS:", "PACKING:"));
-            responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
-
+            return executePostRequest(urlString, prompt, responseMap);
         } catch (Exception e) {
-            responseMap.put("hotel", "Sistemə qoşulmada xəta baş verdi.");
-            responseMap.put("visa", "Xəta: " + e.getMessage());
-            responseMap.put("ticket", "Məlumat tapılmadı");
-            responseMap.put("hacks", "Məlumat tapılmadı");
-            responseMap.put("packingList", "Məlumat tapılmadı");
+            // Əgər üst model regional olaraq bloklanarsa, dərhal ehtiyat modelə keçir
+            if (e.getMessage() != null && e.getMessage().contains("404")) {
+                String backupUrlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey.trim();
+                try {
+                    return executePostRequest(backupUrlString, prompt, responseMap);
+                } catch (Exception ex) {
+                    fillErrorResponse(responseMap, ex.getMessage());
+                }
+            } else {
+                fillErrorResponse(responseMap, e.getMessage());
+            }
         }
 
         return responseMap;
+    }
+
+    private Map<String, String> executePostRequest(String urlString, String prompt, Map<String, String> responseMap) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+        URI uri = URI.create(urlString);
+
+        Map<String, Object> textMap = new HashMap<>();
+        textMap.put("text", prompt);
+
+        Map<String, Object> partsMap = new HashMap<>();
+        partsMap.put("parts", new Object[]{textMap});
+
+        Map<String, Object> contentsMap = new HashMap<>();
+        contentsMap.put("contents", new Object[]{partsMap});
+
+        String rawResponse = restTemplate.postForObject(uri, contentsMap, String.class);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(rawResponse);
+        String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+
+        responseMap.put("hotel", parseSection(aiText, "HOTEL:", "VISA:"));
+        responseMap.put("visa", parseSection(aiText, "VISA:", "TICKET:"));
+        responseMap.put("ticket", parseSection(aiText, "TICKET:", "HACKS:"));
+        responseMap.put("hacks", parseSection(aiText, "HACKS:", "PACKING:"));
+        responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
+
+        return responseMap;
+    }
+
+    private void fillErrorResponse(Map<String, String> responseMap, String errorMsg) {
+        responseMap.put("hotel", "Sistemə qoşulmada xəta baş verdi.");
+        responseMap.put("visa", "Xəta: " + errorMsg);
+        responseMap.put("ticket", "Məlumat tapılmadı");
+        responseMap.put("hacks", "Məlumat tapılmadı");
+        responseMap.put("packingList", "Məlumat tapılmadı");
     }
 
     private String parseSection(String fullText, String startTag, String endTag) {
