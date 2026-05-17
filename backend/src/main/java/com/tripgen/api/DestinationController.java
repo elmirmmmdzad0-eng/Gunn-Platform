@@ -1,6 +1,5 @@
 package com.tripgen.api;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,8 +14,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class DestinationController {
 
-    @Value("${gemini.api.key:#{null}}")
-    private String apiKey;
+    // QƏTİ HƏLL: Spring-in nazı ilə oynamırıq, birbaşa Render-in sistemindən açarı qolundan tutub çəkirik!
+    private final String apiKey = System.getenv("GEMINI_API_KEY");
 
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
@@ -36,6 +35,13 @@ public class DestinationController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", city);
 
+        // Təhlükəsizlik sığortası: Əgər kimsə Render-də adı səhv yazıbsa, sistem dərhal bizə desin
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            responseMap.put("hotel", "KRİTİK XƏTA: Render-də GEMINI_API_KEY mühit dəyişəni oxunmadı!");
+            responseMap.put("visa", "Zəhmət olmasa Render-də Environment bölməsində adın düzgünlüyünü yoxlayın.");
+            return responseMap;
+        }
+
         String prompt = "Sən professional turizm ekspertisən. Səyahətçi Azərbaycan vətəndaşıdır, statusu '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə getmək istəyir. " +
                         "Mənə aşağıdakı formatda, əlavə heç bir mətn yazmadan, yalnız bu 5 başlığı daxil edən cavab qaytar:\n\n" +
@@ -48,7 +54,7 @@ public class DestinationController {
         try {
             RestTemplate restTemplate = new RestTemplate();
             
-            // QƏTİ HƏLL: Linki String yox, qorunan URI obyektinə çeviririk ki, Java qoşa nöqtəni (:) xarab etməsin!
+            // Qorunan URI və tam rəsmi endpoint bağlantısı
             String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
             URI uri = URI.create(urlString);
 
@@ -61,7 +67,6 @@ public class DestinationController {
             Map<String, Object> contentsMap = new HashMap<>();
             contentsMap.put("contents", new Object[]{partsMap});
 
-            // Burada artıq qorunan URI-ni göndəririk:
             String rawResponse = restTemplate.postForObject(uri, contentsMap, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
