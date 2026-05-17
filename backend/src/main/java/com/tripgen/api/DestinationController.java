@@ -88,7 +88,7 @@ public class DestinationController {
         return responseMap;
     }
 
-    private String String parseSection(String fullText, String startTag, String endTag) {
+    private String parseSection(String fullText, String startTag, String endTag) {
         try {
             int start = fullText.indexOf(startTag);
             if (start == -1) return "Məlumat tapılmadı";
