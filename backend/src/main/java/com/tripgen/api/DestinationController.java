@@ -1,5 +1,6 @@
 package com.tripgen.api;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,8 +15,9 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class DestinationController {
 
-    // QƏTİ HƏLL: Spring-in nazı ilə oynamırıq, birbaşa Render-in sistemindən açarı qolundan tutub çəkirik!
-    private final String apiKey = System.getenv("GEMINI_API_KEY");
+    // application.properties-də qeyd etdiyimiz dəyişəni bura bağlayırıq
+    @Value("${gemini.api.key}")
+    private String apiKey;
 
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
@@ -35,10 +37,8 @@ public class DestinationController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", city);
 
-        // Təhlükəsizlik sığortası: Əgər kimsə Render-də adı səhv yazıbsa, sistem dərhal bizə desin
         if (apiKey == null || apiKey.trim().isEmpty()) {
-            responseMap.put("hotel", "KRİTİK XƏTA: Render-də GEMINI_API_KEY mühit dəyişəni oxunmadı!");
-            responseMap.put("visa", "Zəhmət olmasa Render-də Environment bölməsində adın düzgünlüyünü yoxlayın.");
+            responseMap.put("hotel", "XƏTA: API Açar tapılmadı!");
             return responseMap;
         }
 
@@ -53,9 +53,8 @@ public class DestinationController {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            
-            // Qorunan URI və tam rəsmi endpoint bağlantısı
-            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+            // Ən stabil və işlək olan gemini-1.5-flash modelindən istifadə edirik
+            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
             URI uri = URI.create(urlString);
 
             Map<String, Object> textMap = new HashMap<>();
@@ -80,7 +79,7 @@ public class DestinationController {
             responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
 
         } catch (Exception e) {
-            responseMap.put("hotel", "Sistemə qoşulmada xəta baş verdi.");
+            responseMap.put("hotel", "Məlumat müvəqqəti olaraq yüklənmədi.");
             responseMap.put("visa", "Xəta: " + e.getMessage());
             responseMap.put("ticket", "Məlumat tapılmadı");
             responseMap.put("hacks", "Məlumat tapılmadı");
