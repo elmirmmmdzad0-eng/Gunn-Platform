@@ -15,7 +15,6 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class DestinationController {
 
-    // application.properties-də qeyd etdiyimiz dəyişəni bura bağlayırıq
     @Value("${gemini.api.key}")
     private String apiKey;
 
@@ -53,8 +52,8 @@ public class DestinationController {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            // Ən stabil və işlək olan gemini-1.5-flash modelindən istifadə edirik
-            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
+            // DƏYİŞİKLİK BURADADIR: v1beta bura dəyişdirildi -> v1
+            String urlString = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
             URI uri = URI.create(urlString);
 
             Map<String, Object> textMap = new HashMap<>();
@@ -79,7 +78,7 @@ public class DestinationController {
             responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
 
         } catch (Exception e) {
-            responseMap.put("hotel", "Məlumat müvəqqəti olaraq yüklənmədi.");
+            responseMap.put("hotel", "Sistemə qoşulmada xəta baş verdi.");
             responseMap.put("visa", "Xəta: " + e.getMessage());
             responseMap.put("ticket", "Məlumat tapılmadı");
             responseMap.put("hacks", "Məlumat tapılmadı");
@@ -89,7 +88,7 @@ public class DestinationController {
         return responseMap;
     }
 
-    private String parseSection(String fullText, String startTag, String endTag) {
+    private String String parseSection(String fullText, String startTag, String endTag) {
         try {
             int start = fullText.indexOf(startTag);
             if (start == -1) return "Məlumat tapılmadı";
