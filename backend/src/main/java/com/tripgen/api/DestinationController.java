@@ -52,8 +52,8 @@ public class DestinationController {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            // DƏYİŞİKLİK BURADADIR: v1beta bura dəyişdirildi -> v1
-            String urlString = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
+            // Pulsuz tier üçün ən stabil və keçərli keçid (v1beta)
+            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey.trim();
             URI uri = URI.create(urlString);
 
             Map<String, Object> textMap = new HashMap<>();
