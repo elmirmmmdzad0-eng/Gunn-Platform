@@ -3,232 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TripGen - Ağıllı Səyahət Köməkçisi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>TripGen Pro - Ağıllı Səyahət Planı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
+        /* 1. VARIABLES (Rəng və Mövzu) */
+        :root {
+            --primary: #0e1e38;
+            --primary-strong: #003580;
+            --accent: #febb02;
+            --accent-strong: #ff9500;
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --text: #162033;
+            --muted: #667085;
+            --line: #e7ecf3;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 18px 45px rgba(14, 30, 56, 0.16);
         }
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #333;
-            padding: 20px;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 650px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            font-size: 2.5rem;
-            color: #1e3c72;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .header p {
-            color: #666;
-            font-size: 1rem;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2a5298;
-        }
-        input[type="text"], select {
-            width: 100%;
-            padding: 14px 20px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        input[type="text"]:focus, select:focus {
-            border-color: #1e3c72;
-            box-shadow: 0 0 10px rgba(30, 60, 114, 0.2);
-        }
-        .btn {
-            width: 100%;
-            background: #1e3c72;
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.1s ease;
-        }
-        .btn:hover {
-            background: #2a5298;
-        }
-        .btn:active {
-            transform: scale(0.98);
-        }
-        .result-card {
-            margin-top: 30px;
-            padding: 25px;
-            background: #f8fafc;
-            border-left: 6px solid #1e3c72;
-            border-radius: 12px;
-            display: none;
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .result-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .result-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        .result-item h3 {
-            font-size: 0.95rem;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .result-item p {
-            font-size: 1.1rem;
-            color: #1e293b;
-            font-weight: 500;
-            line-height: 1.5;
-            white-space: pre-line; /* AI-dan gələn sətir boşluqlarını düzgün göstərmək üçün */
-        }
-        .loader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: 600;
-            color: #1e3c72;
+
+        /* 2. LAYOUT (Ümumi Quruluş) */
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); }
+        .hero { background: var(--primary); color: white; padding: 36px 24px 72px; }
+        .hero-inner { width: min(1180px, 100%); margin: 0 auto; }
+        .layout { width: min(1180px, 100%); margin: -30px auto 0; padding: 0 24px 48px; display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+        .sidebar, .results { display: grid; gap: 20px; }
+
+        /* 3. COMPONENTS */
+        .brand-row { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; margin-bottom: 18px; }
+        .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; background: var(--accent); color: var(--primary); border-radius: 8px; }
+        .hero h1 { max-width: 760px; margin: 0; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; font-weight: 900; }
+        .hero p { max-width: 640px; margin: 14px 0 0; color: #d7e3f3; font-size: 16px; }
+
+        /* Booking.com Search Panel */
+        .search-panel { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; margin-top: 34px; border: 4px solid var(--accent); background: var(--accent); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; }
+        .search-field { min-height: 72px; display: flex; align-items: center; gap: 12px; background: white; color: var(--primary); padding: 12px 16px; border-right: 4px solid var(--accent); }
+        .search-field i { color: var(--muted); font-size: 20px; }
+        .search-field-inner { display: flex; flex-direction: column; width: 100%; }
+        .search-field small { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+        .search-field input, .search-field select { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; font-weight: 700; font-size: 15px; }
+        .search-button { border: 0; background: var(--primary-strong); color: white; font-weight: 800; font-size: 16px; padding: 0 32px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .search-button:hover { background: #002254; }
+        .search-button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Cards & Cards Content */
+        .side-card, .content-card, .hotel-card, .ticket-card, .visa-alert, .toast-error { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+        .side-title, .card-title { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 800; font-size: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px; }
+        .summary-row span { color: var(--muted); }
+        .section-heading { display: flex; justify-content: space-between; align-items: center; }
+        .section-heading h2 { margin: 0; color: var(--primary); font-size: 24px; font-weight: 800; }
+        .quality-badge { background: #e8f7ee; color: #087443; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
+        .hotel-card { display: grid; grid-template-columns: 150px 1fr 80px; gap: 20px; }
+        .hotel-image { background: linear-gradient(135deg, #003580, #0e1e38); border-radius: 6px; display: grid; place-items: center; color: white; font-size: 40px; }
+        .stars { color: var(--accent); margin: 8px 0; display: flex; gap: 2px; }
+        .rating-box { background: var(--primary-strong); color: white; border-radius: 6px; padding: 8px; text-align: center; height: fit-content; }
+        .rating-box strong { display: block; font-size: 20px; }
+        .rating-box span { font-size: 11px; font-weight: 600; }
+
+        .visa-alert { border-left: 6px solid var(--accent-strong); background: #fff8e5; display: flex; gap: 15px; }
+        .visa-alert.success { background: #eefbf3; border-left-color: #16a34a; }
+        .visa-alert i.main-icon { font-size: 24px; color: var(--accent-strong); }
+        .visa-alert.success i.main-icon { color: #16a34a; }
+
+        .ticket-card { display: grid; grid-template-columns: 1fr 200px; gap: 20px; align-items: center; }
+        .flight-line { border: 1px dashed #b8c2d1; border-radius: 6px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 15px; font-weight: 700; background: #f8fafc; color: var(--primary); }
+
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .list-item { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 14px; line-height: 1.5; }
+        .list-item i { color: #16a34a; margin-top: 3px; }
+
+        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8fafc; border: 1px solid var(--line); border-radius: 6px; margin-top: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .checkbox-item input { width: 16px; height: 16px; accent-color: var(--primary-strong); }
+        .checkbox-item:has(input:checked) { text-decoration: line-through; color: var(--muted); opacity: 0.7; }
+
+        /* Premium Toast Error Panel */
+        .toast-error { border-left: 6px solid #dc2626; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .toast-error i { font-size: 22px; color: #dc2626; }
+
+        /* Codex Skeleton Loading Animation */
+        .skeleton-card { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 25px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .skeleton-line { height: 16px; background: #e2e8f0; border-radius: 4px; }
+        .skeleton-line.title { width: 40%; height: 22px; background: #cbd5e1; }
+        .skeleton-line.short { width: 60%; }
+        .skeleton-card::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: wave 1.6s infinite; transform: translateX(-100%); }
+        @keyframes wave { 100% { transform: translateX(100%); } }
+
+        /* 4. RESPONSIVE (Mobil Uyğunluq) */
+        .hidden { display: none !important; }
+        .loader { animation: spin 1s linear infinite; }
+        @keyframes spin { transform: rotate(360deg); }
+
+        @media (max-width: 900px) {
+            .search-panel { grid-template-columns: 1fr; gap: 4px; border: none; }
+            .search-field { border-right: none; border-radius: 6px; }
+            .search-button { padding: 15px; border-radius: 6px; justify-content: center; }
+            .layout { grid-template-columns: 1fr; margin-top: 20px; }
+            .hotel-card, .ticket-card, .two-column { grid-template-columns: 1fr; }
+            .hotel-image { min-height: 120px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>TripGen 🌍</h1>
-        <p>Statusunuza özəl, süni intellekt dəstəkli fərdi səyahət planı.</p>
-    </div>
+    <main class="tripgen-page">
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="brand-row">
+                    <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span>TripGen Pro</span>
+                </div>
+                <h1>Ağıllı səyahət planını bir ekranda qur.</h1>
+                <p>Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
 
-    <div class="form-group">
-        <label for="cityInput">Gedəcəyiniz Şəhər:</label>
-        <input type="text" id="cityInput" placeholder="Məsələn: Paris, Tokyo, Roma...">
-    </div>
+                <form class="search-panel" id="searchForm">
+                    <div class="search-field">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div class="search-field-inner">
+                            <small>Gedəcəyiniz şəhər</small>
+                            <input type="text" id="cityInput" placeholder="Paris, Roma, Tokyo..." required>
+                        </div>
+                    </div>
+                    <div class="search-field">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <div class="search-field-inner">
+                            <small>Status</small>
+                            <select id="statusInput">
+                                <option value="Tələbə">Tələbə</option>
+                                <option value="İşgüzar səyahətçi">İşgüzar</option>
+                                <option value="Cütlük">Cütlük</option>
+                                <option value="Ailə">Ailə</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="search-field">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <div class="search-field-inner">
+                            <small>Müddət</small>
+                            <input type="number" id="daysInput" value="3" min="1" max="30">
+                        </div>
+                    </div>
+                    <button type="submit" class="search-button" id="submitBtn">
+                        <i class="fa-solid fa-magnifying-glass" id="btnIcon"></i>
+                        <span id="btnText">Plan hazırla</span>
+                    </button>
+                </form>
+            </div>
+        </section>
 
-    <div class="form-group">
-        <label for="statusSelect">Səyahətçi Statusunuz:</label>
-        <select id="statusSelect">
-            <option value="student">Tələbə (Büdcəli və Sərfəli) 🎓</option>
-            <option value="worker">İşgüzar / Solo Səyahətçi 💼</option>
-            <option value="couple">Cütlük / Romantik Səyahət 👩‍❤️‍👨</option>
-        </select>
-    </div>
+        <section class="layout">
+            <aside class="sidebar">
+                <div class="side-card">
+                    <div class="side-title"><i class="fa-solid fa-circle-info"></i> Axtarış xülasəsi</div>
+                    <div class="summary-row"><span>Şəhər:</span><strong id="summaryCity">-</strong></div>
+                    <div class="summary-row"><span>Status:</span><strong id="summaryStatus">Tələbə</strong></div>
+                    <div class="summary-row"><span>Müddət:</span><strong id="summaryDays">3 gün</strong></div>
+                </div>
+                <div class="side-card">
+                    <div class="side-title"><i class="fa-solid fa-wallet"></i> Təxmini Büdcə</div>
+                    <div style="font-size: 24px; font-weight: 900; color: var(--primary-strong); margin-bottom: 10px;">$<span id="budgetValue">1200</span></div>
+                    <input type="range" min="300" max="5000" step="100" value="1200" style="width:100%; accent-color:var(--accent);" id="budgetRange">
+                </div>
+            </aside>
 
-    <button class="btn" onclick="analyzeTrip()">Fərdi Planı Hazırla</button>
+            <section class="results">
+                
+                <div class="toast-error hidden" id="errorBox">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div>
+                        <strong style="display:block; font-size:15px; margin-bottom:2px;">Sistem Xətası</strong>
+                        <span id="errorText">Xəta mesajı</span>
+                    </div>
+                </div>
 
-    <div class="loader" id="loader">Süni İntellekt analiz edir, zəhmət olmasa gözləyin... 🧠</div>
+                <div id="skeletonLoader" class="hidden" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="skeleton-card"><div class="skeleton-line title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+                    <div class="skeleton-card"><div class="skeleton-line title"></div><div class="skeleton-line"></div></div>
+                    <div class="skeleton-card"><div class="skeleton-line title"></div><div class="skeleton-line short"></div></div>
+                </div>
 
-    <div class="result-card" id="resultCard">
-        <div class="result-item">
-            <h3>📍 Şəhər</h3>
-            <p id="resCity">-</p>
-        </div>
-        <div class="result-item">
-            <h3>🏨 Statusunuza Uyğun Otel</h3>
-            <p id="resHotel">-</p>
-        </div>
-        <div class="result-item">
-            <h3>🪪 Viza Statusu (Azərb. Vətəndaşları üçün)</h3>
-            <p id="resVisa">-</p>
-        </div>
-        <div class="result-item">
-            <h3>✈️ Təyyarə Bileti (Təxmini Qiymət)</h3>
-            <p id="resTicket">-</p>
-        </div>
-        <div class="result-item">
-            <h3>💡 Ağıllı Səyahət Fəndləri (Hacks)</h3>
-            <p id="resHacks">-</p>
-        </div>
-        <div class="result-item">
-            <h3>🧳 Ağıllı Çamadan Siyahısı (Packing List)</h3>
-            <p id="resPacking">-</p>
-        </div>
-    </div>
-</div>
+                <div id="realContent">
+                    <div class="section-heading" style="margin-bottom: 20px;">
+                        <div>
+                            <span style="font-size:11px; font-weight:900; color:var(--primary-strong); text-transform:uppercase;">AI Travel Board</span>
+                            <h2 id="resultTitle">Səyahət Planı Paneli</h2>
+                        </div>
+                        <span class="quality-badge"><i class="fa-solid fa-shield-halved"></i> Pro nəticə</span>
+                    </div>
 
-<script>
-    function analyzeTrip() {
-        const city = document.getElementById('cityInput').value.trim();
-        const status = document.getElementById('statusSelect').value;
-        const loader = document.getElementById('loader');
-        const resultCard = document.getElementById('resultCard');
+                    <article class="hotel-card" style="margin-bottom: 20px;">
+                        <div class="hotel-image"><i class="fa-solid fa-hotel"></i></div>
+                        <div>
+                            <div class="card-title"><i class="fa-solid fa-bed"></i> Statusunuza Uyğun Otel</div>
+                            <div class="stars">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <p id="hotelText">Zəhmət olmasa yuxarıdan şəhər seçib plan hazırlayın.</p>
+                        </div>
+                        <div class="rating-box"><strong>9.2</strong><span>Əla</span></div>
+                    </article>
 
-        if (!city) {
-            alert('Zəhmət olmasa bir şəhər adı daxil edin.');
-            return;
+                    <div class="visa-alert" id="visaAlert" style="margin-bottom: 20px;">
+                        <i class="fa-solid fa-circle-exclamation main-icon" id="visaIcon"></i>
+                        <div>
+                            <div class="card-title"><i class="fa-solid fa-passport"></i> Viza Statusu (Azərb. Vətəndaşları Üçün)</div>
+                            <p id="visaText">Axtarışdan sonra məlumat buraya gələcək.</p>
+                        </div>
+                    </div>
+
+                    <article class="ticket-card" style="margin-bottom: 20px;">
+                        <div>
+                            <div class="card-title"><i class="fa-solid fa-ticket"></i> Təxmini Bilet Qiymətləri</div>
+                            <p id="ticketText">Məlumat gözlənilir...</p>
+                        </div>
+                        <div class="flight-line"><span>GYD</span><i class="fa-solid fa-plane"></i><span id="destAirport">DST</span></div>
+                    </article>
+
+                    <div class="two-column">
+                        <article class="content-card">
+                            <div class="card-title"><i class="fa-solid fa-lightbulb"></i> Səyahət Fəndləri (Hacks)</div>
+                            <div id="hacksContainer">
+                                <div class="list-item"><i class="fa-solid fa-circle-check"></i><span>Optimal büdcə fəndləri bura yüklənir.</span></div>
+                            </div>
+                        </article>
+                        <article class="content-card">
+                            <div class="card-title"><i class="fa-solid fa-suitcase-rolling"></i> Çamadan Siyahısı</div>
+                            <div id="packingContainer">
+                                <label class="checkbox-item"><input type="checkbox"> <span>Xüsusi əşyalar</span></label>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        /* =========================================================================
+           1. STATE MANAGEMENT & DOM SELECTORS
+           ========================================================================= */
+        const budgetRange = document.getElementById('budgetRange');
+        const budgetValue = document.getElementById('budgetValue');
+        budgetRange.addEventListener('input', (e) => { budgetValue.textContent = e.target.value; });
+
+        /* =========================================================================
+           2. CODEX HELPER FUNCTIONS (Text Normalization & Anti-HTML Injection)
+           ========================================================================= */
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.innerText = text || "";
+            return div.innerHTML;
         }
 
-        loader.style.display = 'block';
-        resultCard.style.display = 'none';
+        function normalizeText(value) {
+            return (value || "")
+                .replace(/\*/g, "")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
 
-        // URL-i backenddəki tam dəqiq ünvana bağladıq
-        fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${status}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Server cavab vermədi');
-                }
-                return response.json();
-            })
-            .then(data => {
-                loader.style.display = 'none';
-                resultCard.style.display = 'block';
+        function splitSmartList(text) {
+            return normalizeText(text)
+                .split(/\n|;|•|- /)
+                .map(item => item.trim())
+                .filter(Boolean);
+        }
 
-                // Gələn məlumatları xanalara tək-tək yazdırırıq
-                document.getElementById('resCity').innerText = data.city || city;
-                document.getElementById('resHotel').innerText = data.hotel || 'Məlumat tapılmadı';
-                document.getElementById('resVisa').innerText = data.visa || 'Məlumat tapılmadı';
-                document.getElementById('resTicket').innerText = data.ticket || 'Məlumat tapılmadı';
-                document.getElementById('resHacks').innerText = data.hacks || 'Məlumat tapılmadı';
-                document.getElementById('resPacking').innerText = data.packingList || 'Məlumat tapılmadı';
-            })
-            .catch(error => {
-                loader.style.display = 'none';
-                alert('Sistemdə xəta baş verdi. Zəhmət olmasa bir az sonra yenidən yoxlayın.');
-                console.error(error);
+        /* =========================================================================
+           3. PREMIUM ERROR HANDLING CONTROL (Friendly Error Message Converter)
+           ========================================================================= */
+        function getFriendlyError(message) {
+            const text = (message || "").toLowerCase();
+            if (text.includes("429") || text.includes("quota")) {
+                return "Gündəlik AI istifadə limiti dolub. Bir az sonra yenidən yoxlayın.";
+            }
+            if (text.includes("404") || text.includes("model")) {
+                return "AI model konfiqurasiyası tapılmadı. Gemini model adı yoxlanmalıdır.";
+            }
+            if (text.includes("api key") || text.includes("permission") || text.includes("401")) {
+                return "API açarı və icazələr yoxlanmalıdır. Server rədd etdi.";
+            }
+            return "Sistem müvəqqəti olaraq cavab vermir. Bir az sonra yenidən cəhd edin.";
+        }
+
+        function checkVisaStatus(text) {
+            const alertBox = document.getElementById('visaAlert');
+            const icon = document.getElementById('visaIcon');
+            const normalized = (text || "").toLowerCase();
+            const isPositive = normalized.includes("tələb olunmur") || normalized.includes("vizasız") || normalized.includes("e-viza");
+            
+            if(isPositive) {
+                alertBox.classList.add('success');
+                icon.className = "fa-solid fa-circle-check main-icon";
+            } else {
+                alertBox.classList.remove('success');
+                icon.className = "fa-solid fa-circle-exclamation main-icon";
+            }
+        }
+
+        /* =========================================================================
+           4. RENDER FUNCTIONS (Injecting Data Safely Into UI)
+           ========================================================================= */
+        function renderHacksList(text) {
+            const container = document.getElementById('hacksContainer');
+            container.innerHTML = '';
+            const items = splitSmartList(text).slice(0, 5);
+            if(items.length === 0 || text.includes('Məlumat tapılmadı')) {
+                container.innerHTML = `<div class="list-item"><span>Məlumat tapılmadı</span></div>`;
+                return;
+            }
+            items.forEach(item => {
+                container.innerHTML += `<div class="list-item"><i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(item)}</span></div>`;
             });
-    }
-</script>
+        }
+
+        function renderPackingList(text) {
+            const container = document.getElementById('packingContainer');
+            container.innerHTML = '';
+            const items = splitSmartList(text).slice(0, 5);
+            if(items.length === 0 || text.includes('Məlumat tapılmadı')) {
+                container.innerHTML = `<label class="checkbox-item"><span>Məlumat tapılmadı</span></label>`;
+                return;
+            }
+            items.forEach(item => {
+                container.innerHTML += `<label class="checkbox-item"><input type="checkbox"> <span>${escapeHtml(item)}</span></label>`;
+            });
+        }
+
+        /* =========================================================================
+           5. API INTERACTION & EVENT LISTENERS
+           ========================================================================= */
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const city = document.getElementById('cityInput').value.trim();
+            const status = document.getElementById('statusInput').value;
+            const days = document.getElementById('daysInput').value;
+
+            // UI Elements & State Updates
+            document.getElementById('summaryCity').textContent = city;
+            document.getElementById('summaryStatus').textContent = status;
+            document.getElementById('summaryDays').textContent = days + " gün";
+            document.getElementById('resultTitle').textContent = city + " üçün Səyahət Planı";
+            document.getElementById('destAirport').textContent = city.slice(0, 3).toUpperCase();
+
+            // Hide Errors & Show Skeleton Cards
+            document.getElementById('errorBox').classList.add('hidden');
+            document.getElementById('realContent').classList.add('hidden');
+            document.getElementById('skeletonLoader').classList.remove('hidden');
+
+            // Button Loading State
+            const btnIcon = document.getElementById('btnIcon');
+            const btnText = document.getElementById('btnText');
+            const submitBtn = document.getElementById('submitBtn');
+            btnIcon.className = "fa-solid fa-spinner loader";
+            btnText.textContent = "Planlaşdırılır...";
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP xətası! Status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // Injecting safe textual data
+                document.getElementById('hotelText').innerText = data.hotel || "Məlumat tapılmadı";
+                document.getElementById('visaText').innerText = data.visa || "Məlumat tapılmadı";
+                document.getElementById('ticketText').innerText = data.ticket || "Məlumat tapılmadı";
+                
+                checkVisaStatus(data.visa);
+                renderHacksList(data.hacks);
+                renderPackingList(data.packingList);
+
+                // Reveal updated view
+                document.getElementById('realContent').classList.remove('hidden');
+
+            } catch (error) {
+                // Show Premium Friendly Error Box
+                document.getElementById('errorText').textContent = getFriendlyError(error.message);
+                document.getElementById('errorBox').classList.remove('hidden');
+                document.getElementById('realContent').classList.remove('hidden');
+            } finally {
+                // Terminate Loading State
+                document.getElementById('skeletonLoader').classList.add('hidden');
+                btnIcon.className = "fa-solid fa-magnifying-glass";
+                btnText.textContent = "Plan hazırla";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
