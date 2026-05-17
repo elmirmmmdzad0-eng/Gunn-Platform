@@ -16,7 +16,8 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    // Bura tam zəmanətli və stabil olan gemini-pro model ünvanı ilə əvəz olundu!
+    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
@@ -26,7 +27,6 @@ public class DestinationController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", city);
 
-        // Gemini-yə tam olaraq frontend-in gözlədiyi formatda cavab verməsini əmr edirik
         String prompt = "Sən professional turizm ekspertisən. İstifadəçi Azərbaycan vətəndaşıdır, statusu isə '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə səyahət etmək istəyir. " +
                         "Mənə mütləq aşağıdakı formatda, heç bir əlavə qeyd yazmadan, SƏRT ŞƏKİLDƏ yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
@@ -41,7 +41,6 @@ public class DestinationController {
             RestTemplate restTemplate = new RestTemplate();
             String url = geminiUrl + "?key=" + apiKey;
 
-            // Gemini üçün JSON bədəni
             Map<String, Object> textMap = new HashMap<>();
             textMap.put("text", prompt);
 
@@ -53,7 +52,6 @@ public class DestinationController {
 
             String rawResponse = restTemplate.postForObject(url, contentsMap, String.class);
 
-            // Gələn mətni başlıqlara görə parçalayırıq (Regex və ya sadə split ilə)
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(rawResponse);
             String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
@@ -75,7 +73,6 @@ public class DestinationController {
         return responseMap;
     }
 
-    // Mətndən lazımi hissələri qoparmaq üçün köməkçi metod
     private String parseSection(String fullText, String startTag, String endTag) {
         try {
             int start = fullText.indexOf(startTag);
