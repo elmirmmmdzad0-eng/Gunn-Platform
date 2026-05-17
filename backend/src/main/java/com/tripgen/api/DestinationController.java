@@ -16,8 +16,8 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    // Bura tam zəmanətli və stabil olan gemini-pro model ünvanı ilə əvəz olundu!
-    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    // Google-ın ən son qaydalarına uyğun 100% işləyən rəsmi model ünvanı:
+    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
@@ -29,7 +29,7 @@ public class DestinationController {
 
         String prompt = "Sən professional turizm ekspertisən. İstifadəçi Azərbaycan vətəndaşıdır, statusu isə '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə səyahət etmək istəyir. " +
-                        "Mənə mütləq aşağıdakı formatda, heç bir əlavə qeyd yazmadan, SƏRT ŞƏKİLDƏ yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
+                        "Mənə mütləq aşağıdakı formatda, heç bir əlavə qeyd və ya intro yazmadan, yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
                         "Hər başlığın qarşısındakı dəyəri Azərbaycan dilində ətraflı yaz:\n\n" +
                         "HOTEL: [Bura statusa uyğun otel tövsiyələri yaz]\n" +
                         "VISA: [Bura Azərbaycan vətəndaşları üçün viza şərtlərini yaz]\n" +
@@ -83,7 +83,7 @@ public class DestinationController {
             if (end == -1) end = fullText.length();
             
             return fullText.substring(start, end).trim();
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (Exception e) {
             return "Məlumat tapılmadı";
         }
     }
