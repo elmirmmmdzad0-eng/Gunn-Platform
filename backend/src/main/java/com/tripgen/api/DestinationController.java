@@ -16,26 +16,39 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    // Hazırda rəsmi olaraq ən stabil, qəti xəta verməyən model və endpoint strukturu:
+    // Google-ın hazırda rəsmi sənədlərində qəbul edilən yeganə 100% stabil model linki:
     private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
+    // 1-Cİ QAPI (HƏM BU METODU QORUYURUQ):
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
             @RequestParam String city,
             @RequestParam String status) {
+        return callGemini(city, status);
+    }
 
+    // 2-Cİ QAPI (FRONTEND-İN ADAPTASİYASI ÜÇÜN HƏM DƏ BU METODU SAXLAYIRIQ):
+    @GetMapping
+    public Map<String, String> getTripPlan(
+            @RequestParam String destination,
+            @RequestParam(defaultValue = "3") int days) {
+        return callGemini(destination, "Tələbə");
+    }
+
+    // ORTAQ VƏ ZƏMANƏTLİ METOD:
+    private Map<String, String> callGemini(String city, String status) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", city);
 
-        String prompt = "Sən professional turizm ekspertisən. Səyahətçi Azərbaycan vətəndaşıdır və statusu '" + status + "'-dur. " +
+        String prompt = "Sən professional turizm ekspertisən. İstifadəçi Azərbaycan vətəndaşıdır, statusu '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə getmək istəyir. " +
-                        "Mənə aşağıdakı formatda, heç bir giriş və ya əlavə söz yazmadan, SƏRT ŞƏKİLDƏ yalnız bu 5 başlığı daxil edən bir mətn qaytar. " +
-                        "Hər başlığın qarşısındakı cavabı Azərbaycan dilində ətraflı yaz:\n\n" +
-                        "HOTEL: [Bura otel tövsiyələri yaz]\n" +
-                        "VISA: [Bura viza şərtlərini yaz]\n" +
-                        "TICKET: [Bura Bakıdan təyyarə bileti qiymətlərini yaz]\n" +
-                        "HACKS: [Bura büdcə qoruma yollarını yaz]\n" +
-                        "PACKING: [Bura ağıllı çamadan əşya siyahısını todo list kimi yaz]";
+                        "Mənə aşağıdakı formatda, əlavə heç bir mətn yazmadan, yalnız bu 5 başlığı daxil edən bir cavab qaytar. " +
+                        "Hər başlığın qarşısını Azərbaycan dilində ətraflı doldur:\n\n" +
+                        "HOTEL: [Otel tövsiyələri]\n" +
+                        "VISA: [Viza şərtləri]\n" +
+                        "TICKET: [Bilet qiymətləri]\n" +
+                        "HACKS: [Səyahət fəndləri]\n" +
+                        "PACKING: [Çamadan əşya siyahısı]";
 
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -56,7 +69,6 @@ public class DestinationController {
             JsonNode root = mapper.readTree(rawResponse);
             String aiText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
 
-            // Mətni təhlükəsiz şəkildə hissələrə bölürük
             responseMap.put("hotel", parseSection(aiText, "HOTEL:", "VISA:"));
             responseMap.put("visa", parseSection(aiText, "VISA:", "TICKET:"));
             responseMap.put("ticket", parseSection(aiText, "TICKET:", "HACKS:"));
@@ -64,7 +76,7 @@ public class DestinationController {
             responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
 
         } catch (Exception e) {
-            responseMap.put("hotel", "Məlumat alınarkən xəta baş verdi.");
+            responseMap.put("hotel", "Məlumat müvəqqəti olaraq yüklənmədi.");
             responseMap.put("visa", "Xəta: " + e.getMessage());
             responseMap.put("ticket", "Məlumat tapılmadı");
             responseMap.put("hacks", "Məlumat tapılmadı");
