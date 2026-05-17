@@ -16,8 +16,8 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    // Google-ın hazırda rəsmi sənədlərində qəbul edilən yeganə 100% stabil model linki:
-    private final String geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    // Google-ın pulsuz açarlar üçün tələb etdiyi 100% işlək stabil endpoint və model:
+private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
 
     // 1-Cİ QAPI (HƏM BU METODU QORUYURUQ):
     @GetMapping("/analyze")
