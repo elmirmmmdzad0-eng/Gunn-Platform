@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,10 +18,6 @@ public class DestinationController {
     @Value("${gemini.api.key:#{null}}")
     private String apiKey;
 
-    // Google-ın pulsuz açarlar üçün tələb etdiyi 100% işlək stabil endpoint və model:
-private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
-
-    // 1-Cİ QAPI (HƏM BU METODU QORUYURUQ):
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
             @RequestParam String city,
@@ -27,7 +25,6 @@ private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/m
         return callGemini(city, status);
     }
 
-    // 2-Cİ QAPI (FRONTEND-İN ADAPTASİYASI ÜÇÜN HƏM DƏ BU METODU SAXLAYIRIQ):
     @GetMapping
     public Map<String, String> getTripPlan(
             @RequestParam String destination,
@@ -35,15 +32,13 @@ private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/m
         return callGemini(destination, "Tələbə");
     }
 
-    // ORTAQ VƏ ZƏMANƏTLİ METOD:
     private Map<String, String> callGemini(String city, String status) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", city);
 
-        String prompt = "Sən professional turizm ekspertisən. İstifadəçi Azərbaycan vətəndaşıdır, statusu '" + status + "'-dur. " +
+        String prompt = "Sən professional turizm ekspertisən. Səyahətçi Azərbaycan vətəndaşıdır, statusu '" + status + "'-dur. " +
                         "Bu şəxs " + city + " şəhərinə getmək istəyir. " +
-                        "Mənə aşağıdakı formatda, əlavə heç bir mətn yazmadan, yalnız bu 5 başlığı daxil edən bir cavab qaytar. " +
-                        "Hər başlığın qarşısını Azərbaycan dilində ətraflı doldur:\n\n" +
+                        "Mənə aşağıdakı formatda, əlavə heç bir mətn yazmadan, yalnız bu 5 başlığı daxil edən cavab qaytar:\n\n" +
                         "HOTEL: [Otel tövsiyələri]\n" +
                         "VISA: [Viza şərtləri]\n" +
                         "TICKET: [Bilet qiymətləri]\n" +
@@ -52,7 +47,10 @@ private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/m
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            String url = geminiUrl + "?key=" + apiKey;
+            
+            // QƏTİ HƏLL: Linki String yox, qorunan URI obyektinə çeviririk ki, Java qoşa nöqtəni (:) xarab etməsin!
+            String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+            URI uri = URI.create(urlString);
 
             Map<String, Object> textMap = new HashMap<>();
             textMap.put("text", prompt);
@@ -63,7 +61,8 @@ private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/m
             Map<String, Object> contentsMap = new HashMap<>();
             contentsMap.put("contents", new Object[]{partsMap});
 
-            String rawResponse = restTemplate.postForObject(url, contentsMap, String.class);
+            // Burada artıq qorunan URI-ni göndəririk:
+            String rawResponse = restTemplate.postForObject(uri, contentsMap, String.class);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(rawResponse);
@@ -76,7 +75,7 @@ private final String geminiUrl = "https://generativelanguage.googleapis.com/v1/m
             responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
 
         } catch (Exception e) {
-            responseMap.put("hotel", "Məlumat müvəqqəti olaraq yüklənmədi.");
+            responseMap.put("hotel", "Sistemə qoşulmada xəta baş verdi.");
             responseMap.put("visa", "Xəta: " + e.getMessage());
             responseMap.put("ticket", "Məlumat tapılmadı");
             responseMap.put("hacks", "Məlumat tapılmadı");
