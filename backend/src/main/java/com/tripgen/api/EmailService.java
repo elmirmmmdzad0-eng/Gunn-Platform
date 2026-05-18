@@ -32,6 +32,7 @@ public class EmailService {
             mailSender.send(message);
             System.out.println("[AUTH][EMAIL][ASYNC_SUCCESS] Verification email sent to " + toEmail);
         } catch (Exception e) {
+            System.out.println("[GMAIL_ERROR] Səbəb: " + e.getMessage());
             System.out.println("[AUTH][EMAIL][ASYNC_ERROR] Email could not be sent to " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }

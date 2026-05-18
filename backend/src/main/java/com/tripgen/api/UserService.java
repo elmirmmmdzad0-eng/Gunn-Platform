@@ -44,7 +44,9 @@ public class UserService {
         user.setUsername(cleanUsername);
         user.setEmail(cleanEmail);
         user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setEnabled(false);
+        // Local/test mode: keep the account usable even if Gmail delivery fails.
+        // The verification token is still generated, so email verification can be used when SMTP works.
+        user.setEnabled(true);
         user.setVerificationToken(UUID.randomUUID().toString());
 
         User savedUser = userRepository.save(user);

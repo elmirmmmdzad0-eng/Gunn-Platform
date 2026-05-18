@@ -165,6 +165,11 @@
         .auth-message.success { color: #16a34a; }
         .auth-message.warning { color: #d97706; }
         .auth-message.error { color: #dc2626; }
+        .welcome-toast { position: fixed; top: 22px; right: 22px; z-index: 70; min-width: min(340px, calc(100vw - 32px)); display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-left: 5px solid #16a34a; border-radius: 10px; box-shadow: var(--shadow-lg); transform: translateY(-16px); opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+        .welcome-toast.active { transform: translateY(0); opacity: 1; }
+        .welcome-toast i { color: #16a34a; font-size: 20px; }
+        .welcome-toast strong { display: block; color: var(--primary); font-size: 14px; }
+        .welcome-toast span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
         body.dark-mode .auth-backdrop { background: rgba(2, 6, 23, 0.72); }
         body.dark-mode .auth-tabs, body.dark-mode .auth-field input { background: #0b1628; }
 
@@ -543,6 +548,28 @@
                 button.innerHTML = button.dataset.originalHtml;
             }
         }
+
+        function showWelcomeToast(username) {
+            let toast = document.getElementById('welcomeToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'welcomeToast';
+                toast.className = 'welcome-toast';
+                document.body.appendChild(toast);
+            }
+
+            toast.innerHTML = `
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                    <strong>Xoş gəldiniz, ${escapeHtml(username)}!</strong>
+                    <span>TripGen hesabınıza uğurla daxil oldunuz.</span>
+                </div>
+            `;
+            toast.classList.add('active');
+            clearTimeout(window.tripgenWelcomeTimer);
+            window.tripgenWelcomeTimer = setTimeout(() => toast.classList.remove('active'), 3600);
+        }
+
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
         authCloseButton.addEventListener('click', closeAuthModal);
         authBackdrop.addEventListener('click', closeAuthModal);
@@ -600,26 +627,45 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = document.getElementById('loginSubmitButton');
-            submitButton.disabled = true;
+            setAuthButtonLoading(submitButton, true, 'Daxil olunur...');
 
             try {
                 const identifier = document.getElementById('loginIdentifier').value.trim();
-                const data = await postJson('/api/auth/login', {
+                const loginPayload = {
                     email: identifier,
                     password: document.getElementById('loginPassword').value
+                };
+
+                console.log('[AUTH][LOGIN_REQUEST]', {
+                    url: '/api/auth/login',
+                    headers: { 'Content-Type': 'application/json' },
+                    bodyKeys: Object.keys(loginPayload),
+                    email: loginPayload.email
                 });
+
+                const data = await postJson('/api/auth/login', loginPayload);
+                console.log('[AUTH][LOGIN_SUCCESS]', data);
 
                 const displayName = data.username || identifier;
                 localStorage.setItem('tripgen-user', displayName);
                 authButtonText.textContent = displayName;
                 authOpenButton.classList.add('is-authenticated');
-                showAuthMessage(loginMessage, 'Giriş uğurludur.', 'success');
+                showAuthMessage(loginMessage, `Xoş gəldiniz, ${displayName}!`, 'success');
+                showWelcomeToast(displayName);
                 loginForm.reset();
                 setTimeout(closeAuthModal, 650);
             } catch (error) {
+                console.error('[AUTH][LOGIN_ERROR]', {
+                    message: error.message,
+                    status: error.status,
+                    url: error.url,
+                    responseBody: error.responseBody,
+                    rawText: error.rawText
+                });
+                alert(error.message);
                 showAuthMessage(loginMessage, error.message, 'error');
             } finally {
-                submitButton.disabled = false;
+                setAuthButtonLoading(submitButton, false);
             }
         });
 
