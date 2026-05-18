@@ -63,6 +63,13 @@
         .theme-toggle .moon-icon { display: none; }
         body.dark-mode .theme-toggle .sun-icon { display: none; }
         body.dark-mode .theme-toggle .moon-icon { display: inline-block; }
+        .aura-toggle { height: 36px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; font-weight: 800; font-size: 13px; position: relative; overflow: visible; }
+        .aura-toggle:hover { background: rgba(255, 255, 255, 0.22); }
+        .aura-toggle i { position: relative; z-index: 1; }
+        .aura-toggle.is-playing { background: rgba(254, 187, 2, 0.22); border-color: rgba(254, 187, 2, 0.72); color: #fff7dc; }
+        .aura-toggle.is-playing::after { content: ""; position: absolute; width: 26px; height: 26px; left: 8px; border-radius: 999px; border: 1px solid rgba(254, 187, 2, 0.65); animation: auraPulse 1.9s ease-out infinite; }
+        .aura-toggle.is-muted { color: rgba(255, 255, 255, 0.7); }
+        @keyframes auraPulse { 0% { transform: scale(0.72); opacity: 0.9; } 100% { transform: scale(1.75); opacity: 0; } }
         .hero h1 { max-width: 760px; margin: 0; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; font-weight: 900; }
         .hero p { max-width: 640px; margin: 14px 0 0; color: #d7e3f3; font-size: 16px; }
 
@@ -241,10 +248,17 @@
             .top-row { align-items: flex-start; }
             .top-actions { flex-wrap: wrap; justify-content: flex-end; }
             .auth-open-button span { display: none; }
+            .aura-toggle span { display: none; }
         }
     </style>
 </head>
 <body>
+    <audio
+        id="auraAudio"
+        loop
+        preload="none"
+        src="https://upload.wikimedia.org/wikipedia/commons/transcoded/1/1f/Waves.ogg/Waves.ogg.mp3">
+    </audio>
 
     <main class="tripgen-page">
         <section class="hero">
@@ -264,6 +278,10 @@
                                 <i class="fa-solid fa-sun sun-icon"></i>
                                 <i class="fa-solid fa-moon moon-icon"></i>
                             </span>
+                        </button>
+                        <button type="button" class="aura-toggle is-muted" id="auraToggle" aria-label="Aura səsini aç" aria-pressed="false">
+                            <i class="fa-solid fa-volume-xmark" id="auraIcon"></i>
+                            <span id="auraText">Aura</span>
                         </button>
                     </div>
                 </div>
@@ -529,6 +547,10 @@
         const currencyInput = document.getElementById('currencyInput');
         const budgetCurrencySymbol = document.getElementById('budgetCurrencySymbol');
         const themeToggle = document.getElementById('themeToggle');
+        const auraAudio = document.getElementById('auraAudio');
+        const auraToggle = document.getElementById('auraToggle');
+        const auraIcon = document.getElementById('auraIcon');
+        const auraText = document.getElementById('auraText');
         const authOpenButton = document.getElementById('authOpenButton');
         const authButtonText = document.getElementById('authButtonText');
         const authModal = document.getElementById('authModal');
@@ -547,6 +569,9 @@
         const plannerGateButton = document.getElementById('plannerGateButton');
         const plannerStatusBadge = document.getElementById('plannerStatusBadge');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
+        const AURA_VOLUME = 0.12;
+        let auraStarted = false;
+        let auraMuted = localStorage.getItem('tripgen-aura-muted') === 'true';
 
         function applyTheme(theme) {
             const isDark = theme === 'dark';
@@ -555,8 +580,69 @@
             themeToggle.setAttribute('aria-pressed', String(isDark));
         }
 
+        function updateAuraButton() {
+            const isPlaying = auraStarted && !auraMuted && !auraAudio.paused;
+            auraToggle.classList.toggle('is-playing', isPlaying);
+            auraToggle.classList.toggle('is-muted', auraMuted || !isPlaying);
+            auraToggle.setAttribute('aria-label', isPlaying ? 'Aura səsini söndür' : 'Aura səsini aç');
+            auraToggle.setAttribute('aria-pressed', String(isPlaying));
+            auraIcon.className = isPlaying ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+            auraText.textContent = isPlaying ? 'Aura aktiv' : 'Aura';
+        }
+
+        async function startAuraAudio() {
+            if (auraMuted || auraStarted) {
+                updateAuraButton();
+                return;
+            }
+
+            auraAudio.volume = AURA_VOLUME;
+            auraAudio.muted = false;
+
+            try {
+                await auraAudio.play();
+                auraStarted = true;
+            } catch (error) {
+                console.warn('[AURA_AUDIO_BLOCKED]', error.message);
+            } finally {
+                updateAuraButton();
+            }
+        }
+
+        async function toggleAuraAudio() {
+            const isPlaying = auraStarted && !auraMuted && !auraAudio.paused;
+
+            if (isPlaying) {
+                auraMuted = true;
+                localStorage.setItem('tripgen-aura-muted', 'true');
+                auraAudio.pause();
+                updateAuraButton();
+                return;
+            }
+
+            auraMuted = false;
+            localStorage.setItem('tripgen-aura-muted', 'false');
+            auraStarted = false;
+            await startAuraAudio();
+        }
+
         const savedTheme = localStorage.getItem('tripgen-theme') || 'light';
         applyTheme(savedTheme);
+        auraAudio.volume = AURA_VOLUME;
+        auraAudio.muted = auraMuted;
+        updateAuraButton();
+
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('#auraToggle')) {
+                return;
+            }
+
+            startAuraAudio();
+        }, { capture: true });
+        auraToggle.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            await toggleAuraAudio();
+        });
 
         themeToggle.addEventListener('click', () => {
             const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
