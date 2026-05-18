@@ -524,7 +524,9 @@
         });
 
         const savedUser = localStorage.getItem('tripgen-user');
-        if (savedUser) {
+        const savedUserId = localStorage.getItem('tripgen-user-id');
+        const savedAuthToken = localStorage.getItem('tripgen-auth-token');
+        if (savedUser && savedUserId && savedAuthToken) {
             authButtonText.textContent = savedUser;
             authOpenButton.classList.add('is-authenticated');
             activateTripPlanner(savedUser);
@@ -654,6 +656,15 @@
             if (emptyState) {
                 emptyState.textContent = `Xoş gəldiniz, ${username}. İlk AI səyahət planınızı yaratmağa hazırsınız.`;
             }
+        }
+
+        function getCurrentUserId() {
+            const userId = Number(localStorage.getItem('tripgen-user-id'));
+            return Number.isInteger(userId) && userId > 0 ? userId : null;
+        }
+
+        function getCurrentAuthToken() {
+            return localStorage.getItem('tripgen-auth-token') || null;
         }
 
         function setPlannerLoading(isLoading) {
@@ -787,6 +798,8 @@
 
                 const displayName = data.username || identifier;
                 localStorage.setItem('tripgen-user', displayName);
+                localStorage.setItem('tripgen-user-id', data.userId);
+                localStorage.setItem('tripgen-auth-token', data.authToken);
                 authButtonText.textContent = displayName;
                 authOpenButton.classList.add('is-authenticated');
                 showAuthMessage(loginMessage, `Xoş gəldiniz, ${displayName}!`, 'success');
@@ -814,8 +827,16 @@
             const payload = {
                 destination: document.getElementById('tripDestinationInput').value.trim(),
                 days: Number(document.getElementById('tripDaysSelect').value),
-                budgetType: document.getElementById('tripBudgetSelect').value
+                budgetType: document.getElementById('tripBudgetSelect').value,
+                userId: getCurrentUserId(),
+                authToken: getCurrentAuthToken()
             };
+
+            if (!payload.userId || !payload.authToken) {
+                tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">Bu özəlliyi işlətmək üçün qeydiyyatdan keçməlisiniz.</div>`;
+                openAuthModal('login');
+                return;
+            }
 
             setPlannerLoading(true);
 

@@ -13,14 +13,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String appBaseUrl;
 
-    public UserService(UserRepository userRepository, EmailService emailService) {
+    public UserService(UserRepository userRepository, EmailService emailService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -41,7 +42,7 @@ public class UserService {
             throw new IllegalArgumentException("Bu email artiq qeydiyyatdan kecib.");
         }
 
-        String encodedPassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(cleanPassword);
 
         User user = new User();
         user.setUsername(cleanUsername);
@@ -107,13 +108,30 @@ public class UserService {
             user = userRepository.saveAndFlush(user);
         }
 
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(cleanPassword, user.getPassword())) {
             System.out.println("[AUTH_LOGIN_FAILED] Səbəb: BCrypt password mismatch. identifier=" + cleanIdentifier);
             throw new IllegalArgumentException("Email/username ve ya password yanlisdir.");
         }
 
-        System.out.println("[AUTH_LOGIN_SUCCESS] userId=" + user.getId() + ", username=" + user.getUsername());
-        return user;
+        user.setSessionToken(UUID.randomUUID().toString());
+        User loggedInUser = userRepository.saveAndFlush(user);
+
+        System.out.println("[AUTH_LOGIN_SUCCESS] userId=" + loggedInUser.getId() + ", username=" + loggedInUser.getUsername());
+        return loggedInUser;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isActiveSession(Long userId, String sessionToken) {
+        String cleanToken = clean(sessionToken);
+        if (userId == null || cleanToken.isBlank()) {
+            return false;
+        }
+
+        return userRepository.findById(userId)
+                .filter(User::isEnabled)
+                .map(User::getSessionToken)
+                .filter(savedToken -> savedToken != null && savedToken.equals(cleanToken))
+                .isPresent();
     }
 
     private Optional<User> findByEmailOrUsername(String identifier) {

@@ -30,6 +30,9 @@ public class User {
     @Column(unique = true)
     private String verificationToken;
 
+    @Column(unique = true)
+    private String sessionToken;
+
     public User() {
     }
 
@@ -79,5 +82,13 @@ public class User {
 
     public void setVerificationToken(String verificationToken) {
         this.verificationToken = verificationToken;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }

@@ -71,6 +71,7 @@ public class AuthController {
             response.put("username", user.getUsername());
             response.put("email", user.getEmail());
             response.put("enabled", user.isEnabled());
+            response.put("authToken", user.getSessionToken());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("[AUTH_LOGIN_FAILED] Səbəb: " + e.getClass().getSimpleName() + " - " + e.getMessage());
