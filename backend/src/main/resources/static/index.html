@@ -174,11 +174,14 @@
         body.dark-mode .auth-tabs, body.dark-mode .auth-field input { background: #0b1628; }
 
         /* AI Trip Planner */
-        .trip-planner { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); display: grid; gap: 18px; }
+        .trip-planner { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow-lg); display: grid; overflow: hidden; position: relative; min-height: 380px; }
+        .planner-content { display: grid; gap: 18px; padding: 22px; transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease; }
+        .trip-planner.is-locked .planner-content { filter: blur(8px); opacity: 0.58; pointer-events: none; user-select: none; transform: scale(0.992); }
         .planner-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
         .planner-head h2 { margin: 4px 0 6px; color: var(--primary); font-size: 24px; font-weight: 900; }
         .planner-head p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
         .planner-badge { flex: 0 0 auto; background: #eefbf3; color: #087443; border: 1px solid #bfe8cd; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; gap: 6px; }
+        .trip-planner.is-locked .planner-badge { background: #fff7db; color: #9a5b00; border-color: #f8d477; }
         .planner-form { display: grid; grid-template-columns: 1.6fr 0.8fr 1fr auto; gap: 12px; align-items: end; }
         .planner-field { display: grid; gap: 7px; }
         .planner-field label { color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; }
@@ -186,15 +189,38 @@
         .planner-field input:focus, .planner-field select:focus { border-color: var(--primary-strong); box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.18); }
         .planner-submit { min-height: 46px; border: 0; border-radius: 8px; background: var(--accent); color: #0e1e38; cursor: pointer; font-weight: 900; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
         .planner-submit:disabled { opacity: 0.72; cursor: not-allowed; }
-        .planner-output { display: grid; gap: 12px; }
-        .planner-empty { border: 1px dashed var(--line); border-radius: 10px; padding: 18px; color: var(--muted); background: var(--bg); font-size: 14px; line-height: 1.5; }
-        .itinerary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-        .itinerary-card { border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 16px; display: grid; gap: 8px; }
-        .itinerary-card strong { color: var(--primary); font-size: 15px; }
+        .planner-output { display: grid; gap: 14px; }
+        .planner-empty { border: 1px dashed var(--line); border-radius: 8px; padding: 18px; color: var(--muted); background: var(--bg); font-size: 14px; line-height: 1.5; }
+        .itinerary-summary { border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: 8px; padding: 16px; background: var(--bg); box-shadow: var(--shadow); }
+        .itinerary-summary strong { display: block; color: var(--primary); font-size: 16px; margin-bottom: 8px; }
+        .itinerary-summary div { color: var(--muted); font-size: 13px; line-height: 1.55; }
+        .itinerary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .itinerary-card { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 16px; display: grid; gap: 12px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .itinerary-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--accent); }
+        .itinerary-card strong { color: var(--primary); font-size: 16px; }
         .itinerary-card p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.55; }
         .itinerary-meta { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .itinerary-day-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+        .itinerary-day-number { width: 42px; height: 42px; border-radius: 8px; display: grid; place-items: center; background: var(--primary-strong); color: white; font-weight: 900; flex: 0 0 auto; box-shadow: var(--shadow); }
+        .activity-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+        .activity-item { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+        .activity-icon { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: rgba(79, 140, 255, 0.12); color: var(--primary-strong); }
+        .activity-text { color: var(--text); font-size: 13px; line-height: 1.45; }
+        .planner-gate { position: absolute; inset: 0; z-index: 3; display: none; place-items: center; padding: 24px; background: rgba(245, 247, 250, 0.46); backdrop-filter: blur(8px); }
+        .trip-planner.is-locked .planner-gate { display: grid; }
+        .planner-gate-card { width: min(430px, 100%); border: 1px solid rgba(255, 255, 255, 0.65); border-radius: 8px; background: rgba(255, 255, 255, 0.92); color: var(--text); padding: 22px; text-align: center; box-shadow: var(--shadow-lg); display: grid; gap: 12px; }
+        .planner-gate-icon { width: 48px; height: 48px; margin: 0 auto; border-radius: 8px; display: grid; place-items: center; background: var(--accent); color: #0e1e38; font-size: 20px; }
+        .planner-gate-card strong { color: var(--primary); font-size: 18px; line-height: 1.35; }
+        .planner-gate-card span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+        .planner-gate-button { min-height: 46px; border: 0; border-radius: 8px; background: var(--primary-strong); color: white; cursor: pointer; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 10px 24px rgba(0, 53, 128, 0.26); }
+        .planner-gate-button:hover { background: #002254; transform: translateY(-1px); }
         body.dark-mode .planner-badge { background: #10291d; color: #86efac; border-color: #245f3e; }
-        body.dark-mode .planner-field input, body.dark-mode .planner-field select, body.dark-mode .planner-empty, body.dark-mode .itinerary-card { background: #0b1628; }
+        body.dark-mode .trip-planner.is-locked .planner-badge { background: #322812; color: #fde68a; border-color: #6f5417; }
+        body.dark-mode .planner-field input, body.dark-mode .planner-field select, body.dark-mode .planner-empty, body.dark-mode .itinerary-summary, body.dark-mode .activity-item { background: #0b1628; }
+        body.dark-mode .itinerary-card { background: #101b2d; }
+        body.dark-mode .planner-gate { background: rgba(8, 17, 31, 0.5); }
+        body.dark-mode .planner-gate-card { background: rgba(16, 27, 45, 0.94); border-color: rgba(148, 163, 184, 0.24); }
+        body.dark-mode .activity-icon { background: rgba(79, 140, 255, 0.18); }
 
         /* 4. RESPONSIVE (Mobil Uyğunluq) */
         .hidden { display: none !important; }
@@ -207,6 +233,10 @@
             .search-button { padding: 15px; border-radius: 6px; justify-content: center; }
             .layout { grid-template-columns: 1fr; margin-top: 20px; }
             .hotel-card, .ticket-card, .two-column, .planner-form, .itinerary-grid { grid-template-columns: 1fr; }
+            .planner-head { flex-direction: column; }
+            .planner-content { padding: 18px; }
+            .planner-gate { padding: 16px; }
+            .planner-gate-card { padding: 18px; }
             .hotel-image { min-height: 120px; }
             .top-row { align-items: flex-start; }
             .top-actions { flex-wrap: wrap; justify-content: flex-end; }
@@ -312,49 +342,63 @@
                     </div>
                 </div>
 
-                <section class="trip-planner hidden" id="tripPlannerSection">
-                    <div class="planner-head">
-                        <div>
-                            <span class="itinerary-meta">AI Trip Builder</span>
-                            <h2>Səyahət Planlayıcısı</h2>
-                            <p>İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen sizin üçün test AI planını kartlara bölüb göstərəcək.</p>
+                <section class="trip-planner is-locked" id="tripPlannerSection">
+                    <div class="planner-content">
+                        <div class="planner-head">
+                            <div>
+                                <span class="itinerary-meta">AI Trip Builder</span>
+                                <h2>Səyahət Planlayıcısı</h2>
+                                <p>İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen planı premium gün kartlarına bölüb göstərəcək.</p>
+                            </div>
+                            <span class="planner-badge" id="plannerStatusBadge"><i class="fa-solid fa-lock"></i> Giriş tələb olunur</span>
                         </div>
-                        <span class="planner-badge"><i class="fa-solid fa-lock-open"></i> Login aktiv</span>
+
+                        <form class="planner-form" id="tripPlannerForm">
+                            <div class="planner-field">
+                                <label for="tripDestinationInput">İstiqamət</label>
+                                <input type="text" id="tripDestinationInput" placeholder="İstanbul, Roma, Paris..." required>
+                            </div>
+                            <div class="planner-field">
+                                <label for="tripDaysSelect">Gün sayı</label>
+                                <select id="tripDaysSelect">
+                                    <option value="1">1 gün</option>
+                                    <option value="2">2 gün</option>
+                                    <option value="3" selected>3 gün</option>
+                                    <option value="4">4 gün</option>
+                                    <option value="5">5 gün</option>
+                                    <option value="6">6 gün</option>
+                                    <option value="7">7 gün</option>
+                                </select>
+                            </div>
+                            <div class="planner-field">
+                                <label for="tripBudgetSelect">Büdcə</label>
+                                <select id="tripBudgetSelect">
+                                    <option value="Ekonomik">Ekonomik</option>
+                                    <option value="Orta" selected>Orta</option>
+                                    <option value="Lüks">Lüks</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="planner-submit" id="tripPlannerSubmit">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                Səyahət Planımı Hazırla 🌟
+                            </button>
+                        </form>
+
+                        <div class="planner-output" id="tripPlannerOutput">
+                            <div class="planner-empty">Plan yaratmaq üçün istiqamət yazın və düyməyə basın.</div>
+                        </div>
                     </div>
 
-                    <form class="planner-form" id="tripPlannerForm">
-                        <div class="planner-field">
-                            <label for="tripDestinationInput">İstiqamət</label>
-                            <input type="text" id="tripDestinationInput" placeholder="İstanbul, Roma, Paris..." required>
+                    <div class="planner-gate" id="plannerGateOverlay" aria-hidden="false">
+                        <div class="planner-gate-card">
+                            <span class="planner-gate-icon"><i class="fa-solid fa-lock"></i></span>
+                            <strong>Süni İntellektlə fərdiləşdirilmiş səyahət planı hazırlamaq üçün qeydiyyatdan keçin! 🌟</strong>
+                            <span>Hesabınıza daxil olduqdan sonra planlayıcı dərhal aktivləşəcək.</span>
+                            <button type="button" class="planner-gate-button" id="plannerGateButton">
+                                <i class="fa-solid fa-user-plus"></i>
+                                Qeydiyyatdan Keç / Giriş Et
+                            </button>
                         </div>
-                        <div class="planner-field">
-                            <label for="tripDaysSelect">Gün sayı</label>
-                            <select id="tripDaysSelect">
-                                <option value="1">1 gün</option>
-                                <option value="2">2 gün</option>
-                                <option value="3" selected>3 gün</option>
-                                <option value="4">4 gün</option>
-                                <option value="5">5 gün</option>
-                                <option value="6">6 gün</option>
-                                <option value="7">7 gün</option>
-                            </select>
-                        </div>
-                        <div class="planner-field">
-                            <label for="tripBudgetSelect">Büdcə</label>
-                            <select id="tripBudgetSelect">
-                                <option value="Ekonomik">Ekonomik</option>
-                                <option value="Orta" selected>Orta</option>
-                                <option value="Lüks">Lüks</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="planner-submit" id="tripPlannerSubmit">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            Səyahət Planımı Hazırla 🌟
-                        </button>
-                    </form>
-
-                    <div class="planner-output" id="tripPlannerOutput">
-                        <div class="planner-empty">Plan yaratmaq üçün istiqamət yazın və düyməyə basın.</div>
                     </div>
                 </section>
 
@@ -499,6 +543,9 @@
         const tripPlannerForm = document.getElementById('tripPlannerForm');
         const tripPlannerOutput = document.getElementById('tripPlannerOutput');
         const tripPlannerSubmit = document.getElementById('tripPlannerSubmit');
+        const plannerGateOverlay = document.getElementById('plannerGateOverlay');
+        const plannerGateButton = document.getElementById('plannerGateButton');
+        const plannerStatusBadge = document.getElementById('plannerStatusBadge');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
 
         function applyTheme(theme) {
@@ -531,6 +578,7 @@
             authOpenButton.classList.add('is-authenticated');
             activateTripPlanner(savedUser);
         }
+        refreshPlannerGate(savedUser || '');
 
         function openAuthModal(tab = 'login') {
             switchAuthTab(tab);
@@ -651,7 +699,7 @@
                 return;
             }
 
-            tripPlannerSection.classList.remove('hidden');
+            refreshPlannerGate(username);
             const emptyState = tripPlannerOutput.querySelector('.planner-empty');
             if (emptyState) {
                 emptyState.textContent = `Xoş gəldiniz, ${username}. İlk AI səyahət planınızı yaratmağa hazırsınız.`;
@@ -665,6 +713,32 @@
 
         function getCurrentAuthToken() {
             return localStorage.getItem('tripgen-auth-token') || null;
+        }
+
+        function hasActivePlannerSession() {
+            return Boolean(getCurrentUserId() && getCurrentAuthToken());
+        }
+
+        function refreshPlannerGate(username = '') {
+            if (!tripPlannerSection) {
+                return;
+            }
+
+            const isUnlocked = hasActivePlannerSession();
+            tripPlannerSection.classList.toggle('is-locked', !isUnlocked);
+            plannerGateOverlay.setAttribute('aria-hidden', String(isUnlocked));
+
+            if (plannerStatusBadge) {
+                plannerStatusBadge.innerHTML = isUnlocked
+                    ? '<i class="fa-solid fa-lock-open"></i> Login aktiv'
+                    : '<i class="fa-solid fa-lock"></i> Giriş tələb olunur';
+            }
+
+            if (tripPlannerSubmit && !isUnlocked) {
+                tripPlannerSubmit.disabled = true;
+            } else if (tripPlannerSubmit && username) {
+                tripPlannerSubmit.disabled = false;
+            }
         }
 
         function setPlannerLoading(isLoading) {
@@ -687,11 +761,51 @@
             }
         }
 
+        function getActivityIcon(text) {
+            const normalized = normalizeText(text).toLowerCase();
+            if (normalized.includes('otel') || normalized.includes('hotel') || normalized.includes('spa')) {
+                return 'fa-hotel';
+            }
+            if (normalized.includes('seher') || normalized.includes('brunch') || normalized.includes('kafe') || normalized.includes('coffee')) {
+                return 'fa-mug-saucer';
+            }
+            if (normalized.includes('yemek') || normalized.includes('restoran') || normalized.includes('desert') || normalized.includes('dinner') || normalized.includes('balik')) {
+                return 'fa-utensils';
+            }
+            if (normalized.includes('muzey') || normalized.includes('saray') || normalized.includes('tarixi') || normalized.includes('camii') || normalized.includes('mescid') || normalized.includes('qelle') || normalized.includes('qala')) {
+                return 'fa-landmark';
+            }
+            if (normalized.includes('sahil') || normalized.includes('park') || normalized.includes('tebiet') || normalized.includes('ada')) {
+                return 'fa-tree';
+            }
+            if (normalized.includes('transfer') || normalized.includes('neqliyyat') || normalized.includes('vapur') || normalized.includes('tur')) {
+                return 'fa-route';
+            }
+            if (normalized.includes('alis') || normalized.includes('bazar') || normalized.includes('magaza') || normalized.includes('suvenir')) {
+                return 'fa-bag-shopping';
+            }
+            return 'fa-location-dot';
+        }
+
+        function splitActivities(detail) {
+            const sentenceParts = detail
+                .split(/(?<=[.!?])\s+/)
+                .map(item => item.trim())
+                .filter(Boolean);
+
+            const parts = sentenceParts.length > 1
+                ? sentenceParts
+                : detail.split(/,\s+|;\s+/).map(item => item.trim()).filter(Boolean);
+
+            return parts.length ? parts.slice(0, 5) : [detail];
+        }
+
         function renderTripPlan(data) {
             const raw = data.itineraryRaw || '';
             const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-            const dayLines = lines.filter(line => /^\d+[^:]*:\s*/.test(line));
-            const metaLines = lines.filter(line => !/^\d+[^:]*:\s*/.test(line)).slice(0, 3);
+            const dayPattern = /^(?:day\s*)?(\d+)(?:\s*[-.]?\s*(?:ci|cı|cu|cü)?\s*(?:gün|gun|day)?)?\s*[:\-]\s*(.*)$/i;
+            const dayLines = lines.filter(line => dayPattern.test(line));
+            const metaLines = lines.filter(line => !dayPattern.test(line)).slice(0, 3);
 
             if (dayLines.length === 0) {
                 tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || 'Plan məlumatı tapılmadı.')}</div>`;
@@ -699,20 +813,32 @@
             }
 
             const cards = dayLines.map(line => {
-                const match = line.match(/^(\d+)[^:]*:\s*(.*)$/);
+                const match = line.match(dayPattern);
                 const dayNumber = match ? match[1] : '';
                 const detail = match ? match[2] : line;
+                const activities = splitActivities(detail).map(activity => `
+                    <li class="activity-item">
+                        <span class="activity-icon"><i class="fa-solid ${getActivityIcon(activity)}"></i></span>
+                        <span class="activity-text">${escapeHtml(activity)}</span>
+                    </li>
+                `).join('');
+
                 return `
                     <article class="itinerary-card">
-                        <span class="itinerary-meta">${escapeHtml(data.destination || 'Səyahət')} · ${dayNumber}-ci gün</span>
-                        <strong>${escapeHtml(dayNumber)}-ci gün planı</strong>
-                        <p>${escapeHtml(detail)}</p>
+                        <div class="itinerary-day-top">
+                            <div>
+                                <span class="itinerary-meta">${escapeHtml(data.destination || 'Səyahət')} · ${dayNumber}-ci gün</span>
+                                <strong>${escapeHtml(dayNumber)}-ci gün planı</strong>
+                            </div>
+                            <span class="itinerary-day-number">${escapeHtml(dayNumber)}</span>
+                        </div>
+                        <ul class="activity-list">${activities}</ul>
                     </article>
                 `;
             }).join('');
 
             tripPlannerOutput.innerHTML = `
-                <div class="planner-empty">
+                <div class="itinerary-summary">
                     <strong>${escapeHtml(data.destination)} üçün ${data.days} günlük plan hazırdır.</strong>
                     <div style="margin-top:8px;">${metaLines.map(escapeHtml).join('<br>')}</div>
                 </div>
@@ -721,6 +847,7 @@
         }
 
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
+        plannerGateButton.addEventListener('click', () => openAuthModal('register'));
         authCloseButton.addEventListener('click', closeAuthModal);
         authBackdrop.addEventListener('click', closeAuthModal);
         authTabs.forEach(button => {
