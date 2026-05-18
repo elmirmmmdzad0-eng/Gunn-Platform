@@ -173,6 +173,29 @@
         body.dark-mode .auth-backdrop { background: rgba(2, 6, 23, 0.72); }
         body.dark-mode .auth-tabs, body.dark-mode .auth-field input { background: #0b1628; }
 
+        /* AI Trip Planner */
+        .trip-planner { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); display: grid; gap: 18px; }
+        .planner-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .planner-head h2 { margin: 4px 0 6px; color: var(--primary); font-size: 24px; font-weight: 900; }
+        .planner-head p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+        .planner-badge { flex: 0 0 auto; background: #eefbf3; color: #087443; border: 1px solid #bfe8cd; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; gap: 6px; }
+        .planner-form { display: grid; grid-template-columns: 1.6fr 0.8fr 1fr auto; gap: 12px; align-items: end; }
+        .planner-field { display: grid; gap: 7px; }
+        .planner-field label { color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+        .planner-field input, .planner-field select { min-height: 46px; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); outline: 0; padding: 0 12px; font-size: 14px; font-weight: 800; }
+        .planner-field input:focus, .planner-field select:focus { border-color: var(--primary-strong); box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.18); }
+        .planner-submit { min-height: 46px; border: 0; border-radius: 8px; background: var(--accent); color: #0e1e38; cursor: pointer; font-weight: 900; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+        .planner-submit:disabled { opacity: 0.72; cursor: not-allowed; }
+        .planner-output { display: grid; gap: 12px; }
+        .planner-empty { border: 1px dashed var(--line); border-radius: 10px; padding: 18px; color: var(--muted); background: var(--bg); font-size: 14px; line-height: 1.5; }
+        .itinerary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .itinerary-card { border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 16px; display: grid; gap: 8px; }
+        .itinerary-card strong { color: var(--primary); font-size: 15px; }
+        .itinerary-card p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.55; }
+        .itinerary-meta { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        body.dark-mode .planner-badge { background: #10291d; color: #86efac; border-color: #245f3e; }
+        body.dark-mode .planner-field input, body.dark-mode .planner-field select, body.dark-mode .planner-empty, body.dark-mode .itinerary-card { background: #0b1628; }
+
         /* 4. RESPONSIVE (Mobil Uyğunluq) */
         .hidden { display: none !important; }
         .loader { animation: spin 1s linear infinite; }
@@ -183,7 +206,7 @@
             .search-field { border-right: none; border-radius: 6px; }
             .search-button { padding: 15px; border-radius: 6px; justify-content: center; }
             .layout { grid-template-columns: 1fr; margin-top: 20px; }
-            .hotel-card, .ticket-card, .two-column { grid-template-columns: 1fr; }
+            .hotel-card, .ticket-card, .two-column, .planner-form, .itinerary-grid { grid-template-columns: 1fr; }
             .hotel-image { min-height: 120px; }
             .top-row { align-items: flex-start; }
             .top-actions { flex-wrap: wrap; justify-content: flex-end; }
@@ -288,6 +311,52 @@
                         <span id="errorText">Xəta mesajı</span>
                     </div>
                 </div>
+
+                <section class="trip-planner hidden" id="tripPlannerSection">
+                    <div class="planner-head">
+                        <div>
+                            <span class="itinerary-meta">AI Trip Builder</span>
+                            <h2>Səyahət Planlayıcısı</h2>
+                            <p>İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen sizin üçün test AI planını kartlara bölüb göstərəcək.</p>
+                        </div>
+                        <span class="planner-badge"><i class="fa-solid fa-lock-open"></i> Login aktiv</span>
+                    </div>
+
+                    <form class="planner-form" id="tripPlannerForm">
+                        <div class="planner-field">
+                            <label for="tripDestinationInput">İstiqamət</label>
+                            <input type="text" id="tripDestinationInput" placeholder="İstanbul, Roma, Paris..." required>
+                        </div>
+                        <div class="planner-field">
+                            <label for="tripDaysSelect">Gün sayı</label>
+                            <select id="tripDaysSelect">
+                                <option value="1">1 gün</option>
+                                <option value="2">2 gün</option>
+                                <option value="3" selected>3 gün</option>
+                                <option value="4">4 gün</option>
+                                <option value="5">5 gün</option>
+                                <option value="6">6 gün</option>
+                                <option value="7">7 gün</option>
+                            </select>
+                        </div>
+                        <div class="planner-field">
+                            <label for="tripBudgetSelect">Büdcə</label>
+                            <select id="tripBudgetSelect">
+                                <option value="Ekonomik">Ekonomik</option>
+                                <option value="Orta" selected>Orta</option>
+                                <option value="Lüks">Lüks</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="planner-submit" id="tripPlannerSubmit">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            Səyahət Planımı Hazırla 🌟
+                        </button>
+                    </form>
+
+                    <div class="planner-output" id="tripPlannerOutput">
+                        <div class="planner-empty">Plan yaratmaq üçün istiqamət yazın və düyməyə basın.</div>
+                    </div>
+                </section>
 
                 <div id="skeletonLoader" class="hidden" style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="skeleton-card"><div class="skeleton-line title"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
@@ -426,6 +495,10 @@
         const registerForm = document.getElementById('registerForm');
         const loginMessage = document.getElementById('loginMessage');
         const registerMessage = document.getElementById('registerMessage');
+        const tripPlannerSection = document.getElementById('tripPlannerSection');
+        const tripPlannerForm = document.getElementById('tripPlannerForm');
+        const tripPlannerOutput = document.getElementById('tripPlannerOutput');
+        const tripPlannerSubmit = document.getElementById('tripPlannerSubmit');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
 
         function applyTheme(theme) {
@@ -454,6 +527,7 @@
         if (savedUser) {
             authButtonText.textContent = savedUser;
             authOpenButton.classList.add('is-authenticated');
+            activateTripPlanner(savedUser);
         }
 
         function openAuthModal(tab = 'login') {
@@ -570,6 +644,71 @@
             window.tripgenWelcomeTimer = setTimeout(() => toast.classList.remove('active'), 3600);
         }
 
+        function activateTripPlanner(username) {
+            if (!tripPlannerSection) {
+                return;
+            }
+
+            tripPlannerSection.classList.remove('hidden');
+            const emptyState = tripPlannerOutput.querySelector('.planner-empty');
+            if (emptyState) {
+                emptyState.textContent = `Xoş gəldiniz, ${username}. İlk AI səyahət planınızı yaratmağa hazırsınız.`;
+            }
+        }
+
+        function setPlannerLoading(isLoading) {
+            if (isLoading) {
+                tripPlannerSubmit.dataset.originalHtml = tripPlannerSubmit.innerHTML;
+                tripPlannerSubmit.disabled = true;
+                tripPlannerSubmit.innerHTML = '<i class="fa-solid fa-spinner loader"></i> Plan hazırlanır...';
+                tripPlannerOutput.innerHTML = `
+                    <div class="planner-empty">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        AI plan qurulur, bir neçə saniyə gözləyin...
+                    </div>
+                `;
+                return;
+            }
+
+            tripPlannerSubmit.disabled = false;
+            if (tripPlannerSubmit.dataset.originalHtml) {
+                tripPlannerSubmit.innerHTML = tripPlannerSubmit.dataset.originalHtml;
+            }
+        }
+
+        function renderTripPlan(data) {
+            const raw = data.itineraryRaw || '';
+            const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            const dayLines = lines.filter(line => /^\d+[^:]*:\s*/.test(line));
+            const metaLines = lines.filter(line => !/^\d+[^:]*:\s*/.test(line)).slice(0, 3);
+
+            if (dayLines.length === 0) {
+                tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || 'Plan məlumatı tapılmadı.')}</div>`;
+                return;
+            }
+
+            const cards = dayLines.map(line => {
+                const match = line.match(/^(\d+)[^:]*:\s*(.*)$/);
+                const dayNumber = match ? match[1] : '';
+                const detail = match ? match[2] : line;
+                return `
+                    <article class="itinerary-card">
+                        <span class="itinerary-meta">${escapeHtml(data.destination || 'Səyahət')} · ${dayNumber}-ci gün</span>
+                        <strong>${escapeHtml(dayNumber)}-ci gün planı</strong>
+                        <p>${escapeHtml(detail)}</p>
+                    </article>
+                `;
+            }).join('');
+
+            tripPlannerOutput.innerHTML = `
+                <div class="planner-empty">
+                    <strong>${escapeHtml(data.destination)} üçün ${data.days} günlük plan hazırdır.</strong>
+                    <div style="margin-top:8px;">${metaLines.map(escapeHtml).join('<br>')}</div>
+                </div>
+                <div class="itinerary-grid">${cards}</div>
+            `;
+        }
+
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
         authCloseButton.addEventListener('click', closeAuthModal);
         authBackdrop.addEventListener('click', closeAuthModal);
@@ -652,6 +791,7 @@
                 authOpenButton.classList.add('is-authenticated');
                 showAuthMessage(loginMessage, `Xoş gəldiniz, ${displayName}!`, 'success');
                 showWelcomeToast(displayName);
+                activateTripPlanner(displayName);
                 loginForm.reset();
                 setTimeout(closeAuthModal, 650);
             } catch (error) {
@@ -666,6 +806,34 @@
                 showAuthMessage(loginMessage, error.message, 'error');
             } finally {
                 setAuthButtonLoading(submitButton, false);
+            }
+        });
+
+        tripPlannerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                destination: document.getElementById('tripDestinationInput').value.trim(),
+                days: Number(document.getElementById('tripDaysSelect').value),
+                budgetType: document.getElementById('tripBudgetSelect').value
+            };
+
+            setPlannerLoading(true);
+
+            try {
+                console.log('[TRIP_GENERATE_REQUEST]', payload);
+                const data = await postJson('/api/trips/generate', payload);
+                console.log('[TRIP_GENERATE_SUCCESS]', data);
+                renderTripPlan(data);
+            } catch (error) {
+                console.error('[TRIP_GENERATE_ERROR]', {
+                    message: error.message,
+                    status: error.status,
+                    responseBody: error.responseBody,
+                    rawText: error.rawText
+                });
+                tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(error.message)}</div>`;
+            } finally {
+                setPlannerLoading(false);
             }
         });
 
