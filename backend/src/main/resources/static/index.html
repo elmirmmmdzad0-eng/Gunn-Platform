@@ -52,6 +52,10 @@
         .brand-row { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; margin-bottom: 18px; }
         .top-row .brand-row { margin-bottom: 0; }
         .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; background: var(--accent); color: var(--primary); border-radius: 8px; }
+        .top-actions { display: inline-flex; align-items: center; gap: 10px; }
+        .auth-open-button { height: 36px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; font-weight: 800; font-size: 13px; }
+        .auth-open-button:hover { background: rgba(255, 255, 255, 0.22); }
+        .auth-open-button.is-authenticated { background: var(--accent); color: #0e1e38; border-color: transparent; }
         .theme-toggle { width: 52px; height: 32px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: white; cursor: pointer; display: inline-flex; align-items: center; padding: 3px; position: relative; flex: 0 0 auto; }
         .theme-toggle:hover { background: rgba(255, 255, 255, 0.22); }
         .theme-toggle span { width: 24px; height: 24px; border-radius: 999px; background: var(--accent); color: #0e1e38; display: grid; place-items: center; font-size: 13px; transform: translateX(0); transition: all 0.3s ease; }
@@ -136,6 +140,33 @@
         body.dark-mode .skeleton-card::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
         @keyframes wave { 100% { transform: translateX(100%); } }
 
+        /* Auth Modal */
+        .auth-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .auth-modal.active { opacity: 1; pointer-events: auto; }
+        .auth-backdrop { position: absolute; inset: 0; background: rgba(8, 17, 31, 0.58); backdrop-filter: blur(10px); }
+        .auth-panel { position: relative; width: min(440px, 100%); background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 22px; transform: translateY(14px) scale(0.98); transition: all 0.3s ease; }
+        .auth-modal.active .auth-panel { transform: translateY(0) scale(1); }
+        .auth-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+        .auth-header h3 { margin: 0 0 6px; color: var(--primary); font-size: 22px; }
+        .auth-header p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+        .auth-close { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--text); cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; }
+        .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px; margin-bottom: 16px; }
+        .auth-tab { border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-weight: 800; padding: 10px 12px; cursor: pointer; }
+        .auth-tab.active { background: var(--primary-strong); color: white; box-shadow: var(--shadow); }
+        .auth-form { display: none; gap: 12px; }
+        .auth-form.active { display: grid; }
+        .auth-field { display: grid; gap: 6px; }
+        .auth-field label { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .auth-field input { width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); outline: 0; padding: 0 13px; font-weight: 700; }
+        .auth-field input:focus { border-color: var(--primary-strong); box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.18); }
+        .auth-submit { min-height: 46px; border: 0; border-radius: 8px; background: var(--primary-strong); color: white; cursor: pointer; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+        .auth-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+        .auth-message { min-height: 20px; font-size: 13px; font-weight: 700; line-height: 1.45; }
+        .auth-message.success { color: #16a34a; }
+        .auth-message.error { color: #dc2626; }
+        body.dark-mode .auth-backdrop { background: rgba(2, 6, 23, 0.72); }
+        body.dark-mode .auth-tabs, body.dark-mode .auth-field input { background: #0b1628; }
+
         /* 4. RESPONSIVE (Mobil Uyğunluq) */
         .hidden { display: none !important; }
         .loader { animation: spin 1s linear infinite; }
@@ -148,6 +179,9 @@
             .layout { grid-template-columns: 1fr; margin-top: 20px; }
             .hotel-card, .ticket-card, .two-column { grid-template-columns: 1fr; }
             .hotel-image { min-height: 120px; }
+            .top-row { align-items: flex-start; }
+            .top-actions { flex-wrap: wrap; justify-content: flex-end; }
+            .auth-open-button span { display: none; }
         }
     </style>
 </head>
@@ -161,12 +195,18 @@
                         <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
                         <span>TripGen Pro</span>
                     </div>
-                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Rejimi dəyiş">
-                        <span>
-                            <i class="fa-solid fa-sun sun-icon"></i>
-                            <i class="fa-solid fa-moon moon-icon"></i>
-                        </span>
-                    </button>
+                    <div class="top-actions">
+                        <button type="button" class="auth-open-button" id="authOpenButton">
+                            <i class="fa-solid fa-user"></i>
+                            <span id="authButtonText">Giriş et</span>
+                        </button>
+                        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Rejimi dəyiş">
+                            <span>
+                                <i class="fa-solid fa-sun sun-icon"></i>
+                                <i class="fa-solid fa-moon moon-icon"></i>
+                            </span>
+                        </button>
+                    </div>
                 </div>
                 <h1>Ağıllı səyahət planını bir ekranda qur.</h1>
                 <p>Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
@@ -305,6 +345,62 @@
         </section>
     </main>
 
+    <div class="auth-modal" id="authModal" aria-hidden="true">
+        <div class="auth-backdrop" id="authBackdrop"></div>
+        <div class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+            <div class="auth-header">
+                <div>
+                    <h3 id="authTitle">TripGen hesabı</h3>
+                    <p>Səyahət planlarını daha sonra saxlamaq üçün hesabınıza daxil olun.</p>
+                </div>
+                <button type="button" class="auth-close" id="authCloseButton" aria-label="Bağla">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="auth-tabs" role="tablist">
+                <button type="button" class="auth-tab active" data-auth-tab="login">Giriş et</button>
+                <button type="button" class="auth-tab" data-auth-tab="register">Qeydiyyatdan keç</button>
+            </div>
+
+            <form class="auth-form active" id="loginForm">
+                <div class="auth-field">
+                    <label for="loginIdentifier">İstifadəçi adı və ya e-mail</label>
+                    <input type="text" id="loginIdentifier" autocomplete="username" required>
+                </div>
+                <div class="auth-field">
+                    <label for="loginPassword">Şifrə</label>
+                    <input type="password" id="loginPassword" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="auth-submit" id="loginSubmitButton">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Daxil ol
+                </button>
+                <div class="auth-message" id="loginMessage"></div>
+            </form>
+
+            <form class="auth-form" id="registerForm">
+                <div class="auth-field">
+                    <label for="registerUsername">İstifadəçi adı</label>
+                    <input type="text" id="registerUsername" autocomplete="username" required>
+                </div>
+                <div class="auth-field">
+                    <label for="registerEmail">E-mail</label>
+                    <input type="email" id="registerEmail" autocomplete="email" required>
+                </div>
+                <div class="auth-field">
+                    <label for="registerPassword">Şifrə</label>
+                    <input type="password" id="registerPassword" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="auth-submit" id="registerSubmitButton">
+                    <i class="fa-solid fa-envelope-circle-check"></i>
+                    Qeydiyyatı tamamla
+                </button>
+                <div class="auth-message" id="registerMessage"></div>
+            </form>
+        </div>
+    </div>
+
     <script>
         /* =========================================================================
            1. STATE MANAGEMENT & DOM SELECTORS
@@ -314,6 +410,16 @@
         const currencyInput = document.getElementById('currencyInput');
         const budgetCurrencySymbol = document.getElementById('budgetCurrencySymbol');
         const themeToggle = document.getElementById('themeToggle');
+        const authOpenButton = document.getElementById('authOpenButton');
+        const authButtonText = document.getElementById('authButtonText');
+        const authModal = document.getElementById('authModal');
+        const authCloseButton = document.getElementById('authCloseButton');
+        const authBackdrop = document.getElementById('authBackdrop');
+        const authTabs = document.querySelectorAll('[data-auth-tab]');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginMessage = document.getElementById('loginMessage');
+        const registerMessage = document.getElementById('registerMessage');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
 
         function applyTheme(theme) {
@@ -336,6 +442,113 @@
         currencyInput.addEventListener('change', (e) => {
             budgetCurrencySymbol.textContent = currencySymbols[e.target.value] || '₼';
             document.getElementById('summaryCurrency').textContent = e.target.value;
+        });
+
+        const savedUser = localStorage.getItem('tripgen-user');
+        if (savedUser) {
+            authButtonText.textContent = savedUser;
+            authOpenButton.classList.add('is-authenticated');
+        }
+
+        function openAuthModal(tab = 'login') {
+            switchAuthTab(tab);
+            authModal.classList.add('active');
+            authModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('active');
+            authModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function switchAuthTab(tab) {
+            authTabs.forEach(button => button.classList.toggle('active', button.dataset.authTab === tab));
+            loginForm.classList.toggle('active', tab === 'login');
+            registerForm.classList.toggle('active', tab === 'register');
+            loginMessage.textContent = '';
+            registerMessage.textContent = '';
+            loginMessage.className = 'auth-message';
+            registerMessage.className = 'auth-message';
+        }
+
+        function showAuthMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `auth-message ${type}`;
+        }
+
+        async function postJson(url, payload) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.message || 'Sorğu tamamlanmadı. Bir az sonra yenidən cəhd edin.');
+            }
+
+            return data;
+        }
+
+        authOpenButton.addEventListener('click', () => openAuthModal('login'));
+        authCloseButton.addEventListener('click', closeAuthModal);
+        authBackdrop.addEventListener('click', closeAuthModal);
+        authTabs.forEach(button => {
+            button.addEventListener('click', () => switchAuthTab(button.dataset.authTab));
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && authModal.classList.contains('active')) {
+                closeAuthModal();
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = document.getElementById('registerSubmitButton');
+            submitButton.disabled = true;
+
+            try {
+                await postJson('/api/auth/register', {
+                    username: document.getElementById('registerUsername').value.trim(),
+                    email: document.getElementById('registerEmail').value.trim(),
+                    password: document.getElementById('registerPassword').value
+                });
+
+                registerForm.reset();
+                showAuthMessage(registerMessage, 'E-mailinizə təsdiq linki göndərildi, zəhmət olmasa yoxlayın!', 'success');
+            } catch (error) {
+                showAuthMessage(registerMessage, error.message, 'error');
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = document.getElementById('loginSubmitButton');
+            submitButton.disabled = true;
+
+            try {
+                const identifier = document.getElementById('loginIdentifier').value.trim();
+                const data = await postJson('/api/auth/login', {
+                    email: identifier,
+                    password: document.getElementById('loginPassword').value
+                });
+
+                const displayName = data.username || identifier;
+                localStorage.setItem('tripgen-user', displayName);
+                authButtonText.textContent = displayName;
+                authOpenButton.classList.add('is-authenticated');
+                showAuthMessage(loginMessage, 'Giriş uğurludur.', 'success');
+                loginForm.reset();
+                setTimeout(closeAuthModal, 650);
+            } catch (error) {
+                showAuthMessage(loginMessage, error.message, 'error');
+            } finally {
+                submitButton.disabled = false;
+            }
         });
 
         /* =========================================================================
