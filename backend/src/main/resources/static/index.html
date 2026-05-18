@@ -23,27 +23,54 @@
             --shadow-lg: 0 18px 45px rgba(14, 30, 56, 0.16);
         }
 
+        body.dark-mode {
+            --primary: #e8eef8;
+            --primary-strong: #4f8cff;
+            --accent: #facc15;
+            --accent-strong: #f59e0b;
+            --bg: #08111f;
+            --surface: #101b2d;
+            --text: #eef4ff;
+            --muted: #9aa8bd;
+            --line: #24324a;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+            --shadow-lg: 0 22px 54px rgba(0, 0, 0, 0.42);
+        }
+
         /* 2. LAYOUT (Ümumi Quruluş) */
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body, .hero, .search-field, .side-card, .content-card, .hotel-card, .ticket-card, .visa-alert, .toast-error, .checkbox-item, .flight-line, .quality-badge, input, select, button { transition: all 0.3s ease; }
         body { margin: 0; background: var(--bg); color: var(--text); }
-        .hero { background: var(--primary); color: white; padding: 36px 24px 72px; }
+        .hero { background: #0e1e38; color: white; padding: 36px 24px 72px; }
+        body.dark-mode .hero { background: #050b16; }
         .hero-inner { width: min(1180px, 100%); margin: 0 auto; }
         .layout { width: min(1180px, 100%); margin: -30px auto 0; padding: 0 24px 48px; display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
         .sidebar, .results { display: grid; gap: 20px; }
 
         /* 3. COMPONENTS */
+        .top-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
         .brand-row { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; margin-bottom: 18px; }
+        .top-row .brand-row { margin-bottom: 0; }
         .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; background: var(--accent); color: var(--primary); border-radius: 8px; }
+        .theme-toggle { width: 52px; height: 32px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: white; cursor: pointer; display: inline-flex; align-items: center; padding: 3px; position: relative; flex: 0 0 auto; }
+        .theme-toggle:hover { background: rgba(255, 255, 255, 0.22); }
+        .theme-toggle span { width: 24px; height: 24px; border-radius: 999px; background: var(--accent); color: #0e1e38; display: grid; place-items: center; font-size: 13px; transform: translateX(0); transition: all 0.3s ease; }
+        body.dark-mode .theme-toggle span { transform: translateX(20px); background: #263755; color: #f8fafc; }
+        .theme-toggle .moon-icon { display: none; }
+        body.dark-mode .theme-toggle .sun-icon { display: none; }
+        body.dark-mode .theme-toggle .moon-icon { display: inline-block; }
         .hero h1 { max-width: 760px; margin: 0; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; font-weight: 900; }
         .hero p { max-width: 640px; margin: 14px 0 0; color: #d7e3f3; font-size: 16px; }
 
         /* Booking.com Search Panel */
         .search-panel { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; margin-top: 34px; border: 4px solid var(--accent); background: var(--accent); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; }
-        .search-field { min-height: 72px; display: flex; align-items: center; gap: 12px; background: white; color: var(--primary); padding: 12px 16px; border-right: 4px solid var(--accent); }
+        .search-field { min-height: 72px; display: flex; align-items: center; gap: 12px; background: var(--surface); color: var(--primary); padding: 12px 16px; border-right: 4px solid var(--accent); }
         .search-field i { color: var(--muted); font-size: 20px; }
         .search-field-inner { display: flex; flex-direction: column; width: 100%; }
         .search-field small { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
         .search-field input, .search-field select { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; font-weight: 700; font-size: 15px; }
+        .search-field select option { color: #162033; background: #ffffff; }
+        body.dark-mode .search-field select option { color: #eef4ff; background: #101b2d; }
         .search-button { border: 0; background: var(--primary-strong); color: white; font-weight: 800; font-size: 16px; padding: 0 32px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .search-button:hover { background: #002254; }
         .search-button:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -56,9 +83,11 @@
         .section-heading { display: flex; justify-content: space-between; align-items: center; }
         .section-heading h2 { margin: 0; color: var(--primary); font-size: 24px; font-weight: 800; }
         .quality-badge { background: #e8f7ee; color: #087443; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        body.dark-mode .quality-badge { background: #123523; color: #86efac; }
 
         .hotel-card { display: grid; grid-template-columns: 150px 1fr 80px; gap: 20px; }
         .hotel-image { background: linear-gradient(135deg, #003580, #0e1e38); border-radius: 6px; display: grid; place-items: center; color: white; font-size: 40px; }
+        body.dark-mode .hotel-image { background: linear-gradient(135deg, #1d4ed8, #101b2d); }
         .stars { color: var(--accent); margin: 8px 0; display: flex; gap: 2px; }
         .rating-box { background: var(--primary-strong); color: white; border-radius: 6px; padding: 8px; text-align: center; height: fit-content; }
         .rating-box strong { display: block; font-size: 20px; }
@@ -66,11 +95,14 @@
 
         .visa-alert { border-left: 6px solid var(--accent-strong); background: #fff8e5; display: flex; gap: 15px; }
         .visa-alert.success { background: #eefbf3; border-left-color: #16a34a; }
+        body.dark-mode .visa-alert { background: #2b2413; }
+        body.dark-mode .visa-alert.success { background: #10291d; }
         .visa-alert i.main-icon { font-size: 24px; color: var(--accent-strong); }
         .visa-alert.success i.main-icon { color: #16a34a; }
 
         .ticket-card { display: grid; grid-template-columns: 1fr 200px; gap: 20px; align-items: center; }
         .flight-line { border: 1px dashed #b8c2d1; border-radius: 6px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 15px; font-weight: 700; background: #f8fafc; color: var(--primary); }
+        body.dark-mode .flight-line { background: #0b1628; border-color: #3a4b66; }
 
         .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .list-item { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 14px; line-height: 1.5; }
@@ -83,10 +115,14 @@
         .checkbox-text { color: var(--text); transition: color 0.2s, opacity 0.2s, text-decoration-color 0.2s; }
         .checkbox-item.checked { background: #eefbf3; border-color: #bfe8cd; }
         .checkbox-item.checked .checkbox-text { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted); opacity: 0.72; }
+        body.dark-mode .checkbox-item { background: #0b1628; }
+        body.dark-mode .checkbox-item:hover { background: #13243d; border-color: #355074; }
+        body.dark-mode .checkbox-item.checked { background: #10291d; border-color: #245f3e; }
 
         /* Premium Toast Error Panel */
         .toast-error { border-left: 6px solid #dc2626; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
         .toast-error i { font-size: 22px; color: #dc2626; }
+        body.dark-mode .toast-error { background: #351314; color: #fecaca; }
 
         /* Codex Skeleton Loading Animation */
         .skeleton-card { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 25px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
@@ -94,6 +130,10 @@
         .skeleton-line.title { width: 40%; height: 22px; background: #cbd5e1; }
         .skeleton-line.short { width: 60%; }
         .skeleton-card::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: wave 1.6s infinite; transform: translateX(-100%); }
+        body.dark-mode .skeleton-card { background: #101b2d; }
+        body.dark-mode .skeleton-line { background: #24324a; }
+        body.dark-mode .skeleton-line.title { background: #33445f; }
+        body.dark-mode .skeleton-card::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
         @keyframes wave { 100% { transform: translateX(100%); } }
 
         /* 4. RESPONSIVE (Mobil Uyğunluq) */
@@ -116,9 +156,17 @@
     <main class="tripgen-page">
         <section class="hero">
             <div class="hero-inner">
-                <div class="brand-row">
-                    <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
-                    <span>TripGen Pro</span>
+                <div class="top-row">
+                    <div class="brand-row">
+                        <span class="brand-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                        <span>TripGen Pro</span>
+                    </div>
+                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Rejimi dəyiş">
+                        <span>
+                            <i class="fa-solid fa-sun sun-icon"></i>
+                            <i class="fa-solid fa-moon moon-icon"></i>
+                        </span>
+                    </button>
                 </div>
                 <h1>Ağıllı səyahət planını bir ekranda qur.</h1>
                 <p>Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
@@ -265,7 +313,24 @@
         const budgetValue = document.getElementById('budgetValue');
         const currencyInput = document.getElementById('currencyInput');
         const budgetCurrencySymbol = document.getElementById('budgetCurrencySymbol');
+        const themeToggle = document.getElementById('themeToggle');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('dark-mode', isDark);
+            themeToggle.setAttribute('aria-label', isDark ? 'Gündüz rejiminə keç' : 'Gecə rejiminə keç');
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+        }
+
+        const savedTheme = localStorage.getItem('tripgen-theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem('tripgen-theme', nextTheme);
+            applyTheme(nextTheme);
+        });
 
         budgetRange.addEventListener('input', (e) => { budgetValue.textContent = e.target.value; });
         currencyInput.addEventListener('change', (e) => {
