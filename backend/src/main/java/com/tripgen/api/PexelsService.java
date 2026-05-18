@@ -2,6 +2,7 @@ package com.tripgen.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,7 +24,8 @@ public class PexelsService {
     private static final String PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search";
     private static final int PER_PAGE = 15;
 
-    private String apiKey = "YOUR_PEXELS_API_KEY";
+    @Value("${pexels.api.key:}")
+    private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper;
@@ -37,7 +39,7 @@ public class PexelsService {
             return List.of();
         }
 
-        if (apiKey == null || apiKey.isBlank() || apiKey.equals("YOUR_PEXELS_API_KEY")) {
+        if (apiKey == null || apiKey.isBlank()) {
             System.out.println("[PEXELS_SKIP] API key is not configured yet.");
             return List.of();
         }
