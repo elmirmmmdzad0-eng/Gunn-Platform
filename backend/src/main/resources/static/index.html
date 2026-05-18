@@ -210,6 +210,17 @@
         .itinerary-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--accent); }
         .itinerary-card strong { color: var(--primary); font-size: 16px; }
         .itinerary-card p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.55; }
+        .itinerary-carousel { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 9; background: #d9e3ef; box-shadow: var(--shadow); }
+        .itinerary-carousel-track { height: 100%; display: flex; transition: transform 0.35s ease; }
+        .itinerary-slide { min-width: 100%; height: 100%; }
+        .itinerary-slide img { width: 100%; height: 100%; display: block; object-fit: cover; }
+        .carousel-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 999px; background: rgba(8, 17, 31, 0.42); color: white; cursor: pointer; display: grid; place-items: center; backdrop-filter: blur(6px); }
+        .carousel-nav:hover { background: rgba(8, 17, 31, 0.64); }
+        .carousel-nav.prev { left: 8px; }
+        .carousel-nav.next { right: 8px; }
+        .carousel-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; }
+        .carousel-dot { width: 7px; height: 7px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.58); cursor: pointer; padding: 0; }
+        .carousel-dot.active { width: 18px; background: var(--accent); }
         .itinerary-meta { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
         .itinerary-day-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
         .itinerary-day-number { width: 42px; height: 42px; border-radius: 8px; display: grid; place-items: center; background: var(--primary-strong); color: white; font-weight: 900; flex: 0 0 auto; box-shadow: var(--shadow); }
@@ -229,6 +240,7 @@
         body.dark-mode .trip-planner.is-locked .planner-badge { background: #322812; color: #fde68a; border-color: #6f5417; }
         body.dark-mode .planner-field input, body.dark-mode .planner-field select, body.dark-mode .planner-empty, body.dark-mode .itinerary-summary, body.dark-mode .activity-item { background: #0b1628; }
         body.dark-mode .itinerary-card { background: #101b2d; }
+        body.dark-mode .itinerary-carousel { background: #0b1628; }
         body.dark-mode .planner-gate { background: rgba(8, 17, 31, 0.5); }
         body.dark-mode .planner-gate-card { background: rgba(16, 27, 45, 0.94); border-color: rgba(148, 163, 184, 0.24); }
         body.dark-mode .activity-icon { background: rgba(79, 140, 255, 0.18); }
@@ -1253,22 +1265,89 @@
             return parts.length ? parts.slice(0, 5) : [detail];
         }
 
+        const DEFAULT_TRAVEL_IMAGE = 'https://images.pexels.com/photos/3155666/pexels-photo-3155666.jpeg?auto=compress&cs=tinysrgb&w=1200';
+
+        function getPlanImages(data) {
+            const urls = Array.isArray(data.imageUrls)
+                ? data.imageUrls.filter(url => typeof url === 'string' && url.trim())
+                : [];
+
+            return urls.length ? urls : [DEFAULT_TRAVEL_IMAGE];
+        }
+
+        function buildCarousel(images, dayIndex) {
+            const safeImages = images.length ? images : [DEFAULT_TRAVEL_IMAGE];
+            const slides = safeImages.map((url, index) => `
+                <div class="itinerary-slide">
+                    <img src="${escapeHtml(url)}" alt="${escapeHtml(t('dayPlan', { day: dayIndex + 1 }))} ${index + 1}" loading="lazy">
+                </div>
+            `).join('');
+
+            const controls = safeImages.length > 1 ? `
+                <button type="button" class="carousel-nav prev" data-carousel-prev aria-label="Previous image">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="carousel-nav next" data-carousel-next aria-label="Next image">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <div class="carousel-dots">
+                    ${safeImages.map((_, index) => `<button type="button" class="carousel-dot ${index === 0 ? 'active' : ''}" data-carousel-dot="${index}" aria-label="Image ${index + 1}"></button>`).join('')}
+                </div>
+            ` : '';
+
+            return `
+                <div class="itinerary-carousel" data-carousel-index="0">
+                    <div class="itinerary-carousel-track">${slides}</div>
+                    ${controls}
+                </div>
+            `;
+        }
+
+        function initializeItineraryCarousels() {
+            document.querySelectorAll('.itinerary-carousel').forEach(carousel => {
+                const track = carousel.querySelector('.itinerary-carousel-track');
+                const slides = carousel.querySelectorAll('.itinerary-slide');
+                const dots = carousel.querySelectorAll('.carousel-dot');
+                const prev = carousel.querySelector('[data-carousel-prev]');
+                const next = carousel.querySelector('[data-carousel-next]');
+
+                if (!track || slides.length <= 1) {
+                    return;
+                }
+
+                const setIndex = (nextIndex) => {
+                    const index = (nextIndex + slides.length) % slides.length;
+                    carousel.dataset.carouselIndex = String(index);
+                    track.style.transform = `translateX(-${index * 100}%)`;
+                    dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === index));
+                };
+
+                prev.addEventListener('click', () => setIndex(Number(carousel.dataset.carouselIndex || 0) - 1));
+                next.addEventListener('click', () => setIndex(Number(carousel.dataset.carouselIndex || 0) + 1));
+                dots.forEach(dot => dot.addEventListener('click', () => setIndex(Number(dot.dataset.carouselDot))));
+            });
+        }
+
         function renderTripPlan(data) {
             const raw = data.itineraryRaw || '';
             const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
             const dayPattern = /^(?:(?:day|день)\s*)?(\d+)(?:\s*[-.]?\s*(?:ci|cı|cu|cü)?\s*(?:gün|gun|day|день)?)?\s*[:\-]\s*(.*)$/iu;
             const dayLines = lines.filter(line => dayPattern.test(line));
             const metaLines = lines.filter(line => !dayPattern.test(line)).slice(0, 3);
+            const planImages = getPlanImages(data);
 
             if (dayLines.length === 0) {
                 tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || t('planNotFound'))}</div>`;
                 return;
             }
 
-            const cards = dayLines.map(line => {
+            const cards = dayLines.map((line, dayIndex) => {
                 const match = line.match(dayPattern);
                 const dayNumber = match ? match[1] : '';
                 const detail = match ? match[2] : line;
+                const dayImages = planImages.length === 1
+                    ? planImages
+                    : [planImages[dayIndex % planImages.length], planImages[(dayIndex + 1) % planImages.length]].filter(Boolean);
                 const activities = splitActivities(detail).map(activity => `
                     <li class="activity-item">
                         <span class="activity-icon"><i class="fa-solid ${getActivityIcon(activity)}"></i></span>
@@ -1278,6 +1357,7 @@
 
                 return `
                     <article class="itinerary-card">
+                        ${buildCarousel(dayImages, dayIndex)}
                         <div class="itinerary-day-top">
                             <div>
                                 <span class="itinerary-meta">${escapeHtml(t('dayMeta', { destination: data.destination || 'Trip', day: dayNumber }))}</span>
@@ -1297,6 +1377,7 @@
                 </div>
                 <div class="itinerary-grid">${cards}</div>
             `;
+            initializeItineraryCarousels();
         }
 
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
