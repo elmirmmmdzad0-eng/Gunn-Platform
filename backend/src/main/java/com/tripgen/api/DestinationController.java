@@ -49,21 +49,24 @@ public class DestinationController {
     @GetMapping("/analyze")
     public Map<String, String> analyzeTrip(
             @RequestParam String city,
-            @RequestParam String status) {
-        return callGemini(city, status);
+            @RequestParam String status,
+            @RequestParam(defaultValue = "AZN") String currency) {
+        return callGemini(city, status, currency);
     }
 
     @GetMapping
     public Map<String, String> getTripPlan(
             @RequestParam String destination,
-            @RequestParam(defaultValue = "3") int days) {
-        return callGemini(destination, "Tələbə");
+            @RequestParam(defaultValue = "3") int days,
+            @RequestParam(defaultValue = "AZN") String currency) {
+        return callGemini(destination, "Tələbə", currency);
     }
 
-    private Map<String, String> callGemini(String city, String status) {
+    private Map<String, String> callGemini(String city, String status, String currency) {
         String cleanCity = cleanInput(city);
         String cleanStatus = cleanInput(status);
-        String cacheKey = buildCacheKey(cleanCity, cleanStatus);
+        String cleanCurrency = cleanCurrency(currency);
+        String cacheKey = buildCacheKey(cleanCity, cleanStatus, cleanCurrency);
 
         Map<String, String> cachedResponse = getCachedResponse(cacheKey);
         if (cachedResponse != null) {
@@ -72,13 +75,14 @@ public class DestinationController {
 
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", cleanCity);
+        responseMap.put("currency", cleanCurrency);
 
         if (apiKey == null || apiKey.trim().isEmpty()) {
             return errorResponse(cleanCity, "API açarı tapılmadı. Server konfiqurasiyasını yoxlayın.");
         }
 
         try {
-            String prompt = buildPrompt(cleanCity, cleanStatus);
+            String prompt = buildPrompt(cleanCity, cleanStatus, cleanCurrency);
             String rawResponse = restTemplate.postForObject(
                     URI.create(GEMINI_URL),
                     new HttpEntity<>(buildGeminiRequest(prompt), buildHeaders()),
@@ -126,17 +130,18 @@ public class DestinationController {
         tripCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now));
     }
 
-    private String buildPrompt(String city, String status) {
+    private String buildPrompt(String city, String status, String currency) {
         return """
                 Azərbaycanlı səyahətçi üçün qısa plan hazırla.
                 Şəhər: %s. Status: %s.
+                Bütün otel, viza, yemək və nəqliyyat qiymətlərini tam olaraq %s valyutası ilə hesabla və cavabda qiymətlərin yanına bu valyutanı yaz.
                 Yalnız bu formatda cavab ver, əlavə mətn yazma:
                 HOTEL: 2-3 uyğun otel/ərazi tövsiyəsi
                 VISA: viza/e-viza/vizasız məlumatı
                 TICKET: təxmini bilet qiyməti və məsləhət
                 HACKS: 3 qısa səyahət məsləhəti
                 PACKING: 5 vacib əşya
-                """.formatted(city, status);
+                """.formatted(city, status, currency);
     }
 
     private HttpHeaders buildHeaders() {
@@ -205,8 +210,8 @@ public class DestinationController {
         }
     }
 
-    private String buildCacheKey(String city, String status) {
-        return normalizeForCache(city) + "::" + normalizeForCache(status);
+    private String buildCacheKey(String city, String status, String currency) {
+        return normalizeForCache(city) + "::" + normalizeForCache(status) + "::" + normalizeForCache(currency);
     }
 
     private String normalizeForCache(String value) {
@@ -220,6 +225,15 @@ public class DestinationController {
         }
 
         return value.trim().replaceAll("\\s+", " ");
+    }
+
+    private String cleanCurrency(String value) {
+        String normalized = cleanInput(value).toUpperCase(Locale.ROOT);
+        if (normalized.equals("USD") || normalized.equals("EUR")) {
+            return normalized;
+        }
+
+        return "AZN";
     }
 
     private static class CacheEntry {

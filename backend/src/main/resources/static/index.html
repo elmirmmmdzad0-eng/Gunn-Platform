@@ -38,7 +38,7 @@
         .hero p { max-width: 640px; margin: 14px 0 0; color: #d7e3f3; font-size: 16px; }
 
         /* Booking.com Search Panel */
-        .search-panel { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; margin-top: 34px; border: 4px solid var(--accent); background: var(--accent); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; }
+        .search-panel { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; margin-top: 34px; border: 4px solid var(--accent); background: var(--accent); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; }
         .search-field { min-height: 72px; display: flex; align-items: center; gap: 12px; background: white; color: var(--primary); padding: 12px 16px; border-right: 4px solid var(--accent); }
         .search-field i { color: var(--muted); font-size: 20px; }
         .search-field-inner { display: flex; flex-direction: column; width: 100%; }
@@ -150,6 +150,17 @@
                             <input type="number" id="daysInput" value="3" min="1" max="30">
                         </div>
                     </div>
+                    <div class="search-field">
+                        <i class="fa-solid fa-coins"></i>
+                        <div class="search-field-inner">
+                            <small>Valyuta</small>
+                            <select id="currencyInput">
+                                <option value="AZN" selected>AZN (₼)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                            </select>
+                        </div>
+                    </div>
                     <button type="submit" class="search-button" id="submitBtn">
                         <i class="fa-solid fa-magnifying-glass" id="btnIcon"></i>
                         <span id="btnText">Plan hazırla</span>
@@ -165,10 +176,11 @@
                     <div class="summary-row"><span>Şəhər:</span><strong id="summaryCity">-</strong></div>
                     <div class="summary-row"><span>Status:</span><strong id="summaryStatus">Tələbə</strong></div>
                     <div class="summary-row"><span>Müddət:</span><strong id="summaryDays">3 gün</strong></div>
+                    <div class="summary-row"><span>Valyuta:</span><strong id="summaryCurrency">AZN</strong></div>
                 </div>
                 <div class="side-card">
                     <div class="side-title"><i class="fa-solid fa-wallet"></i> Təxmini Büdcə</div>
-                    <div style="font-size: 24px; font-weight: 900; color: var(--primary-strong); margin-bottom: 10px;">$<span id="budgetValue">1200</span></div>
+                    <div style="font-size: 24px; font-weight: 900; color: var(--primary-strong); margin-bottom: 10px;"><span id="budgetCurrencySymbol">₼</span><span id="budgetValue">1200</span></div>
                     <input type="range" min="300" max="5000" step="100" value="1200" style="width:100%; accent-color:var(--accent);" id="budgetRange">
                 </div>
             </aside>
@@ -251,7 +263,15 @@
            ========================================================================= */
         const budgetRange = document.getElementById('budgetRange');
         const budgetValue = document.getElementById('budgetValue');
+        const currencyInput = document.getElementById('currencyInput');
+        const budgetCurrencySymbol = document.getElementById('budgetCurrencySymbol');
+        const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
+
         budgetRange.addEventListener('input', (e) => { budgetValue.textContent = e.target.value; });
+        currencyInput.addEventListener('change', (e) => {
+            budgetCurrencySymbol.textContent = currencySymbols[e.target.value] || '₼';
+            document.getElementById('summaryCurrency').textContent = e.target.value;
+        });
 
         /* =========================================================================
            2. CODEX HELPER FUNCTIONS (Text Normalization & Anti-HTML Injection)
@@ -373,11 +393,13 @@
             const city = document.getElementById('cityInput').value.trim();
             const status = document.getElementById('statusInput').value;
             const days = document.getElementById('daysInput').value;
+            const currency = document.getElementById('currencyInput').value;
 
             // UI Elements & State Updates
             document.getElementById('summaryCity').textContent = city;
             document.getElementById('summaryStatus').textContent = status;
             document.getElementById('summaryDays').textContent = days + " gün";
+            document.getElementById('summaryCurrency').textContent = currency;
             document.getElementById('resultTitle').textContent = city + " üçün Səyahət Planı";
             document.getElementById('destAirport').textContent = city.slice(0, 3).toUpperCase();
 
@@ -395,7 +417,7 @@
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}`);
+                const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
                 if (!response.ok) {
                     throw new Error(`HTTP xətası! Status: ${response.status}`);
                 }
