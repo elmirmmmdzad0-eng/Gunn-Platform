@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +35,11 @@ public class DestinationController {
     private static final String QUOTA_MESSAGE =
             "Gündəlik AI istifadə limiti dolub. Bir az sonra yenidən yoxlayın.";
 
-    private final ConcurrentHashMap<String, Map<String, String>> tripCache = new ConcurrentHashMap<>();
+    // Production üçün 24 saat. Test üçün 1 saat istəyirsinizsə: 60L * 60 * 1000
+    private static final long CACHE_TTL_MS = 24L * 60 * 60 * 1000;
+    private static final long CACHE_CLEANUP_INTERVAL_MS = 60L * 60 * 1000;
+
+    private final ConcurrentHashMap<String, CacheEntry> tripCache = new ConcurrentHashMap<>();
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -60,9 +65,9 @@ public class DestinationController {
         String cleanStatus = cleanInput(status);
         String cacheKey = buildCacheKey(cleanCity, cleanStatus);
 
-        Map<String, String> cachedResponse = tripCache.get(cacheKey);
+        Map<String, String> cachedResponse = getCachedResponse(cacheKey);
         if (cachedResponse != null) {
-            return new HashMap<>(cachedResponse);
+            return cachedResponse;
         }
 
         Map<String, String> responseMap = new HashMap<>();
@@ -88,7 +93,7 @@ public class DestinationController {
             responseMap.put("hacks", parseSection(aiText, "HACKS:", "PACKING:"));
             responseMap.put("packingList", parseSection(aiText, "PACKING:", "END_OF_TEXT"));
 
-            tripCache.put(cacheKey, new HashMap<>(responseMap));
+            tripCache.put(cacheKey, new CacheEntry(responseMap));
             return responseMap;
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
@@ -99,6 +104,26 @@ public class DestinationController {
         } catch (Exception e) {
             return errorResponse(cleanCity, "Məlumat müvəqqəti olaraq yüklənmədi. Bir az sonra yenidən cəhd edin.");
         }
+    }
+
+    private Map<String, String> getCachedResponse(String cacheKey) {
+        CacheEntry cacheEntry = tripCache.get(cacheKey);
+        if (cacheEntry == null) {
+            return null;
+        }
+
+        if (cacheEntry.isExpired(System.currentTimeMillis())) {
+            tripCache.remove(cacheKey, cacheEntry);
+            return null;
+        }
+
+        return cacheEntry.responseCopy();
+    }
+
+    @Scheduled(fixedRate = CACHE_CLEANUP_INTERVAL_MS)
+    public void cleanExpiredCacheEntries() {
+        long now = System.currentTimeMillis();
+        tripCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now));
     }
 
     private String buildPrompt(String city, String status) {
@@ -195,5 +220,23 @@ public class DestinationController {
         }
 
         return value.trim().replaceAll("\\s+", " ");
+    }
+
+    private static class CacheEntry {
+        private final Map<String, String> response;
+        private final long createdAt;
+
+        private CacheEntry(Map<String, String> response) {
+            this.response = new HashMap<>(response);
+            this.createdAt = System.currentTimeMillis();
+        }
+
+        private boolean isExpired(long now) {
+            return now - createdAt > CACHE_TTL_MS;
+        }
+
+        private Map<String, String> responseCopy() {
+            return new HashMap<>(response);
+        }
     }
 }
