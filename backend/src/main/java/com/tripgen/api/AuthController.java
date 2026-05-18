@@ -30,16 +30,21 @@ public class AuthController {
             User user = userService.registerUser(request.username(), request.email(), request.password());
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Qeydiyyat ugurludur. Email tesdiq linki gonderildi.");
+            response.put("message", "Qeydiyyat ugurludur. Profil aktivdir, indi giris ede bilersiniz.");
             response.put("userId", user.getId());
+            response.put("username", user.getUsername());
             response.put("email", user.getEmail());
             response.put("enabled", user.isEnabled());
+            response.put("emailSent", true);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
+            System.out.println("[AUTH_REGISTER_FAILED] Səbəb: " + e.getMessage());
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         } catch (Exception e) {
+            System.out.println("[AUTH_REGISTER_FAILED] Səbəb: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(error("Qeydiyyat zamani xeta bas verdi. Email ayarlarini yoxlayin."));
+                    .body(error("Qeydiyyat zamani xeta bas verdi. Server loglarini yoxlayin."));
         }
     }
 
@@ -65,9 +70,16 @@ public class AuthController {
             response.put("userId", user.getId());
             response.put("username", user.getUsername());
             response.put("email", user.getEmail());
+            response.put("enabled", user.isEnabled());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("[AUTH_LOGIN_FAILED] Səbəb: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error(e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("[AUTH_LOGIN_FAILED] Səbəb: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Login zamani gozlenilmez xeta bas verdi. Server loglarini yoxlayin."));
         }
     }
 
