@@ -163,6 +163,7 @@
         .auth-submit:disabled { opacity: 0.7; cursor: not-allowed; }
         .auth-message { min-height: 20px; font-size: 13px; font-weight: 700; line-height: 1.45; }
         .auth-message.success { color: #16a34a; }
+        .auth-message.warning { color: #d97706; }
         .auth-message.error { color: #dc2626; }
         body.dark-mode .auth-backdrop { background: rgba(2, 6, 23, 0.72); }
         body.dark-mode .auth-tabs, body.dark-mode .auth-field input { background: #0b1628; }
@@ -476,21 +477,72 @@
             element.className = `auth-message ${type}`;
         }
 
-        async function postJson(url, payload) {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+        async function postJson(url, payload, timeoutMs = 25000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(data.message || 'Sorğu tamamlanmadı. Bir az sonra yenidən cəhd edin.');
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+
+                const rawText = await response.text();
+                let data = {};
+                try {
+                    data = rawText ? JSON.parse(rawText) : {};
+                } catch (parseError) {
+                    console.error('[API][JSON_PARSE_ERROR]', { url, status: response.status, rawText, parseError });
+                }
+
+                console.log('[API][RESPONSE]', { url, status: response.status, ok: response.ok, data, rawText });
+
+                if (!response.ok) {
+                    const error = new Error(data.message || rawText || `HTTP ${response.status}`);
+                    error.status = response.status;
+                    error.url = url;
+                    error.responseBody = data;
+                    error.rawText = rawText;
+                    throw error;
+                }
+
+                return data;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    const timeoutError = new Error('Sorğu vaxt aşımına düşdü. Render serveri və ya şəbəkə cavab vermir.');
+                    timeoutError.status = 'TIMEOUT';
+                    timeoutError.url = url;
+                    throw timeoutError;
+                }
+
+                if (error instanceof TypeError) {
+                    const networkError = new Error('Şəbəkə xətası baş verdi. Internet, Render deploy və CORS ayarlarını yoxlayın. Detal: ' + error.message);
+                    networkError.status = 'NETWORK_ERROR';
+                    networkError.url = url;
+                    throw networkError;
+                }
+
+                throw error;
+            } finally {
+                clearTimeout(timeoutId);
             }
-
-            return data;
         }
 
+        function setAuthButtonLoading(button, isLoading, loadingText) {
+            if (isLoading) {
+                button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = `<i class="fa-solid fa-spinner loader"></i> ${loadingText}`;
+                return;
+            }
+
+            button.disabled = false;
+            if (button.dataset.originalHtml) {
+                button.innerHTML = button.dataset.originalHtml;
+            }
+        }
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
         authCloseButton.addEventListener('click', closeAuthModal);
         authBackdrop.addEventListener('click', closeAuthModal);
@@ -507,24 +559,44 @@
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = document.getElementById('registerSubmitButton');
-            submitButton.disabled = true;
+            const registerPayload = {
+                username: document.getElementById('registerUsername').value.trim(),
+                email: document.getElementById('registerEmail').value.trim(),
+                password: document.getElementById('registerPassword').value
+            };
+
+            setAuthButtonLoading(submitButton, true, 'Qeydiyyat göndərilir...');
+            showAuthMessage(registerMessage, 'Sorğu göndərildi, cavab gözlənilir...', 'warning');
 
             try {
-                await postJson('/api/auth/register', {
-                    username: document.getElementById('registerUsername').value.trim(),
-                    email: document.getElementById('registerEmail').value.trim(),
-                    password: document.getElementById('registerPassword').value
+                console.log('[AUTH][REGISTER_REQUEST]', {
+                    url: '/api/auth/register',
+                    headers: { 'Content-Type': 'application/json' },
+                    bodyKeys: Object.keys(registerPayload),
+                    username: registerPayload.username,
+                    email: registerPayload.email
                 });
 
+                const data = await postJson('/api/auth/register', registerPayload);
+                console.log('[AUTH][REGISTER_SUCCESS]', data);
+
                 registerForm.reset();
-                showAuthMessage(registerMessage, 'E-mailinizə təsdiq linki göndərildi, zəhmət olmasa yoxlayın!', 'success');
+                showAuthMessage(registerMessage, data.message || 'Qeydiyyat tamamlandı.', data.emailSent === false ? 'warning' : 'success');
             } catch (error) {
+                console.error('[AUTH][REGISTER_ERROR]', {
+                    message: error.message,
+                    status: error.status,
+                    url: error.url,
+                    responseBody: error.responseBody,
+                    rawText: error.rawText,
+                    payloadKeys: Object.keys(registerPayload)
+                });
+                alert(error.message);
                 showAuthMessage(registerMessage, error.message, 'error');
             } finally {
-                submitButton.disabled = false;
+                setAuthButtonLoading(submitButton, false);
             }
         });
-
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = document.getElementById('loginSubmitButton');
