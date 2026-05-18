@@ -76,9 +76,13 @@
         .list-item { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 14px; line-height: 1.5; }
         .list-item i { color: #16a34a; margin-top: 3px; }
 
-        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8fafc; border: 1px solid var(--line); border-radius: 6px; margin-top: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .checkbox-item input { width: 16px; height: 16px; accent-color: var(--primary-strong); }
-        .checkbox-item:has(input:checked) { text-decoration: line-through; color: var(--muted); opacity: 0.7; }
+        .packing-list { display: grid; gap: 10px; }
+        .checkbox-item { min-height: 46px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font-size: 14px; line-height: 1.45; transition: background 0.2s, border-color 0.2s, transform 0.2s; user-select: none; }
+        .checkbox-item:hover { background: #eef5ff; border-color: #c8d8ee; }
+        .checkbox-item input { flex: 0 0 auto; width: 20px; height: 20px; accent-color: var(--primary-strong); cursor: pointer; }
+        .checkbox-text { color: var(--text); transition: color 0.2s, opacity 0.2s, text-decoration-color 0.2s; }
+        .checkbox-item.checked { background: #eefbf3; border-color: #bfe8cd; }
+        .checkbox-item.checked .checkbox-text { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted); opacity: 0.72; }
 
         /* Premium Toast Error Panel */
         .toast-error { border-left: 6px solid #dc2626; background: #fef2f2; color: #991b1b; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
@@ -231,8 +235,8 @@
                         </article>
                         <article class="content-card">
                             <div class="card-title"><i class="fa-solid fa-suitcase-rolling"></i> Çamadan Siyahısı</div>
-                            <div id="packingContainer">
-                                <label class="checkbox-item"><input type="checkbox"> <span>Xüsusi əşyalar</span></label>
+                            <div id="packingContainer" class="packing-list">
+                                <label class="checkbox-item"><input type="checkbox"> <span class="checkbox-text">Xüsusi əşyalar</span></label>
                             </div>
                         </article>
                     </div>
@@ -269,6 +273,14 @@
             return normalizeText(text)
                 .split(/\n|;|•|- /)
                 .map(item => item.trim())
+                .filter(Boolean);
+        }
+
+        function splitPackingItems(text) {
+            return (text || "")
+                .replace(/\*/g, "")
+                .split(/\r?\n|;|,|â€¢|•|- /)
+                .map(item => item.replace(/^\s*\d+[\).\s-]*/, "").trim())
                 .filter(Boolean);
         }
 
@@ -323,13 +335,33 @@
         function renderPackingList(text) {
             const container = document.getElementById('packingContainer');
             container.innerHTML = '';
-            const items = splitSmartList(text).slice(0, 5);
-            if(items.length === 0 || text.includes('Məlumat tapılmadı')) {
-                container.innerHTML = `<label class="checkbox-item"><span>Məlumat tapılmadı</span></label>`;
+            const items = splitPackingItems(text).slice(0, 8);
+            if(items.length === 0 || (text || "").includes('Məlumat tapılmadı')) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'checkbox-item';
+                emptyItem.innerHTML = `<span class="checkbox-text">Məlumat tapılmadı</span>`;
+                container.appendChild(emptyItem);
                 return;
             }
+
             items.forEach(item => {
-                container.innerHTML += `<label class="checkbox-item"><input type="checkbox"> <span>${escapeHtml(item)}</span></label>`;
+                const label = document.createElement('label');
+                label.className = 'checkbox-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+
+                const itemText = document.createElement('span');
+                itemText.className = 'checkbox-text';
+                itemText.textContent = item;
+
+                checkbox.addEventListener('change', () => {
+                    label.classList.toggle('checked', checkbox.checked);
+                });
+
+                label.appendChild(checkbox);
+                label.appendChild(itemText);
+                container.appendChild(label);
             });
         }
 
