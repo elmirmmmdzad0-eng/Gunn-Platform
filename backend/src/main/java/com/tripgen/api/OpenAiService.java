@@ -46,6 +46,8 @@ public class OpenAiService implements TripPlanProvider {
 
                 Return one line per day in this format:
                 Day 1: hotel/check-in, breakfast, historic place, dinner, transfer note.
+                At the end, add exactly one line with 3-4 English Pexels search keywords:
+                IMAGE_KEYWORDS: Paris cafe, Eiffel Tower night, Louvre museum, Seine river
 
                 %s
                 """.formatted(

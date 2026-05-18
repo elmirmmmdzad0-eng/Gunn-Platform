@@ -1,10 +1,17 @@
 package com.tripgen.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -14,17 +21,23 @@ public class TripService {
     private final OpenAiService openAiService;
     private final GeminiService geminiService;
     private final WebSearchFallbackService webSearchFallbackService;
+    private final PexelsService pexelsService;
+    private final ObjectMapper objectMapper;
 
     public TripService(
             TripPlanRepository tripPlanRepository,
             OpenAiService openAiService,
             GeminiService geminiService,
-            WebSearchFallbackService webSearchFallbackService
+            WebSearchFallbackService webSearchFallbackService,
+            PexelsService pexelsService,
+            ObjectMapper objectMapper
     ) {
         this.tripPlanRepository = tripPlanRepository;
         this.openAiService = openAiService;
         this.geminiService = geminiService;
         this.webSearchFallbackService = webSearchFallbackService;
+        this.pexelsService = pexelsService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -44,6 +57,9 @@ public class TripService {
 
     private TripResponse generateAndCache(TripRequestContext context) {
         ProviderResult providerResult = generateWithFallbacks(context);
+        List<String> imageKeywords = extractImageKeywords(providerResult.itineraryRaw(), context);
+        List<String> imageUrls = fetchTargetedImages(context, imageKeywords);
+        String cleanItinerary = removeImageKeywordLine(providerResult.itineraryRaw());
 
         TripPlan tripPlan = new TripPlan();
         tripPlan.setId(UUID.randomUUID().toString());
@@ -52,7 +68,8 @@ public class TripService {
         tripPlan.setDays(context.getDays());
         tripPlan.setBudgetType(context.getBudgetType());
         tripPlan.setLanguageCode(context.getLanguageCode());
-        tripPlan.setItineraryRaw(providerResult.itineraryRaw());
+        tripPlan.setItineraryRaw(cleanItinerary);
+        tripPlan.setImageUrlsJson(toImageUrlsJson(imageUrls));
         tripPlan.setSource(providerResult.source());
 
         return toResponse(tripPlanRepository.save(tripPlan));
@@ -87,8 +104,104 @@ public class TripService {
                 tripPlan.getId(),
                 tripPlan.getDestination(),
                 tripPlan.getDays(),
-                tripPlan.getItineraryRaw()
+                tripPlan.getItineraryRaw(),
+                fromImageUrlsJson(tripPlan.getImageUrlsJson())
         );
+    }
+
+    private List<String> fetchTargetedImages(TripRequestContext context, List<String> imageKeywords) {
+        Set<String> imageUrls = new LinkedHashSet<>();
+        List<String> queries = new ArrayList<>();
+
+        for (String keyword : imageKeywords) {
+            if (keyword != null && !keyword.isBlank()) {
+                queries.add(context.getDestination() + " " + keyword.trim());
+            }
+        }
+
+        queries.add(context.getDestination() + " travel landmarks");
+        queries.add(context.getDestination() + " cafe street");
+
+        for (String query : queries) {
+            List<String> fetchedUrls = new ArrayList<>(pexelsService.fetchImages(query));
+            Collections.shuffle(fetchedUrls);
+            for (String url : fetchedUrls) {
+                imageUrls.add(url);
+                if (imageUrls.size() >= 6) {
+                    return new ArrayList<>(imageUrls);
+                }
+            }
+        }
+
+        return new ArrayList<>(imageUrls);
+    }
+
+    private List<String> extractImageKeywords(String itineraryRaw, TripRequestContext context) {
+        List<String> keywords = new ArrayList<>();
+        if (itineraryRaw != null) {
+            for (String line : itineraryRaw.split("\\R")) {
+                String trimmed = line.trim();
+                if (trimmed.toUpperCase(Locale.ROOT).startsWith("IMAGE_KEYWORDS:")) {
+                    String keywordLine = trimmed.substring("IMAGE_KEYWORDS:".length())
+                            .replace("[", "")
+                            .replace("]", "")
+                            .replace("\"", "");
+                    for (String keyword : keywordLine.split(",")) {
+                        String cleanKeyword = keyword.trim();
+                        if (!cleanKeyword.isBlank()) {
+                            keywords.add(cleanKeyword);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (keywords.isEmpty()) {
+            keywords.add(context.getDestination() + " skyline");
+            keywords.add(context.getDestination() + " old town");
+            keywords.add(context.getDestination() + " local cafe");
+            keywords.add(context.getDestination() + " museum");
+        }
+
+        return keywords.stream().distinct().limit(4).toList();
+    }
+
+    private String removeImageKeywordLine(String itineraryRaw) {
+        if (itineraryRaw == null || itineraryRaw.isBlank()) {
+            return "";
+        }
+
+        List<String> lines = new ArrayList<>();
+        for (String line : itineraryRaw.split("\\R")) {
+            if (!line.trim().toUpperCase(Locale.ROOT).startsWith("IMAGE_KEYWORDS:")) {
+                lines.add(line);
+            }
+        }
+
+        return String.join("\n", lines).trim();
+    }
+
+    private String toImageUrlsJson(List<String> imageUrls) {
+        try {
+            return objectMapper.writeValueAsString(imageUrls == null ? List.of() : imageUrls);
+        } catch (Exception e) {
+            System.out.println("[PEXELS_CACHE_JSON_ERROR] Could not serialize image URLs: " + e.getMessage());
+            return "[]";
+        }
+    }
+
+    private List<String> fromImageUrlsJson(String imageUrlsJson) {
+        if (imageUrlsJson == null || imageUrlsJson.isBlank()) {
+            return List.of();
+        }
+
+        try {
+            return objectMapper.readValue(imageUrlsJson, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            System.out.println("[PEXELS_CACHE_JSON_ERROR] Could not parse cached image URLs: " + e.getMessage());
+            return List.of();
+        }
     }
 
     private TripRequestContext normalizeRequest(TripRequest request) {

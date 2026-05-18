@@ -28,6 +28,13 @@ public class WebSearchFallbackService {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(context.getDestination())
+                .append(" landmark, ")
+                .append(context.getDestination())
+                .append(" street, ")
+                .append(context.getDestination())
+                .append(" city view");
         itinerary.append("\nQeyd: AI provayderləri müvəqqəti əlçatan olmadı. Sistem xəta verməmək üçün statik axtarış fallback planı qaytardı.");
         return itinerary.toString();
     }
@@ -48,6 +55,13 @@ public class WebSearchFallbackService {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(context.getDestination())
+                .append(" landmark, ")
+                .append(context.getDestination())
+                .append(" street, ")
+                .append(context.getDestination())
+                .append(" city view");
         itinerary.append("\nNote: AI providers were temporarily unavailable, so TripGen returned a static search fallback plan.");
         return itinerary.toString();
     }
@@ -68,6 +82,13 @@ public class WebSearchFallbackService {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(context.getDestination())
+                .append(" landmark, ")
+                .append(context.getDestination())
+                .append(" street, ")
+                .append(context.getDestination())
+                .append(" city view");
         itinerary.append("\nПримечание: AI-провайдеры временно недоступны, поэтому TripGen вернул статический резервный план.");
         return itinerary.toString();
     }

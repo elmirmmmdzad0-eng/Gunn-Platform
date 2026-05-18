@@ -64,6 +64,15 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(destination)
+                .append(" landmark, ")
+                .append(destination)
+                .append(" cafe, ")
+                .append(destination)
+                .append(" old town, ")
+                .append(destination)
+                .append(" travel view");
         itinerary.append("\nQeyd: Bu cavab hazırda Gemini fallback/mock generatorundan gəlir. Real AI qoşulanda eyni service zənciri saxlanacaq.");
         return itinerary.toString();
     }
@@ -95,6 +104,15 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(destination)
+                .append(" landmark, ")
+                .append(destination)
+                .append(" cafe, ")
+                .append(destination)
+                .append(" old town, ")
+                .append(destination)
+                .append(" travel view");
         itinerary.append("\nNote: This response currently comes from the Gemini fallback/mock generator.");
         return itinerary.toString();
     }
@@ -126,6 +144,15 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
+        itinerary.append("\nIMAGE_KEYWORDS: ")
+                .append(destination)
+                .append(" landmark, ")
+                .append(destination)
+                .append(" cafe, ")
+                .append(destination)
+                .append(" old town, ")
+                .append(destination)
+                .append(" travel view");
         itinerary.append("\nПримечание: Сейчас этот ответ создан резервным/mock генератором Gemini.");
         return itinerary.toString();
     }

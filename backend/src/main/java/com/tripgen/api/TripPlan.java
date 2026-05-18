@@ -43,6 +43,9 @@ public class TripPlan {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String itineraryRaw;
 
+    @Column(name = "image_urls_json", columnDefinition = "TEXT")
+    private String imageUrlsJson;
+
     @Column(nullable = false)
     private String source;
 
@@ -116,6 +119,14 @@ public class TripPlan {
 
     public void setItineraryRaw(String itineraryRaw) {
         this.itineraryRaw = itineraryRaw;
+    }
+
+    public String getImageUrlsJson() {
+        return imageUrlsJson;
+    }
+
+    public void setImageUrlsJson(String imageUrlsJson) {
+        this.imageUrlsJson = imageUrlsJson;
     }
 
     public String getSource() {
