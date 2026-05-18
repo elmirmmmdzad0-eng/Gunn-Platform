@@ -6,12 +6,14 @@ public class TripRequestContext {
     private final String normalizedDestination;
     private final int days;
     private final String budgetType;
+    private final String languageCode;
 
-    public TripRequestContext(String destination, String normalizedDestination, int days, String budgetType) {
+    public TripRequestContext(String destination, String normalizedDestination, int days, String budgetType, String languageCode) {
         this.destination = destination;
         this.normalizedDestination = normalizedDestination;
         this.days = days;
         this.budgetType = budgetType;
+        this.languageCode = languageCode;
     }
 
     public String getDestination() {
@@ -28,5 +30,17 @@ public class TripRequestContext {
 
     public String getBudgetType() {
         return budgetType;
+    }
+
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public String getLanguageInstruction() {
+        return switch (languageCode) {
+            case "en" -> "Please prepare the travel plan completely in English.";
+            case "ru" -> "Пожалуйста, подготовьте план путешествия полностью на русском языке.";
+            default -> "Zəhmət olmasa, səyahət planını tamamilə az dilində hazırla.";
+        };
     }
 }

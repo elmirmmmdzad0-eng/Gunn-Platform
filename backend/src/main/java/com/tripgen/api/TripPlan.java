@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(
                         name = "idx_trip_plan_lookup",
-                        columnList = "normalized_destination, days, budget_type"
+                        columnList = "normalized_destination, days, budget_type, language_code"
                 )
         }
 )
@@ -37,6 +37,9 @@ public class TripPlan {
     @Column(name = "budget_type", nullable = false)
     private String budgetType;
 
+    @Column(name = "language_code", length = 8)
+    private String languageCode;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String itineraryRaw;
 
@@ -53,6 +56,9 @@ public class TripPlan {
     public void prePersist() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+        if (languageCode == null || languageCode.isBlank()) {
+            languageCode = "az";
         }
     }
 
@@ -94,6 +100,14 @@ public class TripPlan {
 
     public void setBudgetType(String budgetType) {
         this.budgetType = budgetType;
+    }
+
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     public String getItineraryRaw() {

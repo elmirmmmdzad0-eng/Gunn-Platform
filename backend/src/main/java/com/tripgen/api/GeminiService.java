@@ -14,6 +14,18 @@ public class GeminiService implements TripPlanProvider {
 
     @Override
     public String generate(TripRequestContext context) {
+        if (context.getLanguageCode().equals("en")) {
+            return generateEnglish(context);
+        }
+
+        if (context.getLanguageCode().equals("ru")) {
+            return generateRussian(context);
+        }
+
+        return generateAzerbaijani(context);
+    }
+
+    private String generateAzerbaijani(TripRequestContext context) {
         String destination = context.getDestination();
         String[] istanbulDays = {
                 "Sultanahmet meydanı, Aya Sofya, Sultanahmet Camii və Gülhanə parkı. Axşam Eminönü sahilində balıq-ekmek və Bosfor mənzərəsi.",
@@ -53,6 +65,68 @@ public class GeminiService implements TripPlanProvider {
         }
 
         itinerary.append("\nQeyd: Bu cavab hazırda Gemini fallback/mock generatorundan gəlir. Real AI qoşulanda eyni service zənciri saxlanacaq.");
+        return itinerary.toString();
+    }
+
+    private String generateEnglish(TripRequestContext context) {
+        String destination = context.getDestination();
+        String[] dayPool = {
+                "Hotel check-in, the historic city center, landmark walk and a relaxed local dinner.",
+                "Breakfast at a local cafe, museum visit, scenic neighborhood walk and an evening viewpoint.",
+                "Market route, seaside or park break, shopping stop and a comfortable transfer plan.",
+                "Hidden streets, boutique shops, local food tasting and a calm cultural evening.",
+                "Short day trip near the city, flexible rest time and a light dinner after return.",
+                "Souvenir shopping, dessert stop, public transport route and final photo locations.",
+                "Slow brunch, favorite places revisit, packing time and airport transfer."
+        };
+
+        StringBuilder itinerary = new StringBuilder();
+        itinerary.append("TripGen AI Plan").append("\n");
+        itinerary.append("Destination: ").append(destination).append("\n");
+        itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
+        itinerary.append("Source: Gemini fallback generator").append("\n");
+        itinerary.append(context.getLanguageInstruction()).append("\n\n");
+
+        for (int i = 0; i < context.getDays(); i++) {
+            itinerary.append("Day ")
+                    .append(i + 1)
+                    .append(": ")
+                    .append(dayPool[i])
+                    .append("\n");
+        }
+
+        itinerary.append("\nNote: This response currently comes from the Gemini fallback/mock generator.");
+        return itinerary.toString();
+    }
+
+    private String generateRussian(TripRequestContext context) {
+        String destination = context.getDestination();
+        String[] dayPool = {
+                "Заселение в отель, исторический центр, прогулка по главным достопримечательностям и спокойный ужин в местном ресторане.",
+                "Завтрак в местном кафе, музей, прогулка по атмосферному району и вечерняя смотровая площадка.",
+                "Маршрут по рынку, отдых у воды или в парке, покупки и удобный план трансфера.",
+                "Скрытые улочки, бутик-магазины, дегустация местной кухни и спокойная культурная программа вечером.",
+                "Короткая поездка за город, свободное время для отдыха и легкий ужин после возвращения.",
+                "Покупка сувениров, остановка на десерт, маршрут на общественном транспорте и финальные фото-точки.",
+                "Поздний завтрак, повтор любимых мест, время на сборы и трансфер в аэропорт."
+        };
+
+        StringBuilder itinerary = new StringBuilder();
+        itinerary.append("План TripGen AI").append("\n");
+        itinerary.append("Направление: ").append(destination).append("\n");
+        itinerary.append("Тип бюджета: ").append(context.getBudgetType()).append("\n");
+        itinerary.append("Источник: резервный генератор Gemini").append("\n");
+        itinerary.append(context.getLanguageInstruction()).append("\n\n");
+
+        for (int i = 0; i < context.getDays(); i++) {
+            itinerary.append("День ")
+                    .append(i + 1)
+                    .append(": ")
+                    .append(dayPool[i])
+                    .append("\n");
+        }
+
+        itinerary.append("\nПримечание: Сейчас этот ответ создан резервным/mock генератором Gemini.");
         return itinerary.toString();
     }
 }

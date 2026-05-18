@@ -69,6 +69,10 @@
         .aura-toggle.is-playing { background: rgba(254, 187, 2, 0.22); border-color: rgba(254, 187, 2, 0.72); color: #fff7dc; }
         .aura-toggle.is-playing::after { content: ""; position: absolute; width: 26px; height: 26px; left: 8px; border-radius: 999px; border: 1px solid rgba(254, 187, 2, 0.65); animation: auraPulse 1.9s ease-out infinite; }
         .aura-toggle.is-muted { color: rgba(255, 255, 255, 0.7); }
+        .language-select { height: 36px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: white; cursor: pointer; padding: 0 10px; font-weight: 900; font-size: 12px; outline: none; }
+        .language-select:hover { background: rgba(255, 255, 255, 0.22); }
+        .language-select option { color: #162033; background: #ffffff; }
+        body.dark-mode .language-select option { color: #eef4ff; background: #101b2d; }
         @keyframes auraPulse { 0% { transform: scale(0.72); opacity: 0.9; } 100% { transform: scale(1.75); opacity: 0; } }
         .hero h1 { max-width: 760px; margin: 0; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; font-weight: 900; }
         .hero p { max-width: 640px; margin: 14px 0 0; color: #d7e3f3; font-size: 16px; }
@@ -283,42 +287,47 @@
                             <i class="fa-solid fa-volume-xmark" id="auraIcon"></i>
                             <span id="auraText">Aura</span>
                         </button>
+                        <select class="language-select" id="languageSelect" aria-label="Dil seçimi">
+                            <option value="az">AZ</option>
+                            <option value="en">EN</option>
+                            <option value="ru">RU</option>
+                        </select>
                     </div>
                 </div>
-                <h1>Ağıllı səyahət planını bir ekranda qur.</h1>
-                <p>Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
+                <h1 data-i18n="heroTitle">Ağıllı səyahət planını bir ekranda qur.</h1>
+                <p data-i18n="heroSubtitle">Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
 
                 <form class="search-panel" id="searchForm">
                     <div class="search-field">
                         <i class="fa-solid fa-location-dot"></i>
                         <div class="search-field-inner">
-                            <small>Gedəcəyiniz şəhər</small>
-                            <input type="text" id="cityInput" placeholder="Paris, Roma, Tokyo..." required>
+                            <small data-i18n="destinationLabel">Gedəcəyiniz şəhər</small>
+                            <input type="text" id="cityInput" placeholder="Paris, Roma, Tokyo..." data-i18n-placeholder="cityPlaceholder" required>
                         </div>
                     </div>
                     <div class="search-field">
                         <i class="fa-solid fa-user-tie"></i>
                         <div class="search-field-inner">
-                            <small>Status</small>
+                            <small data-i18n="statusLabel">Status</small>
                             <select id="statusInput">
-                                <option value="Tələbə">Tələbə</option>
-                                <option value="İşgüzar səyahətçi">İşgüzar</option>
-                                <option value="Cütlük">Cütlük</option>
-                                <option value="Ailə">Ailə</option>
+                                <option value="Tələbə" data-i18n="statusStudent">Tələbə</option>
+                                <option value="İşgüzar səyahətçi" data-i18n="statusBusiness">İşgüzar</option>
+                                <option value="Cütlük" data-i18n="statusCouple">Cütlük</option>
+                                <option value="Ailə" data-i18n="statusFamily">Ailə</option>
                             </select>
                         </div>
                     </div>
                     <div class="search-field">
                         <i class="fa-solid fa-calendar-days"></i>
                         <div class="search-field-inner">
-                            <small>Müddət</small>
+                            <small data-i18n="durationLabel">Müddət</small>
                             <input type="number" id="daysInput" value="3" min="1" max="30">
                         </div>
                     </div>
                     <div class="search-field">
                         <i class="fa-solid fa-coins"></i>
                         <div class="search-field-inner">
-                            <small>Valyuta</small>
+                            <small data-i18n="currencyLabel">Valyuta</small>
                             <select id="currencyInput">
                                 <option value="AZN" selected>AZN (₼)</option>
                                 <option value="USD">USD ($)</option>
@@ -328,7 +337,7 @@
                     </div>
                     <button type="submit" class="search-button" id="submitBtn">
                         <i class="fa-solid fa-magnifying-glass" id="btnIcon"></i>
-                        <span id="btnText">Plan hazırla</span>
+                        <span id="btnText" data-i18n="searchButton">Plan hazırla</span>
                     </button>
                 </form>
             </div>
@@ -337,14 +346,14 @@
         <section class="layout">
             <aside class="sidebar">
                 <div class="side-card">
-                    <div class="side-title"><i class="fa-solid fa-circle-info"></i> Axtarış xülasəsi</div>
-                    <div class="summary-row"><span>Şəhər:</span><strong id="summaryCity">-</strong></div>
-                    <div class="summary-row"><span>Status:</span><strong id="summaryStatus">Tələbə</strong></div>
-                    <div class="summary-row"><span>Müddət:</span><strong id="summaryDays">3 gün</strong></div>
-                    <div class="summary-row"><span>Valyuta:</span><strong id="summaryCurrency">AZN</strong></div>
+                    <div class="side-title"><i class="fa-solid fa-circle-info"></i> <span data-i18n="searchSummary">Axtarış xülasəsi</span></div>
+                    <div class="summary-row"><span data-i18n="citySummary">Şəhər:</span><strong id="summaryCity">-</strong></div>
+                    <div class="summary-row"><span data-i18n="statusSummary">Status:</span><strong id="summaryStatus">Tələbə</strong></div>
+                    <div class="summary-row"><span data-i18n="durationSummary">Müddət:</span><strong id="summaryDays">3 gün</strong></div>
+                    <div class="summary-row"><span data-i18n="currencySummary">Valyuta:</span><strong id="summaryCurrency">AZN</strong></div>
                 </div>
                 <div class="side-card">
-                    <div class="side-title"><i class="fa-solid fa-wallet"></i> Təxmini Büdcə</div>
+                    <div class="side-title"><i class="fa-solid fa-wallet"></i> <span data-i18n="budgetTitle">Təxmini Büdcə</span></div>
                     <div style="font-size: 24px; font-weight: 900; color: var(--primary-strong); margin-bottom: 10px;"><span id="budgetCurrencySymbol">₼</span><span id="budgetValue">1200</span></div>
                     <input type="range" min="300" max="5000" step="100" value="1200" style="width:100%; accent-color:var(--accent);" id="budgetRange">
                 </div>
@@ -355,8 +364,8 @@
                 <div class="toast-error hidden" id="errorBox">
                     <i class="fa-solid fa-circle-exclamation"></i>
                     <div>
-                        <strong style="display:block; font-size:15px; margin-bottom:2px;">Sistem Xətası</strong>
-                        <span id="errorText">Xəta mesajı</span>
+                        <strong style="display:block; font-size:15px; margin-bottom:2px;" data-i18n="systemError">Sistem Xətası</strong>
+                        <span id="errorText" data-i18n="errorMessage">Xəta mesajı</span>
                     </div>
                 </div>
 
@@ -364,57 +373,57 @@
                     <div class="planner-content">
                         <div class="planner-head">
                             <div>
-                                <span class="itinerary-meta">AI Trip Builder</span>
-                                <h2>Səyahət Planlayıcısı</h2>
-                                <p>İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen planı premium gün kartlarına bölüb göstərəcək.</p>
+                                <span class="itinerary-meta" data-i18n="plannerEyebrow">AI Trip Builder</span>
+                                <h2 data-i18n="plannerTitle">Səyahət Planlayıcısı</h2>
+                                <p data-i18n="plannerSubtitle">İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen planı premium gün kartlarına bölüb göstərəcək.</p>
                             </div>
                             <span class="planner-badge" id="plannerStatusBadge"><i class="fa-solid fa-lock"></i> Giriş tələb olunur</span>
                         </div>
 
                         <form class="planner-form" id="tripPlannerForm">
                             <div class="planner-field">
-                                <label for="tripDestinationInput">İstiqamət</label>
-                                <input type="text" id="tripDestinationInput" placeholder="İstanbul, Roma, Paris..." required>
+                                <label for="tripDestinationInput" data-i18n="tripDestinationLabel">İstiqamət</label>
+                                <input type="text" id="tripDestinationInput" placeholder="İstanbul, Roma, Paris..." data-i18n-placeholder="tripDestinationPlaceholder" required>
                             </div>
                             <div class="planner-field">
-                                <label for="tripDaysSelect">Gün sayı</label>
+                                <label for="tripDaysSelect" data-i18n="tripDaysLabel">Gün sayı</label>
                                 <select id="tripDaysSelect">
-                                    <option value="1">1 gün</option>
-                                    <option value="2">2 gün</option>
-                                    <option value="3" selected>3 gün</option>
-                                    <option value="4">4 gün</option>
-                                    <option value="5">5 gün</option>
-                                    <option value="6">6 gün</option>
-                                    <option value="7">7 gün</option>
+                                    <option value="1" data-i18n="oneDay">1 gün</option>
+                                    <option value="2" data-i18n="twoDays">2 gün</option>
+                                    <option value="3" selected data-i18n="threeDays">3 gün</option>
+                                    <option value="4" data-i18n="fourDays">4 gün</option>
+                                    <option value="5" data-i18n="fiveDays">5 gün</option>
+                                    <option value="6" data-i18n="sixDays">6 gün</option>
+                                    <option value="7" data-i18n="sevenDays">7 gün</option>
                                 </select>
                             </div>
                             <div class="planner-field">
-                                <label for="tripBudgetSelect">Büdcə</label>
+                                <label for="tripBudgetSelect" data-i18n="tripBudgetLabel">Büdcə</label>
                                 <select id="tripBudgetSelect">
-                                    <option value="Ekonomik">Ekonomik</option>
-                                    <option value="Orta" selected>Orta</option>
-                                    <option value="Lüks">Lüks</option>
+                                    <option value="Ekonomik" data-i18n="budgetEconomic">Ekonomik</option>
+                                    <option value="Orta" selected data-i18n="budgetMedium">Orta</option>
+                                    <option value="Lüks" data-i18n="budgetLuxury">Lüks</option>
                                 </select>
                             </div>
                             <button type="submit" class="planner-submit" id="tripPlannerSubmit">
                                 <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                Səyahət Planımı Hazırla 🌟
+                                <span data-i18n="tripGenerateButton">Səyahət Planımı Hazırla 🌟</span>
                             </button>
                         </form>
 
                         <div class="planner-output" id="tripPlannerOutput">
-                            <div class="planner-empty">Plan yaratmaq üçün istiqamət yazın və düyməyə basın.</div>
+                            <div class="planner-empty" data-i18n="plannerEmpty">Plan yaratmaq üçün istiqamət yazın və düyməyə basın.</div>
                         </div>
                     </div>
 
                     <div class="planner-gate" id="plannerGateOverlay" aria-hidden="false">
                         <div class="planner-gate-card">
                             <span class="planner-gate-icon"><i class="fa-solid fa-lock"></i></span>
-                            <strong>Süni İntellektlə fərdiləşdirilmiş səyahət planı hazırlamaq üçün qeydiyyatdan keçin! 🌟</strong>
-                            <span>Hesabınıza daxil olduqdan sonra planlayıcı dərhal aktivləşəcək.</span>
+                            <strong data-i18n="gateTitle">Süni İntellektlə fərdiləşdirilmiş səyahət planı hazırlamaq üçün qeydiyyatdan keçin! 🌟</strong>
+                            <span data-i18n="gateSubtitle">Hesabınıza daxil olduqdan sonra planlayıcı dərhal aktivləşəcək.</span>
                             <button type="button" class="planner-gate-button" id="plannerGateButton">
                                 <i class="fa-solid fa-user-plus"></i>
-                                Qeydiyyatdan Keç / Giriş Et
+                                <span data-i18n="gateButton">Qeydiyyatdan Keç / Giriş Et</span>
                             </button>
                         </div>
                     </div>
@@ -429,51 +438,51 @@
                 <div id="realContent">
                     <div class="section-heading" style="margin-bottom: 20px;">
                         <div>
-                            <span style="font-size:11px; font-weight:900; color:var(--primary-strong); text-transform:uppercase;">AI Travel Board</span>
-                            <h2 id="resultTitle">Səyahət Planı Paneli</h2>
+                            <span style="font-size:11px; font-weight:900; color:var(--primary-strong); text-transform:uppercase;" data-i18n="travelBoard">AI Travel Board</span>
+                            <h2 id="resultTitle" data-i18n="resultTitle">Səyahət Planı Paneli</h2>
                         </div>
-                        <span class="quality-badge"><i class="fa-solid fa-shield-halved"></i> Pro nəticə</span>
+                        <span class="quality-badge"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="proResult">Pro nəticə</span></span>
                     </div>
 
                     <article class="hotel-card" style="margin-bottom: 20px;">
                         <div class="hotel-image"><i class="fa-solid fa-hotel"></i></div>
                         <div>
-                            <div class="card-title"><i class="fa-solid fa-bed"></i> Statusunuza Uyğun Otel</div>
+                            <div class="card-title"><i class="fa-solid fa-bed"></i> <span data-i18n="hotelTitle">Statusunuza Uyğun Otel</span></div>
                             <div class="stars">
                                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
-                            <p id="hotelText">Zəhmət olmasa yuxarıdan şəhər seçib plan hazırlayın.</p>
+                            <p id="hotelText" data-i18n="hotelPlaceholder">Zəhmət olmasa yuxarıdan şəhər seçib plan hazırlayın.</p>
                         </div>
-                        <div class="rating-box"><strong>9.2</strong><span>Əla</span></div>
+                        <div class="rating-box"><strong>9.2</strong><span data-i18n="ratingExcellent">Əla</span></div>
                     </article>
 
                     <div class="visa-alert" id="visaAlert" style="margin-bottom: 20px;">
                         <i class="fa-solid fa-circle-exclamation main-icon" id="visaIcon"></i>
                         <div>
-                            <div class="card-title"><i class="fa-solid fa-passport"></i> Viza Statusu (Azərb. Vətəndaşları Üçün)</div>
-                            <p id="visaText">Axtarışdan sonra məlumat buraya gələcək.</p>
+                            <div class="card-title"><i class="fa-solid fa-passport"></i> <span data-i18n="visaTitle">Viza Statusu (Azərb. Vətəndaşları Üçün)</span></div>
+                            <p id="visaText" data-i18n="visaPlaceholder">Axtarışdan sonra məlumat buraya gələcək.</p>
                         </div>
                     </div>
 
                     <article class="ticket-card" style="margin-bottom: 20px;">
                         <div>
-                            <div class="card-title"><i class="fa-solid fa-ticket"></i> Təxmini Bilet Qiymətləri</div>
-                            <p id="ticketText">Məlumat gözlənilir...</p>
+                            <div class="card-title"><i class="fa-solid fa-ticket"></i> <span data-i18n="ticketTitle">Təxmini Bilet Qiymətləri</span></div>
+                            <p id="ticketText" data-i18n="ticketPlaceholder">Məlumat gözlənilir...</p>
                         </div>
                         <div class="flight-line"><span>GYD</span><i class="fa-solid fa-plane"></i><span id="destAirport">DST</span></div>
                     </article>
 
                     <div class="two-column">
                         <article class="content-card">
-                            <div class="card-title"><i class="fa-solid fa-lightbulb"></i> Səyahət Fəndləri (Hacks)</div>
+                            <div class="card-title"><i class="fa-solid fa-lightbulb"></i> <span data-i18n="hacksTitle">Səyahət Fəndləri (Hacks)</span></div>
                             <div id="hacksContainer">
-                                <div class="list-item"><i class="fa-solid fa-circle-check"></i><span>Optimal büdcə fəndləri bura yüklənir.</span></div>
+                                <div class="list-item"><i class="fa-solid fa-circle-check"></i><span data-i18n="hacksPlaceholder">Optimal büdcə fəndləri bura yüklənir.</span></div>
                             </div>
                         </article>
                         <article class="content-card">
-                            <div class="card-title"><i class="fa-solid fa-suitcase-rolling"></i> Çamadan Siyahısı</div>
+                            <div class="card-title"><i class="fa-solid fa-suitcase-rolling"></i> <span data-i18n="packingTitle">Çamadan Siyahısı</span></div>
                             <div id="packingContainer" class="packing-list">
-                                <label class="checkbox-item"><input type="checkbox"> <span class="checkbox-text">Xüsusi əşyalar</span></label>
+                                <label class="checkbox-item"><input type="checkbox"> <span class="checkbox-text" data-i18n="packingPlaceholder">Xüsusi əşyalar</span></label>
                             </div>
                         </article>
                     </div>
@@ -487,8 +496,8 @@
         <div class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
             <div class="auth-header">
                 <div>
-                    <h3 id="authTitle">TripGen hesabı</h3>
-                    <p>Səyahət planlarını daha sonra saxlamaq üçün hesabınıza daxil olun.</p>
+                    <h3 id="authTitle" data-i18n="authTitle">TripGen hesabı</h3>
+                    <p data-i18n="authSubtitle">Səyahət planlarını daha sonra saxlamaq üçün hesabınıza daxil olun.</p>
                 </div>
                 <button type="button" class="auth-close" id="authCloseButton" aria-label="Bağla">
                     <i class="fa-solid fa-xmark"></i>
@@ -496,42 +505,42 @@
             </div>
 
             <div class="auth-tabs" role="tablist">
-                <button type="button" class="auth-tab active" data-auth-tab="login">Giriş et</button>
-                <button type="button" class="auth-tab" data-auth-tab="register">Qeydiyyatdan keç</button>
+                <button type="button" class="auth-tab active" data-auth-tab="login" data-i18n="loginTab">Giriş et</button>
+                <button type="button" class="auth-tab" data-auth-tab="register" data-i18n="registerTab">Qeydiyyatdan keç</button>
             </div>
 
             <form class="auth-form active" id="loginForm">
                 <div class="auth-field">
-                    <label for="loginIdentifier">İstifadəçi adı və ya e-mail</label>
+                    <label for="loginIdentifier" data-i18n="loginIdentifierLabel">İstifadəçi adı və ya e-mail</label>
                     <input type="text" id="loginIdentifier" autocomplete="username" required>
                 </div>
                 <div class="auth-field">
-                    <label for="loginPassword">Şifrə</label>
+                    <label for="loginPassword" data-i18n="passwordLabel">Şifrə</label>
                     <input type="password" id="loginPassword" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="auth-submit" id="loginSubmitButton">
                     <i class="fa-solid fa-right-to-bracket"></i>
-                    Daxil ol
+                    <span data-i18n="loginButton">Daxil ol</span>
                 </button>
                 <div class="auth-message" id="loginMessage"></div>
             </form>
 
             <form class="auth-form" id="registerForm">
                 <div class="auth-field">
-                    <label for="registerUsername">İstifadəçi adı</label>
+                    <label for="registerUsername" data-i18n="usernameLabel">İstifadəçi adı</label>
                     <input type="text" id="registerUsername" autocomplete="username" required>
                 </div>
                 <div class="auth-field">
-                    <label for="registerEmail">E-mail</label>
+                    <label for="registerEmail" data-i18n="emailLabel">E-mail</label>
                     <input type="email" id="registerEmail" autocomplete="email" required>
                 </div>
                 <div class="auth-field">
-                    <label for="registerPassword">Şifrə</label>
+                    <label for="registerPassword" data-i18n="passwordLabel">Şifrə</label>
                     <input type="password" id="registerPassword" autocomplete="new-password" required>
                 </div>
                 <button type="submit" class="auth-submit" id="registerSubmitButton">
                     <i class="fa-solid fa-envelope-circle-check"></i>
-                    Qeydiyyatı tamamla
+                    <span data-i18n="registerButton">Qeydiyyatı tamamla</span>
                 </button>
                 <div class="auth-message" id="registerMessage"></div>
             </form>
@@ -551,6 +560,7 @@
         const auraToggle = document.getElementById('auraToggle');
         const auraIcon = document.getElementById('auraIcon');
         const auraText = document.getElementById('auraText');
+        const languageSelect = document.getElementById('languageSelect');
         const authOpenButton = document.getElementById('authOpenButton');
         const authButtonText = document.getElementById('authButtonText');
         const authModal = document.getElementById('authModal');
@@ -569,14 +579,369 @@
         const plannerGateButton = document.getElementById('plannerGateButton');
         const plannerStatusBadge = document.getElementById('plannerStatusBadge');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
+        const translations = {
+            az: {
+                pageTitle: 'TripGen Pro - Ağıllı Səyahət Planı',
+                loginTop: 'Giriş et',
+                heroTitle: 'Ağıllı səyahət planını bir ekranda qur.',
+                heroSubtitle: 'Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.',
+                destinationLabel: 'Gedəcəyiniz şəhər',
+                cityPlaceholder: 'Paris, Roma, Tokyo...',
+                statusLabel: 'Status',
+                statusStudent: 'Tələbə',
+                statusBusiness: 'İşgüzar',
+                statusCouple: 'Cütlük',
+                statusFamily: 'Ailə',
+                durationLabel: 'Müddət',
+                currencyLabel: 'Valyuta',
+                searchButton: 'Plan hazırla',
+                searchSummary: 'Axtarış xülasəsi',
+                citySummary: 'Şəhər:',
+                statusSummary: 'Status:',
+                durationSummary: 'Müddət:',
+                currencySummary: 'Valyuta:',
+                budgetTitle: 'Təxmini Büdcə',
+                systemError: 'Sistem Xətası',
+                errorMessage: 'Xəta mesajı',
+                plannerEyebrow: 'AI Trip Builder',
+                plannerTitle: 'Səyahət Planlayıcısı',
+                plannerSubtitle: 'İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen planı premium gün kartlarına bölüb göstərəcək.',
+                lockedBadge: 'Giriş tələb olunur',
+                unlockedBadge: 'Login aktiv',
+                tripDestinationLabel: 'İstiqamət',
+                tripDestinationPlaceholder: 'İstanbul, Roma, Paris...',
+                tripDaysLabel: 'Gün sayı',
+                tripBudgetLabel: 'Büdcə',
+                oneDay: '1 gün',
+                twoDays: '2 gün',
+                threeDays: '3 gün',
+                fourDays: '4 gün',
+                fiveDays: '5 gün',
+                sixDays: '6 gün',
+                sevenDays: '7 gün',
+                budgetEconomic: 'Ekonomik',
+                budgetMedium: 'Orta',
+                budgetLuxury: 'Lüks',
+                tripGenerateButton: 'Səyahət Planımı Hazırla 🌟',
+                plannerEmpty: 'Plan yaratmaq üçün istiqamət yazın və düyməyə basın.',
+                gateTitle: 'Süni İntellektlə fərdiləşdirilmiş səyahət planı hazırlamaq üçün qeydiyyatdan keçin! 🌟',
+                gateSubtitle: 'Hesabınıza daxil olduqdan sonra planlayıcı dərhal aktivləşəcək.',
+                gateButton: 'Qeydiyyatdan Keç / Giriş Et',
+                travelBoard: 'AI Travel Board',
+                resultTitle: 'Səyahət Planı Paneli',
+                proResult: 'Pro nəticə',
+                hotelTitle: 'Statusunuza Uyğun Otel',
+                hotelPlaceholder: 'Zəhmət olmasa yuxarıdan şəhər seçib plan hazırlayın.',
+                ratingExcellent: 'Əla',
+                visaTitle: 'Viza Statusu (Azərb. Vətəndaşları Üçün)',
+                visaPlaceholder: 'Axtarışdan sonra məlumat buraya gələcək.',
+                ticketTitle: 'Təxmini Bilet Qiymətləri',
+                ticketPlaceholder: 'Məlumat gözlənilir...',
+                hacksTitle: 'Səyahət Fəndləri (Hacks)',
+                hacksPlaceholder: 'Optimal büdcə fəndləri bura yüklənir.',
+                packingTitle: 'Çamadan Siyahısı',
+                packingPlaceholder: 'Xüsusi əşyalar',
+                authTitle: 'TripGen hesabı',
+                authSubtitle: 'Səyahət planlarını daha sonra saxlamaq üçün hesabınıza daxil olun.',
+                loginTab: 'Giriş et',
+                registerTab: 'Qeydiyyatdan keç',
+                loginIdentifierLabel: 'İstifadəçi adı və ya e-mail',
+                passwordLabel: 'Şifrə',
+                loginButton: 'Daxil ol',
+                usernameLabel: 'İstifadəçi adı',
+                emailLabel: 'E-mail',
+                registerButton: 'Qeydiyyatı tamamla',
+                auraOn: 'Aura aktiv',
+                auraOff: 'Aura',
+                auraOnLabel: 'Aura səsini söndür',
+                auraOffLabel: 'Aura səsini aç',
+                lightModeLabel: 'Gündüz rejiminə keç',
+                darkModeLabel: 'Gecə rejiminə keç',
+                registerLoading: 'Qeydiyyat göndərilir...',
+                registerWaiting: 'Sorğu göndərildi, cavab gözlənilir...',
+                registerDone: 'Qeydiyyat tamamlandı.',
+                loginLoading: 'Daxil olunur...',
+                welcomeShort: 'Xoş gəldiniz, {username}!',
+                welcomeLong: 'TripGen hesabınıza uğurla daxil oldunuz.',
+                plannerWelcome: 'Xoş gəldiniz, {username}. İlk AI səyahət planınızı yaratmağa hazırsınız.',
+                plannerLoadingButton: 'Plan hazırlanır...',
+                plannerLoadingText: 'AI plan qurulur, bir neçə saniyə gözləyin...',
+                planNotFound: 'Plan məlumatı tapılmadı.',
+                tripReady: '{destination} üçün {days} günlük plan hazırdır.',
+                dayMeta: '{destination} · {day}-ci gün',
+                dayPlan: '{day}-ci gün planı',
+                authRequired: 'Bu özəlliyi işlətmək üçün qeydiyyatdan keçməlisiniz.',
+                requestTimeout: 'Sorğu vaxt aşımına düşdü. Render serveri və ya şəbəkə cavab vermir.',
+                networkError: 'Şəbəkə xətası baş verdi. Internet, Render deploy və CORS ayarlarını yoxlayın. Detal: {detail}',
+                quotaError: 'Gündəlik AI istifadə limiti dolub. Bir az sonra yenidən yoxlayın.',
+                modelError: 'AI model konfiqurasiyası tapılmadı. Gemini model adı yoxlanmalıdır.',
+                keyError: 'API açarı və icazələr yoxlanmalıdır. Server rədd etdi.',
+                genericError: 'Sistem müvəqqəti olaraq cavab vermir. Bir az sonra yenidən cəhd edin.',
+                notFound: 'Məlumat tapılmadı',
+                planning: 'Planlaşdırılır...',
+                httpError: 'HTTP xətası! Status: {status}',
+                cityTripPlan: '{city} üçün Səyahət Planı',
+                daysCount: '{days} gün',
+                aiLanguageInstruction: 'Zəhmət olmasa, səyahət planını tamamilə az dilində hazırla.'
+            },
+            en: {
+                pageTitle: 'TripGen Pro - Smart Travel Planner',
+                loginTop: 'Sign in',
+                heroTitle: 'Build a smart travel plan on one screen.',
+                heroSubtitle: 'See hotels, visa info, tickets and packing lists in a premium AI result board.',
+                destinationLabel: 'Destination city',
+                cityPlaceholder: 'Paris, Rome, Tokyo...',
+                statusLabel: 'Status',
+                statusStudent: 'Student',
+                statusBusiness: 'Business',
+                statusCouple: 'Couple',
+                statusFamily: 'Family',
+                durationLabel: 'Duration',
+                currencyLabel: 'Currency',
+                searchButton: 'Build plan',
+                searchSummary: 'Search summary',
+                citySummary: 'City:',
+                statusSummary: 'Status:',
+                durationSummary: 'Duration:',
+                currencySummary: 'Currency:',
+                budgetTitle: 'Estimated Budget',
+                systemError: 'System Error',
+                errorMessage: 'Error message',
+                plannerEyebrow: 'AI Trip Builder',
+                plannerTitle: 'Travel Planner',
+                plannerSubtitle: 'Choose a destination, days and budget type. TripGen will split the plan into premium day cards.',
+                lockedBadge: 'Login required',
+                unlockedBadge: 'Login active',
+                tripDestinationLabel: 'Destination',
+                tripDestinationPlaceholder: 'Istanbul, Rome, Paris...',
+                tripDaysLabel: 'Days',
+                tripBudgetLabel: 'Budget',
+                oneDay: '1 day',
+                twoDays: '2 days',
+                threeDays: '3 days',
+                fourDays: '4 days',
+                fiveDays: '5 days',
+                sixDays: '6 days',
+                sevenDays: '7 days',
+                budgetEconomic: 'Economy',
+                budgetMedium: 'Medium',
+                budgetLuxury: 'Luxury',
+                tripGenerateButton: 'Prepare My Travel Plan 🌟',
+                plannerEmpty: 'Enter a destination and press the button to create a plan.',
+                gateTitle: 'Sign up to create a personalized AI travel plan! 🌟',
+                gateSubtitle: 'After signing in, the planner unlocks instantly.',
+                gateButton: 'Sign Up / Sign In',
+                travelBoard: 'AI Travel Board',
+                resultTitle: 'Travel Plan Board',
+                proResult: 'Pro result',
+                hotelTitle: 'Hotel Matched to Your Status',
+                hotelPlaceholder: 'Choose a city above and build a plan.',
+                ratingExcellent: 'Excellent',
+                visaTitle: 'Visa Status (For Azerbaijani Citizens)',
+                visaPlaceholder: 'Information will appear here after search.',
+                ticketTitle: 'Estimated Ticket Prices',
+                ticketPlaceholder: 'Waiting for data...',
+                hacksTitle: 'Travel Hacks',
+                hacksPlaceholder: 'Smart budget hacks will load here.',
+                packingTitle: 'Packing List',
+                packingPlaceholder: 'Special items',
+                authTitle: 'TripGen Account',
+                authSubtitle: 'Sign in to save your travel plans for later.',
+                loginTab: 'Sign in',
+                registerTab: 'Create account',
+                loginIdentifierLabel: 'Username or e-mail',
+                passwordLabel: 'Password',
+                loginButton: 'Log in',
+                usernameLabel: 'Username',
+                emailLabel: 'E-mail',
+                registerButton: 'Complete registration',
+                auraOn: 'Aura on',
+                auraOff: 'Aura',
+                auraOnLabel: 'Turn Aura sound off',
+                auraOffLabel: 'Turn Aura sound on',
+                lightModeLabel: 'Switch to light mode',
+                darkModeLabel: 'Switch to dark mode',
+                registerLoading: 'Sending registration...',
+                registerWaiting: 'Request sent, waiting for response...',
+                registerDone: 'Registration completed.',
+                loginLoading: 'Signing in...',
+                welcomeShort: 'Welcome, {username}!',
+                welcomeLong: 'You signed in to your TripGen account.',
+                plannerWelcome: 'Welcome, {username}. You are ready to create your first AI travel plan.',
+                plannerLoadingButton: 'Preparing plan...',
+                plannerLoadingText: 'AI is building your plan, please wait a few seconds...',
+                planNotFound: 'Plan data was not found.',
+                tripReady: '{days}-day plan for {destination} is ready.',
+                dayMeta: '{destination} · Day {day}',
+                dayPlan: 'Day {day} plan',
+                authRequired: 'You need to sign in to use this feature.',
+                requestTimeout: 'The request timed out. Render server or network is not responding.',
+                networkError: 'Network error occurred. Check internet, Render deploy and CORS settings. Detail: {detail}',
+                quotaError: 'Daily AI usage limit is reached. Please try again later.',
+                modelError: 'AI model configuration was not found. Gemini model name should be checked.',
+                keyError: 'API key and permissions should be checked. The server rejected the request.',
+                genericError: 'The system is temporarily unavailable. Please try again later.',
+                notFound: 'Information not found',
+                planning: 'Planning...',
+                httpError: 'HTTP error! Status: {status}',
+                cityTripPlan: 'Travel Plan for {city}',
+                daysCount: '{days} days',
+                aiLanguageInstruction: 'Please prepare the travel plan completely in English.'
+            },
+            ru: {
+                pageTitle: 'TripGen Pro - Умный план путешествия',
+                loginTop: 'Войти',
+                heroTitle: 'Соберите умный план путешествия на одном экране.',
+                heroSubtitle: 'Отели, виза, билеты и список багажа в премиальной AI-панели результатов.',
+                destinationLabel: 'Город поездки',
+                cityPlaceholder: 'Париж, Рим, Токио...',
+                statusLabel: 'Статус',
+                statusStudent: 'Студент',
+                statusBusiness: 'Бизнес',
+                statusCouple: 'Пара',
+                statusFamily: 'Семья',
+                durationLabel: 'Срок',
+                currencyLabel: 'Валюта',
+                searchButton: 'Создать план',
+                searchSummary: 'Сводка поиска',
+                citySummary: 'Город:',
+                statusSummary: 'Статус:',
+                durationSummary: 'Срок:',
+                currencySummary: 'Валюта:',
+                budgetTitle: 'Примерный бюджет',
+                systemError: 'Ошибка системы',
+                errorMessage: 'Сообщение об ошибке',
+                plannerEyebrow: 'AI Trip Builder',
+                plannerTitle: 'Планировщик путешествий',
+                plannerSubtitle: 'Выберите направление, количество дней и бюджет. TripGen покажет план в премиальных карточках по дням.',
+                lockedBadge: 'Нужен вход',
+                unlockedBadge: 'Вход активен',
+                tripDestinationLabel: 'Направление',
+                tripDestinationPlaceholder: 'Стамбул, Рим, Париж...',
+                tripDaysLabel: 'Дни',
+                tripBudgetLabel: 'Бюджет',
+                oneDay: '1 день',
+                twoDays: '2 дня',
+                threeDays: '3 дня',
+                fourDays: '4 дня',
+                fiveDays: '5 дней',
+                sixDays: '6 дней',
+                sevenDays: '7 дней',
+                budgetEconomic: 'Эконом',
+                budgetMedium: 'Средний',
+                budgetLuxury: 'Люкс',
+                tripGenerateButton: 'Подготовить мой план 🌟',
+                plannerEmpty: 'Введите направление и нажмите кнопку, чтобы создать план.',
+                gateTitle: 'Зарегистрируйтесь, чтобы создать персональный AI-план путешествия! 🌟',
+                gateSubtitle: 'После входа планировщик сразу станет доступен.',
+                gateButton: 'Регистрация / Вход',
+                travelBoard: 'AI Travel Board',
+                resultTitle: 'Панель плана путешествия',
+                proResult: 'Pro результат',
+                hotelTitle: 'Отель под ваш статус',
+                hotelPlaceholder: 'Выберите город выше и создайте план.',
+                ratingExcellent: 'Отлично',
+                visaTitle: 'Статус визы (для граждан Азербайджана)',
+                visaPlaceholder: 'Информация появится здесь после поиска.',
+                ticketTitle: 'Примерные цены на билеты',
+                ticketPlaceholder: 'Ожидание данных...',
+                hacksTitle: 'Лайфхаки для поездки',
+                hacksPlaceholder: 'Оптимальные бюджетные советы появятся здесь.',
+                packingTitle: 'Список багажа',
+                packingPlaceholder: 'Особые вещи',
+                authTitle: 'Аккаунт TripGen',
+                authSubtitle: 'Войдите, чтобы сохранять планы путешествий на потом.',
+                loginTab: 'Войти',
+                registerTab: 'Регистрация',
+                loginIdentifierLabel: 'Имя пользователя или e-mail',
+                passwordLabel: 'Пароль',
+                loginButton: 'Войти',
+                usernameLabel: 'Имя пользователя',
+                emailLabel: 'E-mail',
+                registerButton: 'Завершить регистрацию',
+                auraOn: 'Aura активна',
+                auraOff: 'Aura',
+                auraOnLabel: 'Выключить звук Aura',
+                auraOffLabel: 'Включить звук Aura',
+                lightModeLabel: 'Переключить на светлую тему',
+                darkModeLabel: 'Переключить на темную тему',
+                registerLoading: 'Отправка регистрации...',
+                registerWaiting: 'Запрос отправлен, ожидаем ответ...',
+                registerDone: 'Регистрация завершена.',
+                loginLoading: 'Вход...',
+                welcomeShort: 'Добро пожаловать, {username}!',
+                welcomeLong: 'Вы успешно вошли в аккаунт TripGen.',
+                plannerWelcome: 'Добро пожаловать, {username}. Можно создать первый AI-план путешествия.',
+                plannerLoadingButton: 'План готовится...',
+                plannerLoadingText: 'AI создает план, подождите несколько секунд...',
+                planNotFound: 'Данные плана не найдены.',
+                tripReady: 'План для {destination} на {days} дн. готов.',
+                dayMeta: '{destination} · День {day}',
+                dayPlan: 'План на день {day}',
+                authRequired: 'Чтобы использовать эту функцию, нужно войти.',
+                requestTimeout: 'Время запроса истекло. Render сервер или сеть не отвечает.',
+                networkError: 'Произошла ошибка сети. Проверьте интернет, Render deploy и CORS. Деталь: {detail}',
+                quotaError: 'Дневной лимит AI исчерпан. Попробуйте позже.',
+                modelError: 'Конфигурация AI модели не найдена. Проверьте имя модели Gemini.',
+                keyError: 'Проверьте API ключ и разрешения. Сервер отклонил запрос.',
+                genericError: 'Система временно не отвечает. Попробуйте позже.',
+                notFound: 'Информация не найдена',
+                planning: 'Планируем...',
+                httpError: 'HTTP ошибка! Статус: {status}',
+                cityTripPlan: 'План путешествия: {city}',
+                daysCount: '{days} дн.',
+                aiLanguageInstruction: 'Пожалуйста, подготовьте план путешествия полностью на русском языке.'
+            }
+        };
         const AURA_VOLUME = 0.12;
         let auraStarted = false;
         let auraMuted = localStorage.getItem('tripgen-aura-muted') === 'true';
+        let currentLang = localStorage.getItem('selectedLang') || 'az';
+        if (!translations[currentLang]) {
+            currentLang = 'az';
+        }
+
+        function t(key, params = {}) {
+            const dictionary = translations[currentLang] || translations.az;
+            let value = dictionary[key] || translations.az[key] || key;
+            Object.entries(params).forEach(([name, replacement]) => {
+                value = value.replaceAll(`{${name}}`, replacement);
+            });
+            return value;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = translations[lang] ? lang : 'az';
+            localStorage.setItem('selectedLang', currentLang);
+            document.documentElement.lang = currentLang;
+            document.title = t('pageTitle');
+            languageSelect.value = currentLang;
+
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                element.textContent = t(element.dataset.i18n);
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
+            });
+
+            if (!hasActivePlannerSession()) {
+                authButtonText.textContent = t('loginTop');
+            }
+
+            const statusSelect = document.getElementById('statusInput');
+            const daysField = document.getElementById('daysInput');
+            document.getElementById('summaryStatus').textContent = statusSelect.selectedOptions[0].textContent;
+            document.getElementById('summaryDays').textContent = t('daysCount', { days: daysField.value });
+            applyTheme(localStorage.getItem('tripgen-theme') || 'light');
+            updateAuraButton();
+            refreshPlannerGate(localStorage.getItem('tripgen-user') || '');
+        }
 
         function applyTheme(theme) {
             const isDark = theme === 'dark';
             document.body.classList.toggle('dark-mode', isDark);
-            themeToggle.setAttribute('aria-label', isDark ? 'Gündüz rejiminə keç' : 'Gecə rejiminə keç');
+            themeToggle.setAttribute('aria-label', isDark ? t('lightModeLabel') : t('darkModeLabel'));
             themeToggle.setAttribute('aria-pressed', String(isDark));
         }
 
@@ -584,10 +949,10 @@
             const isPlaying = auraStarted && !auraMuted && !auraAudio.paused;
             auraToggle.classList.toggle('is-playing', isPlaying);
             auraToggle.classList.toggle('is-muted', auraMuted || !isPlaying);
-            auraToggle.setAttribute('aria-label', isPlaying ? 'Aura səsini söndür' : 'Aura səsini aç');
+            auraToggle.setAttribute('aria-label', isPlaying ? t('auraOnLabel') : t('auraOffLabel'));
             auraToggle.setAttribute('aria-pressed', String(isPlaying));
             auraIcon.className = isPlaying ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
-            auraText.textContent = isPlaying ? 'Aura aktiv' : 'Aura';
+            auraText.textContent = isPlaying ? t('auraOn') : t('auraOff');
         }
 
         async function startAuraAudio() {
@@ -627,6 +992,7 @@
         }
 
         const savedTheme = localStorage.getItem('tripgen-theme') || 'light';
+        changeLanguage(currentLang);
         applyTheme(savedTheme);
         auraAudio.volume = AURA_VOLUME;
         auraAudio.muted = auraMuted;
@@ -643,6 +1009,7 @@
             event.stopPropagation();
             await toggleAuraAudio();
         });
+        languageSelect.addEventListener('change', (event) => changeLanguage(event.target.value));
 
         themeToggle.addEventListener('click', () => {
             const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
@@ -726,14 +1093,14 @@
                 return data;
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    const timeoutError = new Error('Sorğu vaxt aşımına düşdü. Render serveri və ya şəbəkə cavab vermir.');
+                    const timeoutError = new Error(t('requestTimeout'));
                     timeoutError.status = 'TIMEOUT';
                     timeoutError.url = url;
                     throw timeoutError;
                 }
 
                 if (error instanceof TypeError) {
-                    const networkError = new Error('Şəbəkə xətası baş verdi. Internet, Render deploy və CORS ayarlarını yoxlayın. Detal: ' + error.message);
+                    const networkError = new Error(t('networkError', { detail: error.message }));
                     networkError.status = 'NETWORK_ERROR';
                     networkError.url = url;
                     throw networkError;
@@ -771,8 +1138,8 @@
             toast.innerHTML = `
                 <i class="fa-solid fa-circle-check"></i>
                 <div>
-                    <strong>Xoş gəldiniz, ${escapeHtml(username)}!</strong>
-                    <span>TripGen hesabınıza uğurla daxil oldunuz.</span>
+                    <strong>${escapeHtml(t('welcomeShort', { username }))}</strong>
+                    <span>${escapeHtml(t('welcomeLong'))}</span>
                 </div>
             `;
             toast.classList.add('active');
@@ -788,7 +1155,7 @@
             refreshPlannerGate(username);
             const emptyState = tripPlannerOutput.querySelector('.planner-empty');
             if (emptyState) {
-                emptyState.textContent = `Xoş gəldiniz, ${username}. İlk AI səyahət planınızı yaratmağa hazırsınız.`;
+                emptyState.textContent = t('plannerWelcome', { username });
             }
         }
 
@@ -816,8 +1183,8 @@
 
             if (plannerStatusBadge) {
                 plannerStatusBadge.innerHTML = isUnlocked
-                    ? '<i class="fa-solid fa-lock-open"></i> Login aktiv'
-                    : '<i class="fa-solid fa-lock"></i> Giriş tələb olunur';
+                    ? `<i class="fa-solid fa-lock-open"></i> ${escapeHtml(t('unlockedBadge'))}`
+                    : `<i class="fa-solid fa-lock"></i> ${escapeHtml(t('lockedBadge'))}`;
             }
 
             if (tripPlannerSubmit && !isUnlocked) {
@@ -831,11 +1198,11 @@
             if (isLoading) {
                 tripPlannerSubmit.dataset.originalHtml = tripPlannerSubmit.innerHTML;
                 tripPlannerSubmit.disabled = true;
-                tripPlannerSubmit.innerHTML = '<i class="fa-solid fa-spinner loader"></i> Plan hazırlanır...';
+                tripPlannerSubmit.innerHTML = `<i class="fa-solid fa-spinner loader"></i> ${escapeHtml(t('plannerLoadingButton'))}`;
                 tripPlannerOutput.innerHTML = `
                     <div class="planner-empty">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        AI plan qurulur, bir neçə saniyə gözləyin...
+                        ${escapeHtml(t('plannerLoadingText'))}
                     </div>
                 `;
                 return;
@@ -889,12 +1256,12 @@
         function renderTripPlan(data) {
             const raw = data.itineraryRaw || '';
             const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-            const dayPattern = /^(?:day\s*)?(\d+)(?:\s*[-.]?\s*(?:ci|cı|cu|cü)?\s*(?:gün|gun|day)?)?\s*[:\-]\s*(.*)$/i;
+            const dayPattern = /^(?:(?:day|день)\s*)?(\d+)(?:\s*[-.]?\s*(?:ci|cı|cu|cü)?\s*(?:gün|gun|day|день)?)?\s*[:\-]\s*(.*)$/iu;
             const dayLines = lines.filter(line => dayPattern.test(line));
             const metaLines = lines.filter(line => !dayPattern.test(line)).slice(0, 3);
 
             if (dayLines.length === 0) {
-                tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || 'Plan məlumatı tapılmadı.')}</div>`;
+                tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || t('planNotFound'))}</div>`;
                 return;
             }
 
@@ -913,8 +1280,8 @@
                     <article class="itinerary-card">
                         <div class="itinerary-day-top">
                             <div>
-                                <span class="itinerary-meta">${escapeHtml(data.destination || 'Səyahət')} · ${dayNumber}-ci gün</span>
-                                <strong>${escapeHtml(dayNumber)}-ci gün planı</strong>
+                                <span class="itinerary-meta">${escapeHtml(t('dayMeta', { destination: data.destination || 'Trip', day: dayNumber }))}</span>
+                                <strong>${escapeHtml(t('dayPlan', { day: dayNumber }))}</strong>
                             </div>
                             <span class="itinerary-day-number">${escapeHtml(dayNumber)}</span>
                         </div>
@@ -925,7 +1292,7 @@
 
             tripPlannerOutput.innerHTML = `
                 <div class="itinerary-summary">
-                    <strong>${escapeHtml(data.destination)} üçün ${data.days} günlük plan hazırdır.</strong>
+                    <strong>${escapeHtml(t('tripReady', { destination: data.destination, days: data.days }))}</strong>
                     <div style="margin-top:8px;">${metaLines.map(escapeHtml).join('<br>')}</div>
                 </div>
                 <div class="itinerary-grid">${cards}</div>
@@ -955,8 +1322,8 @@
                 password: document.getElementById('registerPassword').value
             };
 
-            setAuthButtonLoading(submitButton, true, 'Qeydiyyat göndərilir...');
-            showAuthMessage(registerMessage, 'Sorğu göndərildi, cavab gözlənilir...', 'warning');
+            setAuthButtonLoading(submitButton, true, t('registerLoading'));
+            showAuthMessage(registerMessage, t('registerWaiting'), 'warning');
 
             try {
                 console.log('[AUTH][REGISTER_REQUEST]', {
@@ -971,7 +1338,7 @@
                 console.log('[AUTH][REGISTER_SUCCESS]', data);
 
                 registerForm.reset();
-                showAuthMessage(registerMessage, data.message || 'Qeydiyyat tamamlandı.', data.emailSent === false ? 'warning' : 'success');
+                showAuthMessage(registerMessage, data.message || t('registerDone'), data.emailSent === false ? 'warning' : 'success');
             } catch (error) {
                 console.error('[AUTH][REGISTER_ERROR]', {
                     message: error.message,
@@ -990,7 +1357,7 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = document.getElementById('loginSubmitButton');
-            setAuthButtonLoading(submitButton, true, 'Daxil olunur...');
+            setAuthButtonLoading(submitButton, true, t('loginLoading'));
 
             try {
                 const identifier = document.getElementById('loginIdentifier').value.trim();
@@ -1015,7 +1382,7 @@
                 localStorage.setItem('tripgen-auth-token', data.authToken);
                 authButtonText.textContent = displayName;
                 authOpenButton.classList.add('is-authenticated');
-                showAuthMessage(loginMessage, `Xoş gəldiniz, ${displayName}!`, 'success');
+                showAuthMessage(loginMessage, t('welcomeShort', { username: displayName }), 'success');
                 showWelcomeToast(displayName);
                 activateTripPlanner(displayName);
                 loginForm.reset();
@@ -1042,11 +1409,12 @@
                 days: Number(document.getElementById('tripDaysSelect').value),
                 budgetType: document.getElementById('tripBudgetSelect').value,
                 userId: getCurrentUserId(),
-                authToken: getCurrentAuthToken()
+                authToken: getCurrentAuthToken(),
+                lang: currentLang
             };
 
             if (!payload.userId || !payload.authToken) {
-                tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">Bu özəlliyi işlətmək üçün qeydiyyatdan keçməlisiniz.</div>`;
+                tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(t('authRequired'))}</div>`;
                 openAuthModal('login');
                 return;
             }
@@ -1108,15 +1476,15 @@
         function getFriendlyError(message) {
             const text = (message || "").toLowerCase();
             if (text.includes("429") || text.includes("quota")) {
-                return "Gündəlik AI istifadə limiti dolub. Bir az sonra yenidən yoxlayın.";
+                return t('quotaError');
             }
             if (text.includes("404") || text.includes("model")) {
-                return "AI model konfiqurasiyası tapılmadı. Gemini model adı yoxlanmalıdır.";
+                return t('modelError');
             }
             if (text.includes("api key") || text.includes("permission") || text.includes("401")) {
-                return "API açarı və icazələr yoxlanmalıdır. Server rədd etdi.";
+                return t('keyError');
             }
-            return "Sistem müvəqqəti olaraq cavab vermir. Bir az sonra yenidən cəhd edin.";
+            return t('genericError');
         }
 
         function checkVisaStatus(text) {
@@ -1142,7 +1510,7 @@
             container.innerHTML = '';
             const items = splitSmartList(text).slice(0, 5);
             if(items.length === 0 || text.includes('Məlumat tapılmadı')) {
-                container.innerHTML = `<div class="list-item"><span>Məlumat tapılmadı</span></div>`;
+                container.innerHTML = `<div class="list-item"><span>${escapeHtml(t('notFound'))}</span></div>`;
                 return;
             }
             items.forEach(item => {
@@ -1157,7 +1525,7 @@
             if(items.length === 0 || (text || "").includes('Məlumat tapılmadı')) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'checkbox-item';
-                emptyItem.innerHTML = `<span class="checkbox-text">Məlumat tapılmadı</span>`;
+                emptyItem.innerHTML = `<span class="checkbox-text">${escapeHtml(t('notFound'))}</span>`;
                 container.appendChild(emptyItem);
                 return;
             }
@@ -1195,10 +1563,10 @@
 
             // UI Elements & State Updates
             document.getElementById('summaryCity').textContent = city;
-            document.getElementById('summaryStatus').textContent = status;
-            document.getElementById('summaryDays').textContent = days + " gün";
+            document.getElementById('summaryStatus').textContent = document.getElementById('statusInput').selectedOptions[0].textContent;
+            document.getElementById('summaryDays').textContent = t('daysCount', { days });
             document.getElementById('summaryCurrency').textContent = currency;
-            document.getElementById('resultTitle').textContent = city + " üçün Səyahət Planı";
+            document.getElementById('resultTitle').textContent = t('cityTripPlan', { city });
             document.getElementById('destAirport').textContent = city.slice(0, 3).toUpperCase();
 
             // Hide Errors & Show Skeleton Cards
@@ -1211,20 +1579,20 @@
             const btnText = document.getElementById('btnText');
             const submitBtn = document.getElementById('submitBtn');
             btnIcon.className = "fa-solid fa-spinner loader";
-            btnText.textContent = "Planlaşdırılır...";
+            btnText.textContent = t('planning');
             submitBtn.disabled = true;
 
             try {
                 const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
                 if (!response.ok) {
-                    throw new Error(`HTTP xətası! Status: ${response.status}`);
+                    throw new Error(t('httpError', { status: response.status }));
                 }
                 const data = await response.json();
 
                 // Injecting safe textual data
-                document.getElementById('hotelText').innerText = data.hotel || "Məlumat tapılmadı";
-                document.getElementById('visaText').innerText = data.visa || "Məlumat tapılmadı";
-                document.getElementById('ticketText').innerText = data.ticket || "Məlumat tapılmadı";
+                document.getElementById('hotelText').innerText = data.hotel || t('notFound');
+                document.getElementById('visaText').innerText = data.visa || t('notFound');
+                document.getElementById('ticketText').innerText = data.ticket || t('notFound');
                 
                 checkVisaStatus(data.visa);
                 renderHacksList(data.hacks);
@@ -1242,7 +1610,7 @@
                 // Terminate Loading State
                 document.getElementById('skeletonLoader').classList.add('hidden');
                 btnIcon.className = "fa-solid fa-magnifying-glass";
-                btnText.textContent = "Plan hazırla";
+                btnText.textContent = t('searchButton');
                 submitBtn.disabled = false;
             }
         });

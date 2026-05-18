@@ -7,6 +7,7 @@ public class TripRequest {
     private String budgetType;
     private Long userId;
     private String authToken;
+    private String lang;
 
     public TripRequest() {
     }
@@ -49,5 +50,13 @@ public class TripRequest {
 
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

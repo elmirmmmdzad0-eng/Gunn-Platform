@@ -11,10 +11,11 @@ import java.util.Optional;
 
 public interface TripPlanRepository extends JpaRepository<TripPlan, String> {
 
-    Optional<TripPlan> findFirstByNormalizedDestinationAndDaysAndBudgetTypeOrderByCreatedAtDesc(
+    Optional<TripPlan> findFirstByNormalizedDestinationAndDaysAndBudgetTypeAndLanguageCodeOrderByCreatedAtDesc(
             String normalizedDestination,
             int days,
-            String budgetType
+            String budgetType,
+            String languageCode
     );
 
     long countByCreatedAtBefore(LocalDateTime dateTime);
