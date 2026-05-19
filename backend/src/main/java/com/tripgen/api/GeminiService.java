@@ -55,15 +55,41 @@ public class GeminiService implements TripPlanProvider {
 
         if (context.getLanguageCode().equals("ru")) {
             itinerary.append("Выбранные стили путешествия: ").append(context.getSelectedTypes()).append("\n");
+            itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
             return;
         }
 
         if (context.getLanguageCode().equals("en")) {
             itinerary.append("Selected tourism styles: ").append(context.getSelectedTypes()).append("\n");
+            itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
             return;
         }
 
         itinerary.append("Seçilən səyahət stilləri: ").append(context.getSelectedTypes()).append("\n");
+        itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
+    }
+
+    private String buildTourismStylePromptDirective(TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return "";
+        }
+
+        String selectedTypes = context.getSelectedTypes();
+        if (context.getLanguageCode().equals("ru")) {
+            return "ВНИМАНИЕ: пользователь хочет провести это путешествие именно в этих туристических стилях: "
+                    + selectedTypes
+                    + ". Если в списке есть концертный туризм, обязательно выдели известные концертные залы и места с живой музыкой в городе. Если выбран гастрономический туризм, отдай приоритет местным вкусам, рынкам и ресторанам. Полностью персонализируй план под выбранные типы.";
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            return "IMPORTANT: The user wants this trip specifically in these tourism styles: "
+                    + selectedTypes
+                    + ". If Concert Tourism is listed, highlight famous concert halls and live music venues in the city. If Gastronomic Tourism is selected, prioritize local flavors, markets and restaurants. Fully personalize the plan around the selected types.";
+        }
+
+        return "DİQQƏT: İstifadəçi bu səyahəti xüsusi olaraq bu turizm üslublarında keçirmək istəyir: "
+                + selectedTypes
+                + ". Əgər siyahıda Konsert turizmi varsa, günlük planda mütləq o şəhərdəki məşhur konsert zallarını və canlı musiqi məkanlarını önə çıxar. Əgər Qastronomik turizm seçilibsə, yerli dadlara, bazarlara və restoranlara üstünlük ver. Planı tamamilə bu seçilən növlərə uyğun fərdiləşdir.";
     }
 
     private String tourismStyleNote(TripRequestContext context) {
