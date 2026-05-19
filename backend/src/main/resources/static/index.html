@@ -284,6 +284,227 @@
             .auth-open-button span { display: none; }
             .aura-toggle span { display: none; }
         }
+
+        @media (max-width: 768px) {
+            .hero {
+                background: #071326;
+                padding: 22px 16px 34px;
+            }
+
+            body.dark-mode .hero {
+                background: #040a14;
+            }
+
+            .ambient-hero-video {
+                display: none;
+            }
+
+            .ambient-video-overlay {
+                background: rgba(7, 19, 38, 0.86);
+            }
+
+            .hero-inner {
+                width: 100%;
+            }
+
+            .top-row {
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .brand-row {
+                min-width: 0;
+                gap: 8px;
+                font-size: 14px;
+            }
+
+            .brand-mark {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                flex: 0 0 auto;
+            }
+
+            .top-actions {
+                justify-content: flex-end;
+                gap: 7px;
+                flex-wrap: wrap;
+                max-width: 58%;
+            }
+
+            .auth-open-button,
+            .aura-toggle {
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                justify-content: center;
+                border-radius: 999px;
+            }
+
+            .theme-toggle {
+                width: 48px;
+                height: 30px;
+            }
+
+            .theme-toggle span {
+                width: 22px;
+                height: 22px;
+            }
+
+            body.dark-mode .theme-toggle span {
+                transform: translateX(18px);
+            }
+
+            .language-select {
+                height: 34px;
+                padding: 0 8px;
+                font-size: 11px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+                line-height: 1.16;
+                max-width: 100%;
+            }
+
+            .hero p {
+                max-width: 100%;
+                margin-top: 10px;
+                font-size: 14px;
+                line-height: 1.55;
+            }
+
+            .search-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                margin-top: 22px;
+                border-width: 3px;
+                border-radius: 8px;
+                overflow: visible;
+            }
+
+            .search-field {
+                min-height: 60px;
+                padding: 10px 12px;
+                gap: 10px;
+                border-right: 0;
+                border-bottom: 3px solid var(--accent);
+                border-radius: 5px;
+            }
+
+            .search-field i {
+                font-size: 17px;
+            }
+
+            .search-field small {
+                font-size: 10px;
+                margin-bottom: 1px;
+            }
+
+            .search-field input,
+            .search-field select {
+                font-size: 14px;
+            }
+
+            .budget-search-field {
+                min-height: 68px;
+            }
+
+            .budget-control {
+                gap: 6px;
+            }
+
+            .budget-amount {
+                font-size: 15px;
+            }
+
+            .budget-range {
+                width: 100%;
+            }
+
+            .search-button {
+                min-height: 52px;
+                padding: 0 16px;
+                border-radius: 5px;
+                justify-content: center;
+            }
+
+            .layout {
+                margin-top: 24px;
+                padding: 0 16px 34px;
+                gap: 16px;
+            }
+
+            .sidebar,
+            .results {
+                gap: 16px;
+            }
+
+            .side-card,
+            .content-card,
+            .hotel-card,
+            .ticket-card,
+            .visa-alert,
+            .toast-error,
+            .trip-planner {
+                border-radius: 8px;
+                padding: 16px;
+            }
+
+            .planner-content {
+                gap: 14px;
+                padding: 16px;
+            }
+
+            .planner-head h2 {
+                font-size: 21px;
+            }
+
+            .google-map-panel {
+                padding: 10px;
+                margin: 2px 0 14px;
+                border-radius: 16px;
+            }
+
+            .google-map-head {
+                padding: 10px 10px 12px;
+                gap: 6px;
+            }
+
+            .google-map-head strong {
+                font-size: 14px;
+            }
+
+            .google-map-head span {
+                font-size: 11px;
+                line-height: 1.35;
+            }
+
+            #google-map-container,
+            .google-map-container,
+            .google-map-frame {
+                height: 260px;
+                border-radius: 16px;
+            }
+
+            .itinerary-card {
+                padding: 14px;
+                gap: 10px;
+            }
+
+            .activity-item {
+                grid-template-columns: 30px 1fr;
+                padding: 9px;
+            }
+
+            .activity-icon {
+                width: 30px;
+                height: 30px;
+            }
+        }
     </style>
 </head>
 <body>
