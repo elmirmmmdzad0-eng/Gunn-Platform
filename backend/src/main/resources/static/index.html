@@ -6,8 +6,6 @@
     <title>TripGen Pro - Ağıllı Səyahət Planı</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQv5vTTb9V+FHN9Z4WefZ4x4kM9iR/o=" crossorigin="">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <style>
         /* 1. VARIABLES (Rəng və Mövzu) */
@@ -230,16 +228,13 @@
         .carousel-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; }
         .carousel-dot { width: 7px; height: 7px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.58); cursor: pointer; padding: 0; }
         .carousel-dot.active { width: 18px; background: var(--accent); }
-        .trip-map-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); overflow: hidden; padding: 10px; margin: 6px 0 18px; clear: both; }
-        .trip-map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
-        .trip-map-head strong { color: var(--primary); font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 8px; }
-        .trip-map-head span { color: var(--muted); font-size: 12px; font-weight: 800; text-align: right; }
-        #trip-map, .trip-map { display: block; width: 100% !important; clear: both; height: 350px; border-radius: 12px; background: #d9e3ef; position: relative; z-index: 0; overflow: hidden; }
-        .trip-map .leaflet-control-attribution { font-size: 10px; }
-        .trip-map-marker { background: transparent; border: 0; }
-        .trip-map-marker span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 999px; background: var(--accent); color: #0e1e38; border: 3px solid var(--primary-strong); box-shadow: 0 8px 18px rgba(0, 53, 128, 0.28); font-size: 12px; font-weight: 900; }
-        .trip-map-popup strong { display: block; color: #0e1e38; font-size: 13px; margin-bottom: 4px; }
-        .trip-map-popup span { color: #475467; font-size: 12px; font-weight: 800; }
+        .google-map-panel { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-lg); overflow: hidden; padding: 12px; margin: 6px 0 18px; clear: both; }
+        .google-map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px 16px; }
+        .google-map-head strong { color: var(--primary); font-size: 15px; font-weight: 900; display: inline-flex; align-items: center; gap: 8px; }
+        .google-map-head i { color: #4285f4; }
+        .google-map-head span { color: var(--muted); font-size: 12px; font-weight: 800; text-align: right; }
+        #google-map-container, .google-map-container { display: block; width: 100% !important; clear: both; height: 400px; border-radius: 16px; background: #d9e3ef; position: relative; overflow: hidden; box-shadow: 0 18px 38px rgba(14, 30, 56, 0.18); }
+        .google-map-frame { display: block; width: 100%; height: 400px; border: 0; border-radius: 16px; background: #d9e3ef; transition: opacity 0.25s ease; }
         .itinerary-meta { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
         .itinerary-day-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
         .itinerary-day-number { width: 42px; height: 42px; border-radius: 8px; display: grid; place-items: center; background: var(--primary-strong); color: white; font-weight: 900; flex: 0 0 auto; box-shadow: var(--shadow); }
@@ -260,8 +255,8 @@
         body.dark-mode .planner-field input, body.dark-mode .planner-field select, body.dark-mode .planner-empty, body.dark-mode .itinerary-summary, body.dark-mode .activity-item { background: #0b1628; }
         body.dark-mode .itinerary-card { background: #101b2d; }
         body.dark-mode .itinerary-carousel { background: #0b1628; }
-        body.dark-mode .trip-map-panel { background: #101b2d; }
-        body.dark-mode .trip-map { background: #0b1628; filter: brightness(0.88) contrast(1.08); }
+        body.dark-mode .google-map-panel { background: #101b2d; }
+        body.dark-mode #google-map-container, body.dark-mode .google-map-container, body.dark-mode .google-map-frame { background: #0b1628; }
         body.dark-mode .planner-gate { background: rgba(8, 17, 31, 0.5); }
         body.dark-mode .planner-gate-card { background: rgba(16, 27, 45, 0.94); border-color: rgba(148, 163, 184, 0.24); }
         body.dark-mode .activity-icon { background: rgba(79, 140, 255, 0.18); }
@@ -279,8 +274,8 @@
             .hotel-card, .ticket-card, .two-column, .planner-form, .itinerary-grid { grid-template-columns: 1fr; }
             .planner-head { flex-direction: column; }
             .planner-content { padding: 18px; }
-            .trip-map-head { align-items: flex-start; flex-direction: column; }
-            .trip-map-head span { text-align: left; }
+            .google-map-head { align-items: flex-start; flex-direction: column; }
+            .google-map-head span { text-align: left; }
             .planner-gate { padding: 16px; }
             .planner-gate-card { padding: 18px; }
             .hotel-image { min-height: 120px; }
@@ -710,9 +705,8 @@
                 plannerLoadingText: 'AI plan qurulur, bir neçə saniyə gözləyin...',
                 planNotFound: 'Plan məlumatı tapılmadı.',
                 tripReady: '{destination} üçün {days} günlük plan hazırdır.',
-                mapTitle: 'Ağıllı xəritə görünüşü',
-                mapSubtitle: 'Gün kartlarında adı keçən məkanlar OpenStreetMap üzərində göstərilir.',
-                mapDayLabel: 'Gün {day}',
+                mapTitle: 'Ağıllı Xəritə Görünüşü (Google Platforms)',
+                mapSubtitle: 'Hədəf şəhər Google satellite görünüşündə sürətli açılır.',
                 dayMeta: '{destination} · {day}-ci gün',
                 dayPlan: '{day}-ci gün planı',
                 authRequired: 'Bu özəlliyi işlətmək üçün qeydiyyatdan keçməlisiniz.',
@@ -817,9 +811,8 @@
                 plannerLoadingText: 'AI is building your plan, please wait a few seconds...',
                 planNotFound: 'Plan data was not found.',
                 tripReady: '{days}-day plan for {destination} is ready.',
-                mapTitle: 'Smart map view',
-                mapSubtitle: 'Places mentioned in day cards are shown on OpenStreetMap.',
-                mapDayLabel: 'Day {day}',
+                mapTitle: 'Smart Map View (Google Platforms)',
+                mapSubtitle: 'The destination opens quickly in Google satellite view.',
                 dayMeta: '{destination} · Day {day}',
                 dayPlan: 'Day {day} plan',
                 authRequired: 'You need to sign in to use this feature.',
@@ -924,9 +917,8 @@
                 plannerLoadingText: 'AI создает план, подождите несколько секунд...',
                 planNotFound: 'Данные плана не найдены.',
                 tripReady: 'План для {destination} на {days} дн. готов.',
-                mapTitle: 'Умная карта',
-                mapSubtitle: 'Места из карточек дня показаны на OpenStreetMap.',
-                mapDayLabel: 'День {day}',
+                mapTitle: 'Умная карта (Google Platforms)',
+                mapSubtitle: 'Направление быстро открывается в спутниковом виде Google.',
                 dayMeta: '{destination} · День {day}',
                 dayPlan: 'План на день {day}',
                 authRequired: 'Чтобы использовать эту функцию, нужно войти.',
@@ -1247,7 +1239,7 @@
 
         function setPlannerLoading(isLoading) {
             if (isLoading) {
-                resetTripMap();
+                resetGoogleMap();
                 tripPlannerSubmit.dataset.originalHtml = tripPlannerSubmit.innerHTML;
                 tripPlannerSubmit.disabled = true;
                 tripPlannerSubmit.innerHTML = `<i class="fa-solid fa-spinner loader"></i> ${escapeHtml(t('plannerLoadingButton'))}`;
@@ -1368,240 +1360,60 @@
             });
         }
 
-        let tripMapInstance = null;
-        let tripMapLayerGroup = null;
-        let tripMapRequestId = 0;
-        const tripMapGeocodeCache = new Map();
-        const TRIP_MAP_KNOWN_CENTERS = [
-            { keys: ['baku', 'baki', 'bakı'], lat: 40.4093, lng: 49.8671, zoom: 12 },
-            { keys: ['istanbul', 'i̇stanbul'], lat: 41.0082, lng: 28.9784, zoom: 12 },
-            { keys: ['paris'], lat: 48.8566, lng: 2.3522, zoom: 12 },
-            { keys: ['rome', 'roma'], lat: 41.9028, lng: 12.4964, zoom: 12 },
-            { keys: ['london'], lat: 51.5072, lng: -0.1276, zoom: 12 },
-            { keys: ['tokyo'], lat: 35.6762, lng: 139.6503, zoom: 11 },
-            { keys: ['dubai'], lat: 25.2048, lng: 55.2708, zoom: 11 },
-            { keys: ['barcelona'], lat: 41.3874, lng: 2.1686, zoom: 12 },
-            { keys: ['prague', 'praqa'], lat: 50.0755, lng: 14.4378, zoom: 12 },
-            { keys: ['amsterdam'], lat: 52.3676, lng: 4.9041, zoom: 12 },
-            { keys: ['new york'], lat: 40.7128, lng: -74.0060, zoom: 11 }
-        ];
-        const TRIP_MAP_STOP_WORDS = new Set([
-            'day', 'gun', 'gün', 'den', 'день', 'plan', 'trip', 'tripgen', 'ai',
-            'morning', 'afternoon', 'evening', 'night', 'lunch', 'dinner',
-            'seher', 'səhər', 'gunorta', 'günorta', 'axsam', 'axşam',
-            'утро', 'день', 'вечер', 'ночь', 'обед', 'ужин'
-        ]);
+        let latestGoogleMapDestination = '';
 
-        function resetTripMap() {
-            tripMapRequestId += 1;
-            if (tripMapInstance) {
-                tripMapInstance.remove();
-            }
-            tripMapInstance = null;
-            tripMapLayerGroup = null;
+        function buildGoogleMapUrl(destination) {
+            const safeDestination = normalizeText(destination) || 'Baku Azerbaijan';
+            return `https://maps.google.com/maps?q=${encodeURIComponent(safeDestination)}&t=k&z=13&ie=UTF8&iwloc=&output=embed`;
         }
 
-        function findKnownMapCenter(value) {
-            const normalized = normalizeText(value).toLowerCase();
-            if (!normalized) return null;
-
-            const known = TRIP_MAP_KNOWN_CENTERS.find(item => item.keys.some(key => normalized.includes(key)));
-            return known ? { lat: known.lat, lng: known.lng, zoom: known.zoom } : null;
-        }
-
-        function cleanMapCandidate(value) {
-            return normalizeText(value)
-                .replace(/[“”"']/g, '')
-                .replace(/\([^)]*\)/g, ' ')
-                .replace(/^\d+[\).\s-]*/, '')
-                .replace(/^(visit|see|explore|walk|go to|at|in|ziyarət|gezinti|gəzinti|gedin|baxış|посетите|осмотрите|прогулка)\s+/iu, '')
-                .replace(/\b(morning|afternoon|evening|night|seher|səhər|gunorta|günorta|axsam|axşam|утро|вечер)\b/giu, '')
-                .replace(/[.!?:;]+$/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-
-        function isUsefulMapCandidate(value) {
-            const candidate = cleanMapCandidate(value);
-            if (candidate.length < 3 || candidate.length > 72) return false;
-            if (!/\p{L}/u.test(candidate)) return false;
-
-            const words = candidate.toLowerCase().split(/\s+/).filter(Boolean);
-            return words.some(word => !TRIP_MAP_STOP_WORDS.has(word));
-        }
-
-        function extractMapPlaceNames(activity) {
-            const cleaned = cleanMapCandidate(activity);
-            if (!cleaned) return [];
-
-            const capitalizedMatches = cleaned.match(/(?:[A-ZƏÖÜĞÇŞİА-ЯЁ][\p{L}'’.-]*(?:\s+(?:of|the|de|da|del|du|la|le|el|al|[A-ZƏÖÜĞÇŞİА-ЯЁ][\p{L}'’.-]*)){0,5})/gu) || [];
-            const phraseMatches = cleaned
-                .split(/\s*(?:,|;|\band\b|\bvə\b|\bve\b|\bи\b|\bthen\b|\bsonra\b|\bзатем\b)\s*/iu)
-                .map(cleanMapCandidate)
-                .filter(Boolean);
-
-            const candidates = [...capitalizedMatches, ...phraseMatches]
-                .map(cleanMapCandidate)
-                .filter(isUsefulMapCandidate);
-
-            return [...new Set(candidates)].slice(0, 2);
-        }
-
-        function buildTripMapCandidates(items, destination) {
-            const seen = new Set();
-            const candidates = [];
-
-            items.forEach(item => {
-                extractMapPlaceNames(item.text).forEach(name => {
-                    const key = `${name}|${item.day}`.toLowerCase();
-                    if (seen.has(key)) return;
-                    seen.add(key);
-                    candidates.push({ name, day: item.day });
-                });
-            });
-
-            if (!candidates.length && destination) {
-                candidates.push({ name: destination, day: '1' });
-            }
-
-            return candidates.slice(0, 8);
-        }
-
-        function createTripMapIcon(index) {
-            return L.divIcon({
-                className: 'trip-map-marker',
-                html: `<span>${escapeHtml(index)}</span>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 30],
-                popupAnchor: [0, -28]
-            });
-        }
-
-        function waitForTripMapDelay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        async function geocodeTripLocation(query, preferKnownCenter = false) {
-            const cleanQuery = cleanMapCandidate(query);
-            if (!cleanQuery) return null;
-
-            if (preferKnownCenter) {
-                const knownCenter = findKnownMapCenter(cleanQuery);
-                if (knownCenter) {
-                    return knownCenter;
-                }
-            }
-
-            const cacheKey = cleanQuery.toLowerCase();
-            if (tripMapGeocodeCache.has(cacheKey)) {
-                return tripMapGeocodeCache.get(cacheKey);
-            }
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5200);
-
-            try {
-                const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(cleanQuery)}`;
-                const response = await fetch(url, {
-                    headers: { Accept: 'application/json' },
-                    signal: controller.signal
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Nominatim ${response.status}`);
-                }
-
-                const results = await response.json();
-                const firstResult = Array.isArray(results) ? results[0] : null;
-                const location = firstResult
-                    ? { lat: Number(firstResult.lat), lng: Number(firstResult.lon), zoom: 14 }
-                    : null;
-
-                tripMapGeocodeCache.set(cacheKey, location);
-                return location;
-            } catch (error) {
-                console.warn('[TRIP_MAP_GEOCODE_SKIPPED]', cleanQuery, error.message);
-                tripMapGeocodeCache.set(cacheKey, null);
-                return null;
-            } finally {
-                clearTimeout(timeoutId);
+        function resetGoogleMap() {
+            latestGoogleMapDestination = '';
+            const frame = document.getElementById('google-map-frame');
+            if (frame) {
+                frame.removeAttribute('src');
             }
         }
 
-        async function initializeTripMap(data, mapItems) {
-            resetTripMap();
+        function updateGoogleMap(destination) {
+            const safeDestination = normalizeText(destination);
+            if (!safeDestination) return;
 
-            const mapElement = document.getElementById('trip-map');
-            if (!mapElement || !window.L) return;
+            latestGoogleMapDestination = safeDestination;
+            const frame = document.getElementById('google-map-frame');
+            if (!frame) return;
 
-            const requestId = tripMapRequestId;
-            const destination = data.destination || document.getElementById('tripDestinationInput')?.value || '';
-            const fallbackCenter = findKnownMapCenter(destination) || { lat: 40.4093, lng: 49.8671, zoom: 11 };
+            const nextUrl = buildGoogleMapUrl(safeDestination);
+            if (frame.src === nextUrl) return;
 
-            tripMapInstance = L.map(mapElement, {
-                scrollWheelZoom: false,
-                worldCopyJump: true
-            }).setView([fallbackCenter.lat, fallbackCenter.lng], fallbackCenter.zoom || 11);
+            frame.style.opacity = '0.25';
+            setTimeout(() => {
+                frame.src = nextUrl;
+            }, 120);
+        }
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(tripMapInstance);
+        function buildGoogleMapPanel(destination) {
+            const safeDestination = normalizeText(destination) || latestGoogleMapDestination || 'Baku Azerbaijan';
 
-            tripMapLayerGroup = L.layerGroup().addTo(tripMapInstance);
-            setTimeout(() => tripMapInstance?.invalidateSize(), 80);
-
-            const destinationCenter = await geocodeTripLocation(destination, true);
-            if (requestId !== tripMapRequestId || !tripMapInstance) return;
-            if (destinationCenter) {
-                tripMapInstance.setView([destinationCenter.lat, destinationCenter.lng], destinationCenter.zoom || 12);
-            }
-
-            const markers = [];
-            const candidates = buildTripMapCandidates(mapItems, destination);
-
-            for (const [index, candidate] of candidates.entries()) {
-                await waitForTripMapDelay(180);
-                const queryWithDestination = destination && !candidate.name.toLowerCase().includes(destination.toLowerCase())
-                    ? `${candidate.name}, ${destination}`
-                    : candidate.name;
-                const location = await geocodeTripLocation(queryWithDestination) || await geocodeTripLocation(candidate.name);
-
-                if (requestId !== tripMapRequestId || !tripMapInstance || !tripMapLayerGroup) return;
-                if (!location) continue;
-
-                const marker = L.marker([location.lat, location.lng], {
-                    icon: createTripMapIcon(index + 1),
-                    title: candidate.name
-                }).addTo(tripMapLayerGroup);
-
-                marker.bindPopup(`
-                    <div class="trip-map-popup">
-                        <strong>${escapeHtml(candidate.name)}</strong>
-                        <span>${escapeHtml(t('mapDayLabel', { day: candidate.day || index + 1 }))}</span>
+            return `
+                <div class="google-map-panel">
+                    <div class="google-map-head">
+                        <strong><i class="fa-brands fa-google"></i> ${escapeHtml(t('mapTitle'))}</strong>
+                        <span>${escapeHtml(t('mapSubtitle'))}</span>
                     </div>
-                `);
-                markers.push(marker);
-            }
-
-            if (requestId !== tripMapRequestId || !tripMapInstance) return;
-
-            if (markers.length > 1) {
-                tripMapInstance.fitBounds(L.featureGroup(markers).getBounds(), {
-                    padding: [24, 24],
-                    maxZoom: 14
-                });
-            } else if (markers.length === 1) {
-                tripMapInstance.setView(markers[0].getLatLng(), 14);
-            } else if (destinationCenter) {
-                tripMapInstance.setView([destinationCenter.lat, destinationCenter.lng], destinationCenter.zoom || 12);
-            }
-
-            setTimeout(function() {
-                if (tripMapInstance) {
-                    tripMapInstance.invalidateSize();
-                }
-            }, 300);
+                    <div id="google-map-container" class="google-map-container">
+                        <iframe
+                            id="google-map-frame"
+                            class="google-map-frame"
+                            title="${escapeHtml(t('mapTitle'))}"
+                            src="${buildGoogleMapUrl(safeDestination)}"
+                            loading="lazy"
+                            allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade"
+                            onload="this.style.opacity='1'"></iframe>
+                    </div>
+                </div>
+            `;
         }
 
         function renderTripPlan(data) {
@@ -1613,12 +1425,12 @@
             const planImages = getPlanImages(data);
 
             if (dayLines.length === 0) {
-                resetTripMap();
+                resetGoogleMap();
                 tripPlannerOutput.innerHTML = `<div class="planner-empty">${escapeHtml(raw || t('planNotFound'))}</div>`;
                 return;
             }
 
-            const mapItems = [];
+            const mapDestination = data.destination || document.getElementById('tripDestinationInput')?.value || latestGoogleMapDestination;
             const cards = dayLines.map((line, dayIndex) => {
                 const match = line.match(dayPattern);
                 const dayNumber = match ? match[1] : '';
@@ -1627,7 +1439,6 @@
                     ? planImages
                     : [planImages[dayIndex % planImages.length], planImages[(dayIndex + 1) % planImages.length]].filter(Boolean);
                 const dayActivities = splitActivities(detail);
-                dayActivities.forEach(activity => mapItems.push({ day: dayNumber || String(dayIndex + 1), text: activity }));
                 const activities = dayActivities.map(activity => `
                     <li class="activity-item">
                         <span class="activity-icon"><i class="fa-solid ${getActivityIcon(activity)}"></i></span>
@@ -1655,17 +1466,11 @@
                     <strong>${escapeHtml(t('tripReady', { destination: data.destination, days: data.days }))}</strong>
                     <div style="margin-top:8px;">${metaLines.map(escapeHtml).join('<br>')}</div>
                 </div>
-                <div class="trip-map-panel">
-                    <div class="trip-map-head">
-                        <strong><i class="fa-solid fa-map-location-dot"></i> ${escapeHtml(t('mapTitle'))}</strong>
-                        <span>${escapeHtml(t('mapSubtitle'))}</span>
-                    </div>
-                    <div id="trip-map" class="trip-map"></div>
-                </div>
+                ${buildGoogleMapPanel(mapDestination)}
                 <div class="itinerary-grid">${cards}</div>
             `;
             initializeItineraryCarousels();
-            initializeTripMap(data, mapItems);
+            updateGoogleMap(mapDestination);
         }
 
         authOpenButton.addEventListener('click', () => openAuthModal('login'));
@@ -1783,7 +1588,7 @@
             };
 
             if (!payload.userId || !payload.authToken) {
-                resetTripMap();
+                resetGoogleMap();
                 tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(t('authRequired'))}</div>`;
                 openAuthModal('login');
                 return;
@@ -1803,7 +1608,7 @@
                     responseBody: error.responseBody,
                     rawText: error.rawText
                 });
-                resetTripMap();
+                resetGoogleMap();
                 tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(error.message)}</div>`;
             } finally {
                 setPlannerLoading(false);
@@ -1933,6 +1738,7 @@
             const currency = document.getElementById('currencyInput').value;
 
             // UI Elements & State Updates
+            updateGoogleMap(city);
             document.getElementById('summaryCity').textContent = city;
             document.getElementById('summaryStatus').textContent = document.getElementById('statusInput').selectedOptions[0].textContent;
             document.getElementById('summaryDays').textContent = t('daysCount', { days });
