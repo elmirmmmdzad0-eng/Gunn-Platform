@@ -966,7 +966,6 @@
         const tourismStyleToggle = document.getElementById('tourismStyleToggle');
         const tourismTypesGrid = document.getElementById('tourismTypesGrid');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
-        const GUEST_TRIP_GENERATION_ENABLED = true;
         const tourismTypeDefinitions = [
             { key: 'mountain', emoji: '🏔' },
             { key: 'eco', emoji: '🌿' },
@@ -1836,13 +1835,26 @@
             return Boolean(getCurrentUserId() && getCurrentAuthToken());
         }
 
+        function getOpenSearchBudgetType() {
+            const budgetAmount = Number(budgetRange?.value || 1200);
+            if (budgetAmount >= 2600) {
+                return 'Lüks';
+            }
+
+            if (budgetAmount <= 800) {
+                return 'Ekonomik';
+            }
+
+            return 'Orta';
+        }
+
         function refreshPlannerGate(username = '') {
             if (!tripPlannerSection) {
                 return;
             }
 
             const isUnlocked = hasActivePlannerSession();
-            const canUsePlanner = GUEST_TRIP_GENERATION_ENABLED || isUnlocked;
+            const canUsePlanner = true;
             tripPlannerSection.classList.toggle('is-locked', !canUsePlanner);
             plannerGateOverlay.setAttribute('aria-hidden', String(canUsePlanner));
 
@@ -1852,9 +1864,7 @@
                     : `<i class="fa-solid fa-unlock"></i> ${escapeHtml(t('guestBadge'))}`;
             }
 
-            if (tripPlannerSubmit && !canUsePlanner) {
-                tripPlannerSubmit.disabled = true;
-            } else if (tripPlannerSubmit) {
+            if (tripPlannerSubmit) {
                 tripPlannerSubmit.disabled = false;
             }
         }
@@ -2369,22 +2379,11 @@
                 destination: document.getElementById('tripDestinationInput').value.trim(),
                 days: Number(document.getElementById('tripDaysSelect').value),
                 budgetType: document.getElementById('tripBudgetSelect').value,
-                selectedTypes: getSelectedTourismTypeLabels().join(', '),
                 userId: getCurrentUserId(),
                 authToken: getCurrentAuthToken(),
                 lang: currentLang
             };
-            console.log('[TRIP_SELECTED_TYPES]', {
-                selectedTypeKeys: selectedTourismTypes,
-                selectedTypes: payload.selectedTypes
-            });
-
-            if (!GUEST_TRIP_GENERATION_ENABLED && (!payload.userId || !payload.authToken)) {
-                resetGoogleMap();
-                tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(t('authRequired'))}</div>`;
-                openAuthModal('login');
-                return;
-            }
+            console.log('[TRIP_BUILDER_REQUEST]', { destination: payload.destination, days: payload.days, budgetType: payload.budgetType, lang: payload.lang });
 
             setPlannerLoading(true);
 
@@ -2528,6 +2527,20 @@
             const status = document.getElementById('statusInput').value;
             const days = document.getElementById('daysInput').value;
             const currency = document.getElementById('currencyInput').value;
+            const planDays = Math.min(Math.max(Number(days) || 3, 1), 7);
+            const selectedTypes = getSelectedTourismTypeLabels().join(', ');
+            const openSearchTripPayload = {
+                destination: city,
+                days: planDays,
+                budgetType: getOpenSearchBudgetType(),
+                selectedTypes,
+                lang: currentLang
+            };
+            console.log('[OPEN_SEARCH_SELECTED_TYPES]', {
+                selectedTypeKeys: selectedTourismTypes,
+                selectedTypes: openSearchTripPayload.selectedTypes,
+                endpoint: '/api/trips/generate'
+            });
 
             // UI Elements & State Updates
             updateGoogleMap(city);
@@ -2552,20 +2565,27 @@
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
-                if (!response.ok) {
-                    throw new Error(t('httpError', { status: response.status }));
-                }
-                const data = await response.json();
+                const tripData = await postJson('/api/trips/generate', openSearchTripPayload);
+                renderTripPlan(tripData);
 
-                // Injecting safe textual data
-                document.getElementById('hotelText').innerText = data.hotel || t('notFound');
-                document.getElementById('visaText').innerText = data.visa || t('notFound');
-                document.getElementById('ticketText').innerText = data.ticket || t('notFound');
-                
-                checkVisaStatus(data.visa);
-                renderHacksList(data.hacks);
-                renderPackingList(data.packingList);
+                try {
+                    const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
+                    if (!response.ok) {
+                        throw new Error(t('httpError', { status: response.status }));
+                    }
+                    const data = await response.json();
+
+                    // Injecting safe textual data
+                    document.getElementById('hotelText').innerText = data.hotel || t('notFound');
+                    document.getElementById('visaText').innerText = data.visa || t('notFound');
+                    document.getElementById('ticketText').innerText = data.ticket || t('notFound');
+
+                    checkVisaStatus(data.visa);
+                    renderHacksList(data.hacks);
+                    renderPackingList(data.packingList);
+                } catch (analyzeError) {
+                    console.warn('[OPEN_SEARCH_ANALYZE_SKIPPED]', analyzeError.message);
+                }
 
                 // Reveal updated view
                 document.getElementById('realContent').classList.remove('hidden');

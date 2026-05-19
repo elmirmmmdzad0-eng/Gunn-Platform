@@ -55,18 +55,30 @@ public class GeminiService implements TripPlanProvider {
 
         if (context.getLanguageCode().equals("ru")) {
             itinerary.append("Выбранные стили путешествия: ").append(context.getSelectedTypes()).append("\n");
-            itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
+            itinerary.append(buildCriticalTourismStyleInstruction(context)).append("\n");
             return;
         }
 
         if (context.getLanguageCode().equals("en")) {
             itinerary.append("Selected tourism styles: ").append(context.getSelectedTypes()).append("\n");
-            itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
+            itinerary.append(buildCriticalTourismStyleInstruction(context)).append("\n");
             return;
         }
 
         itinerary.append("Seçilən səyahət stilləri: ").append(context.getSelectedTypes()).append("\n");
-        itinerary.append(buildTourismStylePromptDirective(context)).append("\n");
+        itinerary.append(buildCriticalTourismStyleInstruction(context)).append("\n");
+    }
+
+    private String buildCriticalTourismStyleInstruction(TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return "";
+        }
+
+        return "CRITICAL INSTRUCTION: The user has strictly customized this trip for the following travel styles: "
+                + context.getSelectedTypes()
+                + ". You MUST transform the entire itinerary configuration based on these styles. For example, if \"Romantik turizm\" is selected, the daily schedule must strictly prioritize romantic viewpoints, elegant dining, scenic walks, and couples' activities in "
+                + context.getDestination()
+                + ", completely shifting the tone away from standard mass tourism. Use specific real places when possible, such as romantic gardens, hidden viewpoints, elegant restaurants, river walks, concert venues, jazz clubs, local markets, and tasting routes that match the selected styles. Do not treat these styles as optional metadata; make them the main itinerary logic.";
     }
 
     private String buildTourismStylePromptDirective(TripRequestContext context) {
