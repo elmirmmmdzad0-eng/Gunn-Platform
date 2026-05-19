@@ -1,0 +1,32 @@
+# Render Blueprint for the GUNN web service.
+# Render derives the default .onrender.com subdomain from the service name,
+# so this service name targets https://gunn-platform.onrender.com.
+services:
+  - type: web
+    name: gunn-platform
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    healthCheckPath: /
+    envVars:
+      - key: APP_BASE_URL
+        value: https://gunn-platform.onrender.com
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PEXELS_API_KEY
+        sync: false
+      - key: GMAIL_USERNAME
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        sync: false
