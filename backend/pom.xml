@@ -11,8 +11,8 @@
     <groupId>com.tripgen</groupId>
     <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>TripGen Core API</name>
-    <description>TripGen Executive Travel Intelligence Backend</description>
+    <name>GUNN Core API</name>
+    <description>GUNN Executive Travel Intelligence Backend</description>
     
     <properties>
         <java.version>21</java.version>

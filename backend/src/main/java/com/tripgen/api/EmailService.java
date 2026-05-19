@@ -19,11 +19,11 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(toEmail);
-            message.setSubject("TripGen email verification");
+            message.setSubject("GUNN email verification");
             message.setText("""
                     Salam %s,
 
-                    TripGen hesabini aktiv etmek ucun asagidaki linke daxil olun:
+                    GUNN hesabini aktiv etmek ucun asagidaki linke daxil olun:
                     %s
 
                     Eger bu qeydiyyati siz etmemisinizse, bu emaili nezere almayin.

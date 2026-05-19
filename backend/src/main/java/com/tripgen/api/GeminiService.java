@@ -267,7 +267,7 @@ public class GeminiService implements TripPlanProvider {
         String tourismStyleNote = tourismStyleNote(context);
 
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("TripGen AI Plan").append("\n");
+        itinerary.append("GUNN AI Plan").append("\n");
         itinerary.append("İstiqamət: ").append(destination).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
@@ -311,7 +311,7 @@ public class GeminiService implements TripPlanProvider {
         dayPool = customizeDayPool(dayPool, context);
 
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("TripGen AI Plan").append("\n");
+        itinerary.append("GUNN AI Plan").append("\n");
         itinerary.append("Destination: ").append(destination).append("\n");
         itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
@@ -358,7 +358,7 @@ public class GeminiService implements TripPlanProvider {
         dayPool = customizeDayPool(dayPool, context);
 
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("План TripGen AI").append("\n");
+        itinerary.append("План GUNN AI").append("\n");
         itinerary.append("Направление: ").append(destination).append("\n");
         itinerary.append("Тип бюджета: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);

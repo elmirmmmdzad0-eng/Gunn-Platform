@@ -72,7 +72,7 @@ public class WebSearchFallbackService {
         }
 
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("TripGen Web Search Fallback").append("\n");
+        itinerary.append("GUNN Web Search Fallback").append("\n");
         itinerary.append("İstiqamət: ").append(context.getDestination()).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
@@ -102,7 +102,7 @@ public class WebSearchFallbackService {
 
     private String generateEnglishFallback(TripRequestContext context) {
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("TripGen Web Search Fallback").append("\n");
+        itinerary.append("GUNN Web Search Fallback").append("\n");
         itinerary.append("Destination: ").append(context.getDestination()).append("\n");
         itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
@@ -127,13 +127,13 @@ public class WebSearchFallbackService {
                 .append(" street, ")
                 .append(context.getDestination())
                 .append(" city view");
-        itinerary.append("\nNote: AI providers were temporarily unavailable, so TripGen returned a static search fallback plan.");
+        itinerary.append("\nNote: AI providers were temporarily unavailable, so GUNN returned a static search fallback plan.");
         return itinerary.toString();
     }
 
     private String generateRussianFallback(TripRequestContext context) {
         StringBuilder itinerary = new StringBuilder();
-        itinerary.append("Резервный поиск TripGen").append("\n");
+        itinerary.append("Резервный поиск GUNN").append("\n");
         itinerary.append("Направление: ").append(context.getDestination()).append("\n");
         itinerary.append("Тип бюджета: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
@@ -158,7 +158,7 @@ public class WebSearchFallbackService {
                 .append(" street, ")
                 .append(context.getDestination())
                 .append(" city view");
-        itinerary.append("\nПримечание: AI-провайдеры временно недоступны, поэтому TripGen вернул статический резервный план.");
+        itinerary.append("\nПримечание: AI-провайдеры временно недоступны, поэтому GUNN вернул статический резервный план.");
         return itinerary.toString();
     }
 }
