@@ -327,7 +327,10 @@
             }
 
             .ambient-hero-video {
-                display: none;
+                display: block;
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
             }
 
             .ambient-video-overlay {
@@ -628,7 +631,7 @@
 
     <main class="tripgen-page">
         <section class="hero">
-            <video id="ambientHeroVideo" class="ambient-hero-video" autoplay loop muted playsinline preload="auto" aria-hidden="true">
+            <video id="ambientHeroVideo" class="ambient-hero-video" autoplay loop muted playsinline webkit-playsinline preload="auto" aria-hidden="true">
                 <source id="ambientHeroVideoSource" src="https://cdn.pixabay.com/video/2019/02/19/21528-318978038_large.mp4" type="video/mp4">
             </video>
             <div class="ambient-video-overlay" aria-hidden="true"></div>
@@ -2621,7 +2624,11 @@
 
             function playAmbientVideo() {
                 ambientVideo.muted = true;
+                ambientVideo.defaultMuted = true;
                 ambientVideo.playsInline = true;
+                ambientVideo.setAttribute('muted', '');
+                ambientVideo.setAttribute('playsinline', '');
+                ambientVideo.setAttribute('webkit-playsinline', '');
 
                 const playPromise = ambientVideo.play();
                 if (playPromise) {
