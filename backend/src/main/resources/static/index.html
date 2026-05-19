@@ -40,8 +40,11 @@
         /* 2. LAYOUT (Ümumi Quruluş) */
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body, .hero, .search-field, .side-card, .content-card, .hotel-card, .ticket-card, .visa-alert, .toast-error, .checkbox-item, .flight-line, .quality-badge, input, select, button { transition: all 0.3s ease; }
-        body { margin: 0; background: var(--bg); color: var(--text); }
+        body { margin: 0; background: linear-gradient(135deg, #061611 0%, #0b221a 50%, #020c08 100%); color: var(--text); position: relative; }
+        body::before { content: ""; position: fixed; inset: -22%; z-index: 0; pointer-events: none; opacity: 0.44; background: radial-gradient(circle at 18% 22%, rgba(0, 255, 163, 0.18), transparent 30%), radial-gradient(circle at 78% 18%, rgba(168, 85, 247, 0.14), transparent 28%), radial-gradient(circle at 52% 84%, rgba(16, 185, 129, 0.12), transparent 34%); filter: blur(34px); animation: auroraBorealis 28s ease-in-out infinite alternate; }
+        .tripgen-page { position: relative; z-index: 1; }
         .hero { position: relative; overflow: hidden; isolation: isolate; background: linear-gradient(135deg, #061611 0%, #0b221a 50%, #020c08 100%); color: white; padding: 36px 24px 72px; }
+        .hero::after { content: ""; position: absolute; inset: -18%; z-index: 2; pointer-events: none; opacity: 0.34; background: radial-gradient(circle at 16% 28%, rgba(0, 255, 163, 0.18), transparent 30%), radial-gradient(circle at 86% 22%, rgba(168, 85, 247, 0.16), transparent 28%), linear-gradient(115deg, transparent 20%, rgba(0, 255, 163, 0.08), transparent 62%); filter: blur(28px); mix-blend-mode: screen; animation: auroraBorealis 32s ease-in-out infinite alternate; }
         body.dark-mode .hero { background: #020c08; }
         .ambient-hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 1; transition: opacity 0.9s ease-in-out; pointer-events: none; }
         .ambient-hero-video.is-fading { opacity: 0; }
@@ -182,6 +185,9 @@
         @keyframes premiumGlow { 0%, 100% { box-shadow: 0 0 0 rgba(0, 255, 163, 0), 0 14px 36px rgba(16, 185, 129, 0.22); } 50% { box-shadow: 0 0 26px rgba(0, 255, 163, 0.5), 0 18px 50px rgba(16, 185, 129, 0.38); } }
         @keyframes companionPulse { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.74; } 50% { transform: translate3d(8px, -6px, 0) scale(1.04); opacity: 1; } }
         @keyframes routeLineFlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes auroraBorealis { 0% { transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1); opacity: 0.34; } 50% { transform: translate3d(2%, 1%, 0) rotate(8deg) scale(1.06); opacity: 0.52; } 100% { transform: translate3d(-1%, 3%, 0) rotate(-6deg) scale(1.02); opacity: 0.42; } }
+        @keyframes floatGlass { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -5px, 0); } }
+        @keyframes aiTypingCaret { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
 
         /* Auth Modal */
         .auth-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -470,6 +476,42 @@
                 line-height: 1.45;
             }
 
+            .companion-typing-status {
+                display: none;
+                margin-top: 12px;
+                min-height: 40px;
+                align-items: center;
+                gap: 9px;
+                padding: 11px 12px;
+                border: 1px solid rgba(0, 255, 163, 0.28);
+                border-radius: 14px;
+                background: rgba(0, 255, 163, 0.08);
+                color: #b8ffe5;
+                font-size: 12px;
+                font-weight: 900;
+                line-height: 1.35;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 24px rgba(0, 255, 163, 0.08);
+            }
+
+            .companion-typing-status.is-active {
+                display: flex;
+            }
+
+            .companion-typing-dot {
+                width: 9px;
+                height: 9px;
+                border-radius: 999px;
+                flex: 0 0 auto;
+                background: #00ffa3;
+                box-shadow: 0 0 16px rgba(0, 255, 163, 0.68);
+                animation: aiTypingCaret 1s ease-in-out infinite;
+            }
+
+            .mobile-ai-companion.is-typing .companion-route {
+                opacity: 0.34;
+                filter: blur(1px);
+            }
+
             .companion-route {
                 position: relative;
                 display: grid;
@@ -738,6 +780,22 @@
                 scroll-snap-align: start;
                 border: 1px solid rgba(255, 255, 255, 0.12);
                 box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+                animation: floatGlass 4.8s ease-in-out infinite;
+            }
+
+            .destination-card:nth-child(2),
+            .feature-card:nth-child(2) {
+                animation-delay: 0.45s;
+            }
+
+            .destination-card:nth-child(3),
+            .feature-card:nth-child(3) {
+                animation-delay: 0.9s;
+            }
+
+            .destination-card:nth-child(4),
+            .feature-card:nth-child(4) {
+                animation-delay: 1.35s;
             }
 
             .destination-card img {
@@ -802,6 +860,7 @@
                 gap: 12px;
                 align-items: center;
                 padding: 13px;
+                animation: floatGlass 5.2s ease-in-out infinite;
             }
 
             .feature-card i {
@@ -1014,6 +1073,10 @@
                     <span class="companion-kicker">Canlı AI marşrut önizləməsi</span>
                     <h2 class="companion-title" id="companionTitle">Roma üçün fərdi səyahət xəritəsi</h2>
                     <p class="companion-subtitle" id="companionSubtitle">Stilləri seçdikcə TripGen marşrutu romantik, mədəni və qastronomik dayanacaqlarla yenidən qurur.</p>
+                    <div class="companion-typing-status" id="companionTypingStatus" aria-live="polite">
+                        <span class="companion-typing-dot"></span>
+                        <span id="companionTypingText">Süni intellekt seçdiyiniz stilləri analiz edir...</span>
+                    </div>
                     <div class="companion-route" id="companionRoute"></div>
                 </section>
 
@@ -1379,6 +1442,8 @@
         const companionTitle = document.getElementById('companionTitle');
         const companionSubtitle = document.getElementById('companionSubtitle');
         const companionRoute = document.getElementById('companionRoute');
+        const companionTypingStatus = document.getElementById('companionTypingStatus');
+        const companionTypingText = document.getElementById('companionTypingText');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
         const tourismTypeDefinitions = [
             { key: 'mountain', emoji: '🏔' },
@@ -1919,6 +1984,7 @@
         let auraMuted = localStorage.getItem('tripgen-aura-muted') === 'true';
         let currentLang = localStorage.getItem('selectedLang') || 'az';
         let latestTripPlanData = null;
+        let companionTypingTimer = null;
         if (!translations[currentLang]) {
             currentLang = 'az';
         }
@@ -2048,6 +2114,39 @@
                     </div>
                 </article>
             `).join('');
+        }
+
+        function isMobileViewport() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
+
+        function startMobileAiTyping() {
+            if (!isMobileViewport() || !companionTypingStatus || !companionTypingText) return;
+
+            const messages = [
+                'Süni intellekt seçdiyiniz stilləri analiz edir...',
+                'Gizli coğrafi məkanlar verilənlər bazasından çıxarılır...',
+                'Marşrut fərdiləşdirilir...'
+            ];
+            let messageIndex = 0;
+
+            clearInterval(companionTypingTimer);
+            companionTypingStatus.classList.add('is-active');
+            companionTypingStatus.closest('.mobile-ai-companion')?.classList.add('is-typing');
+            companionTypingText.textContent = messages[messageIndex];
+
+            companionTypingTimer = setInterval(() => {
+                messageIndex = (messageIndex + 1) % messages.length;
+                companionTypingText.textContent = messages[messageIndex];
+            }, 1450);
+        }
+
+        function stopMobileAiTyping() {
+            clearInterval(companionTypingTimer);
+            companionTypingTimer = null;
+            companionTypingStatus?.classList.remove('is-active');
+            companionTypingStatus?.closest('.mobile-ai-companion')?.classList.remove('is-typing');
+            renderMobileTravelCompanion();
         }
 
         function changeLanguage(lang) {
@@ -3061,9 +3160,11 @@
             btnIcon.className = "fa-solid fa-spinner loader";
             btnText.textContent = t('planning');
             submitBtn.disabled = true;
+            startMobileAiTyping();
 
             try {
                 const tripData = await postJson('/api/trips/generate', openSearchTripPayload);
+                stopMobileAiTyping();
                 renderTripPlan(tripData);
 
                 try {
@@ -3089,6 +3190,7 @@
                 document.getElementById('realContent').classList.remove('hidden');
 
             } catch (error) {
+                stopMobileAiTyping();
                 // Show Premium Friendly Error Box
                 document.getElementById('errorText').textContent = getFriendlyError(error.message);
                 document.getElementById('errorBox').classList.remove('hidden');
