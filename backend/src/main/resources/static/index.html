@@ -977,6 +977,9 @@
                 tripReady: '{destination} üçün {days} günlük plan hazırdır.',
                 mapTitle: 'Ağıllı Xəritə Görünüşü (Google Platforms)',
                 mapSubtitle: 'Hədəf şəhər Google satellite görünüşündə sürətli açılır.',
+                hiddenGemsTitle: '💎 TripGen Sirləri: Yerli Gizli Məkanlar',
+                hiddenGemsKicker: 'Yerli seçimlər',
+                hiddenGemFallback: 'Daha fərqli marşrut üçün seçilmiş az bilinən yerli dayanacaq.',
                 dayMeta: '{destination} · {day}-ci gün',
                 dayPlan: '{day}-ci gün planı',
                 authRequired: 'Bu özəlliyi işlətmək üçün qeydiyyatdan keçməlisiniz.',
@@ -1083,6 +1086,9 @@
                 tripReady: '{days}-day plan for {destination} is ready.',
                 mapTitle: 'Smart Map View (Google Platforms)',
                 mapSubtitle: 'The destination opens quickly in Google satellite view.',
+                hiddenGemsTitle: '💎 TripGen Secrets: Local Hidden Gems',
+                hiddenGemsKicker: 'Local-first picks',
+                hiddenGemFallback: 'A lesser-known local stop selected for a more original route.',
                 dayMeta: '{destination} · Day {day}',
                 dayPlan: 'Day {day} plan',
                 authRequired: 'You need to sign in to use this feature.',
@@ -1189,6 +1195,9 @@
                 tripReady: 'План для {destination} на {days} дн. готов.',
                 mapTitle: 'Умная карта (Google Platforms)',
                 mapSubtitle: 'Направление быстро открывается в спутниковом виде Google.',
+                hiddenGemsTitle: '💎 Секреты TripGen: Местные Скрытые Места',
+                hiddenGemsKicker: 'Местный выбор',
+                hiddenGemFallback: 'Малоизвестная локальная точка для более оригинального маршрута.',
                 dayMeta: '{destination} · День {day}',
                 dayPlan: 'План на день {day}',
                 authRequired: 'Чтобы использовать эту функцию, нужно войти.',
@@ -1210,6 +1219,7 @@
         let auraStarted = false;
         let auraMuted = localStorage.getItem('tripgen-aura-muted') === 'true';
         let currentLang = localStorage.getItem('selectedLang') || 'az';
+        let latestTripPlanData = null;
         if (!translations[currentLang]) {
             currentLang = 'az';
         }
@@ -1249,6 +1259,9 @@
             applyTheme(localStorage.getItem('tripgen-theme') || 'light');
             updateAuraButton();
             refreshPlannerGate(localStorage.getItem('tripgen-user') || '');
+            if (latestTripPlanData) {
+                renderTripPlan(latestTripPlanData);
+            }
         }
 
         function applyTheme(theme) {
@@ -1705,7 +1718,7 @@
 
             let description = detail;
             let tip = '';
-            const tipMatch = detail.match(/\b(?:local tip|insider tip|pro tip|tip|yerli tip)\s*:\s*(.+)$/i);
+            const tipMatch = detail.match(/(?:local tip|insider tip|pro tip|tip|yerli tip|yerli məsləhət|məsləhət|местный совет|локальный совет|совет)\s*:\s*(.+)$/i);
             if (tipMatch) {
                 tip = tipMatch[1].trim();
                 description = detail.slice(0, tipMatch.index).replace(/[.;,\s]+$/, '').trim();
@@ -1750,7 +1763,7 @@
                 const line = lines[i];
                 const lower = line.toLowerCase();
 
-                if (/^image_keywords\s*:/i.test(line) || lower.startsWith('note:') || lower.startsWith('source:')) {
+                if (/^image_keywords\s*:/i.test(line) || lower.startsWith('note:') || lower.startsWith('source:') || lower.startsWith('qeyd:') || lower.startsWith('mənbə:') || lower.startsWith('примечание:') || lower.startsWith('источник:')) {
                     break;
                 }
 
@@ -1831,17 +1844,17 @@
                     <span class="hidden-gem-index">0${index + 1}</span>
                     <div class="hidden-gem-body">
                         <strong>${escapeHtml(gem.name)}</strong>
-                        <p>${escapeHtml(gem.description || 'A lesser-known local stop selected for a more original route.')}</p>
+                        <p>${escapeHtml(gem.description || t('hiddenGemFallback'))}</p>
                         ${gem.tip ? `<span class="hidden-gem-tip"><i class="fa-solid fa-lightbulb"></i>${escapeHtml(gem.tip)}</span>` : ''}
                     </div>
                 </article>
             `).join('');
 
             return `
-                <div id="hidden-gems-section" class="hidden-gems-section" aria-label="TripGen Secrets Local Hidden Gems">
+                <div id="hidden-gems-section" class="hidden-gems-section" aria-label="${escapeHtml(t('hiddenGemsTitle'))}">
                     <div class="hidden-gems-head">
-                        <h3 class="hidden-gems-title">&#128142; TripGen Secrets: Local Hidden Gems</h3>
-                        <span class="hidden-gems-kicker">Local-first picks</span>
+                        <h3 class="hidden-gems-title">${escapeHtml(t('hiddenGemsTitle'))}</h3>
+                        <span class="hidden-gems-kicker">${escapeHtml(t('hiddenGemsKicker'))}</span>
                     </div>
                     <div class="hidden-gems-grid">${cards}</div>
                 </div>
@@ -1849,6 +1862,7 @@
         }
 
         function renderTripPlan(data) {
+            latestTripPlanData = data;
             const raw = data.itineraryRaw || '';
             const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
             const dayPattern = /^(?:(?:day|день)\s*)?(\d+)(?:\s*[-.]?\s*(?:ci|cı|cu|cü)?\s*(?:gün|gun|day|день)?)?\s*[:\-]\s*(.*)$/iu;

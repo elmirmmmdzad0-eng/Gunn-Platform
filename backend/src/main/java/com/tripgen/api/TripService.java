@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 @Service
 public class TripService {
@@ -102,7 +103,8 @@ public class TripService {
     private TripResponse toResponse(TripPlan tripPlan) {
         String itineraryRaw = ensureHiddenGemsBlock(
                 tripPlan.getItineraryRaw(),
-                tripPlan.getDestination()
+                tripPlan.getDestination(),
+                tripPlan.getLanguageCode()
         );
 
         return new TripResponse(
@@ -114,13 +116,23 @@ public class TripService {
         );
     }
 
-    private String ensureHiddenGemsBlock(String itineraryRaw, String destination) {
+    private String ensureHiddenGemsBlock(String itineraryRaw, String destination, String languageCode) {
         String cleanItinerary = itineraryRaw == null ? "" : itineraryRaw.trim();
         if (cleanItinerary.toUpperCase(Locale.ROOT).contains("HIDDEN_GEMS:")) {
+            if (shouldRefreshHiddenGemsBlock(cleanItinerary, languageCode)) {
+                String hiddenGemsBlock = buildDefaultHiddenGemsBlock(destination, languageCode);
+                return cleanItinerary
+                        .replaceFirst(
+                                "(?m)\\R*HIDDEN_GEMS:\\s*(?:\\R\\s*\\d+\\..*){1,3}",
+                                Matcher.quoteReplacement("\n\n" + hiddenGemsBlock)
+                        )
+                        .trim();
+            }
+
             return cleanItinerary;
         }
 
-        String hiddenGemsBlock = buildDefaultHiddenGemsBlock(destination);
+        String hiddenGemsBlock = buildDefaultHiddenGemsBlock(destination, languageCode);
         if (cleanItinerary.isBlank()) {
             return hiddenGemsBlock;
         }
@@ -128,16 +140,49 @@ public class TripService {
         return cleanItinerary + "\n\n" + hiddenGemsBlock;
     }
 
-    private String buildDefaultHiddenGemsBlock(String destination) {
+    private boolean shouldRefreshHiddenGemsBlock(String itineraryRaw, String languageCode) {
+        if (languageCode == null || languageCode.equals("en")) {
+            return false;
+        }
+
+        String hiddenBlock = itineraryRaw.substring(
+                itineraryRaw.toUpperCase(Locale.ROOT).indexOf("HIDDEN_GEMS:")
+        ).toLowerCase(Locale.ROOT);
+
+        return hiddenBlock.contains("local tip:")
+                || hiddenBlock.contains("backstreet cafe")
+                || hiddenBlock.contains("hidden viewpoint")
+                || hiddenBlock.contains("artisan lane");
+    }
+
+    private String buildDefaultHiddenGemsBlock(String destination, String languageCode) {
         String safeDestination = destination == null || destination.isBlank()
                 ? "the destination"
                 : destination.trim();
 
+        if ("ru".equals(languageCode)) {
+            return """
+                    HIDDEN_GEMS:
+                    1. %s тихое кафе в старом квартале - Место вдали от туристического потока, куда чаще заходят местные жители. Местный совет: спросите домашний десерт и фирменный чай.
+                    2. %s скрытая смотровая точка - Спокойное место для закатных фото без толпы на главной площади. Местный совет: приходите ближе к вечеру и наденьте удобную обувь.
+                    3. %s переулок ремесленников - Маленькие мастерские и локальные дизайнерские лавки с настоящим характером города. Местный совет: спросите у мастеров, какую соседнюю улицу они советуют увидеть.
+                    """.formatted(safeDestination, safeDestination, safeDestination).trim();
+        }
+
+        if ("en".equals(languageCode)) {
+            return """
+                    HIDDEN_GEMS:
+                    1. %s backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.
+                    2. %s hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.
+                    3. %s artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.
+                    """.formatted(safeDestination, safeDestination, safeDestination).trim();
+        }
+
         return """
                 HIDDEN_GEMS:
-                1. %s backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.
-                2. %s hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.
-                3. %s artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.
+                1. %s sakit məhəllə kafesi - Turist axınından uzaq, yerli sakinlərin seçdiyi isti və rahat dayanacaq. Yerli məsləhət: ev şirniyyatını və yerli çayı soruşun.
+                2. %s gizli mənzərə nöqtəsi - Gün batımında şəhəri izdihamsız görmək üçün az tanınan panorama nöqtəsi. Yerli məsləhət: axşamüstü gedin və rahat ayaqqabı geyinin.
+                3. %s sənətkarlar keçidi - Kiçik emalatxanalar və yerli dizayn dükanları ilə daha orijinal küçə. Yerli məsləhət: ustalardan yaxınlıqdakı sakit küçə tövsiyəsini istəyin.
                 """.formatted(safeDestination, safeDestination, safeDestination).trim();
     }
 

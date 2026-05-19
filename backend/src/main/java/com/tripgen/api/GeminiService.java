@@ -25,11 +25,27 @@ public class GeminiService implements TripPlanProvider {
         return generateAzerbaijani(context);
     }
 
-    private void appendHiddenGemsBlock(StringBuilder itinerary, String destination) {
-        itinerary.append("\nHIDDEN_GEMS:\n")
-                .append("1. ").append(destination).append(" backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.\n")
-                .append("2. ").append(destination).append(" hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.\n")
-                .append("3. ").append(destination).append(" artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.\n");
+    private void appendHiddenGemsBlock(StringBuilder itinerary, TripRequestContext context) {
+        String destination = context.getDestination();
+        itinerary.append("\nHIDDEN_GEMS:\n");
+
+        if (context.getLanguageCode().equals("ru")) {
+            itinerary.append("1. ").append(destination).append(" тихое кафе в старом квартале - Место вдали от туристического потока, куда чаще заходят местные жители. Местный совет: спросите домашний десерт и фирменный чай.\n")
+                    .append("2. ").append(destination).append(" скрытая смотровая точка - Спокойное место для закатных фото без толпы на главной площади. Местный совет: приходите ближе к вечеру и наденьте удобную обувь.\n")
+                    .append("3. ").append(destination).append(" переулок ремесленников - Маленькие мастерские и локальные дизайнерские лавки с настоящим характером города. Местный совет: спросите у мастеров, какую соседнюю улицу они советуют увидеть.\n");
+            return;
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            itinerary.append("1. ").append(destination).append(" backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.\n")
+                    .append("2. ").append(destination).append(" hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.\n")
+                    .append("3. ").append(destination).append(" artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.\n");
+            return;
+        }
+
+        itinerary.append("1. ").append(destination).append(" sakit məhəllə kafesi - Turist axınından uzaq, yerli sakinlərin seçdiyi isti və rahat dayanacaq. Yerli məsləhət: ev şirniyyatını və yerli çayı soruşun.\n")
+                .append("2. ").append(destination).append(" gizli mənzərə nöqtəsi - Gün batımında şəhəri izdihamsız görmək üçün az tanınan panorama nöqtəsi. Yerli məsləhət: axşamüstü gedin və rahat ayaqqabı geyinin.\n")
+                .append("3. ").append(destination).append(" sənətkarlar keçidi - Kiçik emalatxanalar və yerli dizayn dükanları ilə daha orijinal küçə. Yerli məsləhət: ustalardan yaxınlıqdakı sakit küçə tövsiyəsini istəyin.\n");
     }
 
     private String generateAzerbaijani(TripRequestContext context) {
@@ -71,7 +87,7 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
-        appendHiddenGemsBlock(itinerary, destination);
+        appendHiddenGemsBlock(itinerary, context);
 
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)
@@ -113,7 +129,7 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
-        appendHiddenGemsBlock(itinerary, destination);
+        appendHiddenGemsBlock(itinerary, context);
 
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)
@@ -155,7 +171,7 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
-        appendHiddenGemsBlock(itinerary, destination);
+        appendHiddenGemsBlock(itinerary, context);
 
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)

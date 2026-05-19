@@ -52,6 +52,7 @@ public class OpenAiService implements TripPlanProvider {
                 2. Place name - why this lesser-known local spot is special. Local tip: what to taste or do there.
                 3. Place name - why this lesser-known local spot is special. Local tip: what to taste or do there.
                 Choose 3 genuinely local hidden gems such as a quiet cafe, hidden street, underrated viewpoint, artisan corner, or secret cultural stop.
+                IMPORTANT: Write every place name, description and local tip inside HIDDEN_GEMS in the user's selected language (%s). If the language is AZ, use only Azerbaijani; if RU, use only Russian; if EN, use only English.
                 At the end, add exactly one line with 3-4 English Pexels search keywords:
                 IMAGE_KEYWORDS: Paris cafe, Eiffel Tower night, Louvre museum, Seine river
 
@@ -60,6 +61,7 @@ public class OpenAiService implements TripPlanProvider {
                 context.getDestination(),
                 context.getDays(),
                 context.getBudgetType(),
+                context.getLanguageCode().toUpperCase(),
                 context.getLanguageInstruction()
         );
     }
