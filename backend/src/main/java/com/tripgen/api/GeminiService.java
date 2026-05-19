@@ -82,9 +82,11 @@ public class GeminiService implements TripPlanProvider {
         }
 
         if (context.getLanguageCode().equals("en")) {
-            return "IMPORTANT: The user wants this trip specifically in these tourism styles: "
+            return "CRITICAL INSTRUCTION: The user has strictly customized this trip for the following travel styles: "
                     + selectedTypes
-                    + ". If Concert Tourism is listed, highlight famous concert halls and live music venues in the city. If Gastronomic Tourism is selected, prioritize local flavors, markets and restaurants. Fully personalize the plan around the selected types.";
+                    + ". You MUST transform the entire itinerary configuration based on these styles. For example, if \"Romantik turizm\" is selected, the daily schedule must strictly prioritize romantic viewpoints, elegant dining, scenic walks, and couples' activities in "
+                    + context.getDestination()
+                    + ", completely shifting the tone away from standard mass tourism. If \"Konsert turizmi\" is selected, the plan must foreground concert halls, live music venues, evening performances, and music neighborhoods. If \"Qastronomik turizm\" is selected, the plan must prioritize local flavors, markets, food halls, tasting menus, and restaurants. Do not treat these styles as optional metadata; make them the main itinerary logic.";
         }
 
         return "DİQQƏT: İstifadəçi bu səyahəti xüsusi olaraq bu turizm üslublarında keçirmək istəyir: "
@@ -106,6 +108,123 @@ public class GeminiService implements TripPlanProvider {
         }
 
         return " Marşrut seçilən turizm stillərinə uyğunlaşdırılıb: " + context.getSelectedTypes() + ".";
+    }
+
+    private boolean selectedTypesContain(TripRequestContext context, String... needles) {
+        if (!context.hasSelectedTypes()) {
+            return false;
+        }
+
+        String selectedTypes = context.getSelectedTypes().toLowerCase(Locale.ROOT);
+        for (String needle : needles) {
+            if (selectedTypes.contains(needle.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String[] customizeDayPool(String[] defaultPool, TripRequestContext context) {
+        String destination = context.getDestination();
+
+        if (selectedTypesContain(context, "Romantik", "Romantic", "Романтичес")) {
+            return switch (context.getLanguageCode()) {
+                case "en" -> new String[] {
+                        "Begin with a slow breakfast in a charming cafe, then visit a romantic viewpoint over " + destination + ". Reserve an elegant dinner table with a landmark or river view.",
+                        "Plan a couples' museum or garden walk, a boutique chocolate or pastry stop, and an evening scenic walk through softly lit streets.",
+                        "Choose a private photo spot, a quiet riverside promenade or boat ride, and finish with live piano, jazz or a candlelit dining experience.",
+                        "Spend the day around hidden courtyards, flower markets and intimate wine bars, keeping the pace slow and elegant.",
+                        "Take a short romantic escape outside the center, then return for sunset views and a refined local restaurant.",
+                        "Build a memory-focused route: handwritten postcard stop, artisan gift shop, dessert tasting and night city lights.",
+                        "Close with brunch, a favorite-viewpoint revisit, relaxed shopping for a meaningful gift and smooth airport transfer."
+                };
+                case "ru" -> new String[] {
+                        "Начните с неспешного завтрака в уютном кафе, затем выберите романтическую смотровую точку в " + destination + " и завершите день элегантным ужином с красивым видом.",
+                        "Запланируйте прогулку для пары по саду или музею, остановку за десертом и вечерний маршрут по мягко освещенным улицам.",
+                        "Добавьте приватную фотолокацию, прогулку у воды или вечернюю поездку на лодке, а затем ужин с живой музыкой.",
+                        "Проведите день в скрытых двориках, цветочных лавках и камерных винных барах с медленным романтическим темпом.",
+                        "Сделайте короткий романтический выезд за пределы центра, вернитесь к закату и выберите изысканный местный ресторан.",
+                        "Маршрут для воспоминаний: открытка, мастерская подарков, дегустация десертов и ночные огни города.",
+                        "Завершите поездку бранчем, повторным визитом к любимой панораме, покупкой символичного подарка и спокойным трансфером."
+                };
+                default -> new String[] {
+                        destination + " üçün günə zərif kafedə sakit səhər yeməyi ilə başlayın, sonra romantik mənzərə nöqtəsinə gedin və axşamı şəhər və ya çay mənzərəli eleqant restoranda tamamlayın.",
+                        "Cütlüklər üçün bağ, muzey və ya sakit qalereya gəzintisi planlayın, ardınca desert dayanacağı və yumşaq işıqlı küçələrdə axşam gəzintisi edin.",
+                        "Gizli foto nöqtəsi, su kənarında promenade və ya axşam qayıq gəzintisi seçin, günü canlı piano, caz və ya şam işığında yeməklə bitirin.",
+                        "Günü gizli həyətlər, çiçək dükanları və butik şərab barları ətrafında yavaş və romantik tempdə qurun.",
+                        "Mərkəzdən qısa romantik qaçış edin, gün batımı mənzərəsinə qayıdın və zərif yerli restoran seçin.",
+                        "Xatirə yönümlü marşrut qurun: açıqca dayanacağı, sənətkar hədiyyə dükanı, desert dadımı və gecə şəhər işıqları.",
+                        "Səyahəti brunch, sevimli mənzərə nöqtəsinə qayıdış, mənalı hədiyyə alış-verişi və rahat transferlə tamamlayın."
+                };
+            };
+        }
+
+        if (selectedTypesContain(context, "Qastronomik", "Gastronomic", "Гастроном")) {
+            return switch (context.getLanguageCode()) {
+                case "en" -> new String[] {
+                        "Start with a local market and bakery route, then choose a classic neighborhood restaurant for signature dishes.",
+                        "Build the day around food halls, specialty coffee, a cooking class or tasting menu, and a relaxed dinner.",
+                        "Visit an artisan cheese, chocolate or spice stop, then add a street-food walk and a chef-led restaurant.",
+                        "Explore hidden local eateries, family-run cafes and a late dessert bar.",
+                        "Take a short food-focused day trip near " + destination + " and return for a seasonal dinner.",
+                        "Shop for edible souvenirs, visit gourmet stores and compare two local dessert spots.",
+                        "Finish with brunch, a favorite market revisit and a light farewell meal."
+                };
+                case "ru" -> new String[] {
+                        "Начните с местного рынка и пекарни, затем выберите ресторан района с фирменными блюдами.",
+                        "Постройте день вокруг фуд-холлов, specialty coffee, кулинарного мастер-класса или дегустационного меню.",
+                        "Добавьте ремесленный сыр, шоколад или специи, затем прогулку по стрит-фуду и ресторан от шефа.",
+                        "Исследуйте скрытые локальные закусочные, семейные кафе и поздний десерт-бар.",
+                        "Сделайте короткую гастрономическую поездку рядом с " + destination + " и вернитесь на сезонный ужин.",
+                        "Купите съедобные сувениры, зайдите в гастролавки и сравните два местных десерта.",
+                        "Завершите бранчем, повторным визитом на любимый рынок и легким прощальным ужином."
+                };
+                default -> new String[] {
+                        "Günə yerli bazar və çörəkçi marşrutu ilə başlayın, sonra imza yeməkləri olan məhəllə restoranı seçin.",
+                        "Günü food hall, specialty coffee, kulinariya master-klası və ya dadım menyusu ətrafında qurun.",
+                        "Sənətkar pendir, şokolad və ya ədviyyat dayanacağı əlavə edin, ardınca street-food gəzintisi və chef restoranı seçin.",
+                        "Gizli yerli yeməkxanalar, ailə kafeləri və gec desert barı kəşf edin.",
+                        destination + " yaxınlığında qısa qastronomik günlük tur edin və mövsümi axşam yeməyinə qayıdın.",
+                        "Yeməli suvenirlər alın, gourmet mağazalara baş çəkin və iki yerli desert məkanını müqayisə edin.",
+                        "Səyahəti brunch, sevimli bazara qayıdış və yüngül vida yeməyi ilə tamamlayın."
+                };
+            };
+        }
+
+        if (selectedTypesContain(context, "Konsert", "Concert", "Концерт")) {
+            return switch (context.getLanguageCode()) {
+                case "en" -> new String[] {
+                        "Plan the day around the city's best-known concert hall, nearby dinner and an evening live performance.",
+                        "Visit music-related streets or record shops, then choose a jazz, classical or indie live venue.",
+                        "Keep daytime sightseeing light and reserve energy for a headline concert, opera house or acoustic night.",
+                        "Explore cultural neighborhoods with small stages, late cafes and local musicians.",
+                        "Add a relaxed morning, venue tour or music museum, then an evening show.",
+                        "Shop for music souvenirs and plan a second live-music stop.",
+                        "Close with brunch near a favorite venue and a smooth transfer."
+                };
+                case "ru" -> new String[] {
+                        "Постройте день вокруг известного концертного зала города, ужина рядом и вечернего выступления.",
+                        "Посетите музыкальные улицы или магазины пластинок, затем выберите джазовую, классическую или indie-сцену.",
+                        "Днем оставьте легкие достопримечательности, а вечер посвятите концерту, опере или акустическому вечеру.",
+                        "Исследуйте культурные районы с камерными сценами, поздними кафе и местными музыкантами.",
+                        "Добавьте спокойное утро, тур по площадке или музыкальный музей, затем вечернее шоу.",
+                        "Купите музыкальные сувениры и запланируйте вторую live-music остановку.",
+                        "Завершите бранчем рядом с любимой площадкой и спокойным трансфером."
+                };
+                default -> new String[] {
+                        "Günü şəhərin məşhur konsert zalı, yaxınlıqda axşam yeməyi və canlı performans ətrafında qurun.",
+                        "Musiqi ilə bağlı küçələrə və ya vinil mağazalarına baş çəkin, sonra caz, klassik və ya indie canlı səhnə seçin.",
+                        "Gündüz proqramını yüngül saxlayın və axşamı əsas konsert, opera zalı və ya akustik gecəyə ayırın.",
+                        "Kiçik səhnələr, gec kafelər və yerli musiqiçilərlə tanınan mədəni məhəllələri kəşf edin.",
+                        "Sakit səhər, konsert məkanı turu və ya musiqi muzeyi əlavə edin, sonra axşam şousuna gedin.",
+                        "Musiqi suvenirləri alın və ikinci canlı musiqi dayanacağı planlayın.",
+                        "Səyahəti sevimli səhnəyə yaxın brunch və rahat transferlə tamamlayın."
+                };
+            };
+        }
+
+        return defaultPool;
     }
 
     private String generateAzerbaijani(TripRequestContext context) {
@@ -132,7 +251,7 @@ public class GeminiService implements TripPlanProvider {
 
         boolean isIstanbul = context.getNormalizedDestination().contains("istanbul")
                 || destination.toLowerCase(Locale.ROOT).contains("i̇stanbul");
-        String[] dayPool = isIstanbul ? istanbulDays : genericDays;
+        String[] dayPool = customizeDayPool(isIstanbul ? istanbulDays : genericDays, context);
         String tourismStyleNote = tourismStyleNote(context);
 
         StringBuilder itinerary = new StringBuilder();
@@ -177,6 +296,7 @@ public class GeminiService implements TripPlanProvider {
                 "Souvenir shopping, dessert stop, public transport route and final photo locations.",
                 "Slow brunch, favorite places revisit, packing time and airport transfer."
         };
+        dayPool = customizeDayPool(dayPool, context);
 
         StringBuilder itinerary = new StringBuilder();
         itinerary.append("TripGen AI Plan").append("\n");
@@ -222,6 +342,8 @@ public class GeminiService implements TripPlanProvider {
                 "Покупка сувениров, остановка на десерт, маршрут на общественном транспорте и финальные фото-точки.",
                 "Поздний завтрак, повтор любимых мест, время на сборы и трансфер в аэропорт."
         };
+
+        dayPool = customizeDayPool(dayPool, context);
 
         StringBuilder itinerary = new StringBuilder();
         itinerary.append("План TripGen AI").append("\n");

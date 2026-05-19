@@ -1553,7 +1553,7 @@
         function getSelectedTourismTypeLabels() {
             return tourismTypeDefinitions
                 .filter(type => selectedTourismTypes.includes(type.key))
-                .map(type => `${type.emoji} ${getTourismTypeLabel(type.key)}`);
+                .map(type => getTourismTypeLabel(type.key));
         }
 
         function changeLanguage(lang) {
@@ -2374,6 +2374,10 @@
                 authToken: getCurrentAuthToken(),
                 lang: currentLang
             };
+            console.log('[TRIP_SELECTED_TYPES]', {
+                selectedTypeKeys: selectedTourismTypes,
+                selectedTypes: payload.selectedTypes
+            });
 
             if (!GUEST_TRIP_GENERATION_ENABLED && (!payload.userId || !payload.authToken)) {
                 resetGoogleMap();
