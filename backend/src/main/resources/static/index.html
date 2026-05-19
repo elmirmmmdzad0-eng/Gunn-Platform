@@ -235,6 +235,19 @@
         .google-map-head span { color: var(--muted); font-size: 12px; font-weight: 800; text-align: right; }
         #google-map-container, .google-map-container { display: block; width: 100% !important; clear: both; height: 400px; border-radius: 16px; background: #d9e3ef; position: relative; overflow: hidden; box-shadow: 0 18px 38px rgba(14, 30, 56, 0.18); }
         .google-map-frame { display: block; width: 100%; height: 400px; border: 0; border-radius: 16px; background: #d9e3ef; transition: opacity 0.25s ease; }
+        .hidden-gems-section { position: relative; overflow: hidden; display: grid; gap: 14px; margin: 0 0 18px; padding: 18px; border-radius: 16px; color: #ffffff; background: linear-gradient(135deg, rgba(14, 30, 56, 0.98), rgba(45, 28, 81, 0.94) 54%, rgba(10, 25, 47, 0.98)); border: 1px solid rgba(254, 187, 2, 0.58); box-shadow: 0 18px 44px rgba(14, 30, 56, 0.22), 0 0 0 1px rgba(139, 92, 246, 0.24), 0 0 28px rgba(139, 92, 246, 0.18); }
+        .hidden-gems-section::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--accent), rgba(139, 92, 246, 0.95), rgba(66, 133, 244, 0.92)); }
+        .hidden-gems-head { position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+        .hidden-gems-title { margin: 0; color: #ffffff; font-size: 18px; font-weight: 900; line-height: 1.25; }
+        .hidden-gems-kicker { color: #fde68a; font-size: 11px; font-weight: 900; letter-spacing: 0; text-transform: uppercase; white-space: nowrap; }
+        .hidden-gems-grid { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+        .hidden-gem-card { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: flex-start; min-height: 150px; padding: 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+        .hidden-gem-index { width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; background: var(--accent); color: #0e1e38; font-size: 12px; font-weight: 900; box-shadow: 0 10px 24px rgba(254, 187, 2, 0.22); }
+        .hidden-gem-body { display: grid; gap: 8px; min-width: 0; }
+        .hidden-gem-body strong { color: #ffffff; font-size: 14px; line-height: 1.35; }
+        .hidden-gem-body p { margin: 0; color: rgba(255, 255, 255, 0.82); font-size: 13px; line-height: 1.5; }
+        .hidden-gem-tip { display: flex; align-items: flex-start; gap: 7px; color: #fde68a; font-size: 12px; font-weight: 800; line-height: 1.45; }
+        .hidden-gem-tip i { margin-top: 2px; color: var(--accent); }
         .itinerary-meta { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
         .itinerary-day-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
         .itinerary-day-number { width: 42px; height: 42px; border-radius: 8px; display: grid; place-items: center; background: var(--primary-strong); color: white; font-weight: 900; flex: 0 0 auto; box-shadow: var(--shadow); }
@@ -488,6 +501,42 @@
             .google-map-frame {
                 height: 260px;
                 border-radius: 16px;
+            }
+
+            .hidden-gems-section {
+                padding: 14px;
+                margin-bottom: 14px;
+                border-radius: 14px;
+            }
+
+            .hidden-gems-head {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .hidden-gems-title {
+                font-size: 16px;
+            }
+
+            .hidden-gems-kicker {
+                white-space: normal;
+            }
+
+            .hidden-gems-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .hidden-gem-card {
+                grid-template-columns: 34px 1fr;
+                min-height: 0;
+                padding: 12px;
+            }
+
+            .hidden-gem-index {
+                width: 34px;
+                height: 34px;
             }
 
             .itinerary-card {
@@ -1637,6 +1686,168 @@
             `;
         }
 
+        function parseHiddenGemLine(line) {
+            const cleaned = normalizeText(line)
+                .replace(/^[\s\-\u2022]+/, '')
+                .replace(/^\d+\s*[\).\:-]\s*/, '')
+                .trim();
+
+            if (!cleaned) return null;
+
+            const separatorMatch = cleaned.match(/\s[-\u2013\u2014]\s|:\s/);
+            let name = cleaned;
+            let detail = '';
+
+            if (separatorMatch) {
+                name = cleaned.slice(0, separatorMatch.index).trim();
+                detail = cleaned.slice(separatorMatch.index + separatorMatch[0].length).trim();
+            }
+
+            let description = detail;
+            let tip = '';
+            const tipMatch = detail.match(/\b(?:local tip|insider tip|pro tip|tip|yerli tip)\s*:\s*(.+)$/i);
+            if (tipMatch) {
+                tip = tipMatch[1].trim();
+                description = detail.slice(0, tipMatch.index).replace(/[.;,\s]+$/, '').trim();
+            }
+
+            if (!name) return null;
+            return { name, description, tip };
+        }
+
+        function normalizeHiddenGemEntry(entry) {
+            if (!entry) return null;
+
+            if (typeof entry === 'string') {
+                return parseHiddenGemLine(entry);
+            }
+
+            if (typeof entry !== 'object') {
+                return null;
+            }
+
+            const name = normalizeText(entry.name || entry.title || entry.place || entry.location);
+            const description = normalizeText(entry.description || entry.short_description || entry.shortDescription || entry.why || entry.reason || entry.about);
+            const tip = normalizeText(entry.local_tip || entry.localTip || entry.tip || entry.what_to_do || entry.whatToDo);
+
+            if (name) {
+                return { name, description, tip };
+            }
+
+            const textFallback = Object.values(entry)
+                .filter(value => typeof value === 'string')
+                .join(' - ');
+            return parseHiddenGemLine(textFallback);
+        }
+
+        function parseHiddenGemsFromText(text) {
+            const lines = (text || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            const startIndex = lines.findIndex(line => /^hidden[\s_-]*gems\s*:/i.test(line) || /local hidden gems/i.test(line));
+            if (startIndex === -1) return [];
+
+            const gems = [];
+            for (let i = startIndex + 1; i < lines.length; i++) {
+                const line = lines[i];
+                const lower = line.toLowerCase();
+
+                if (/^image_keywords\s*:/i.test(line) || lower.startsWith('note:') || lower.startsWith('source:')) {
+                    break;
+                }
+
+                const gem = parseHiddenGemLine(line);
+                if (gem) {
+                    gems.push(gem);
+                }
+
+                if (gems.length >= 3) {
+                    break;
+                }
+            }
+
+            return gems;
+        }
+
+        function collectHiddenGemsFromValue(value) {
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value.map(normalizeHiddenGemEntry).filter(Boolean).slice(0, 3);
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                if (/^[\[{]/.test(trimmed)) {
+                    try {
+                        const parsed = JSON.parse(trimmed);
+                        const fromJson = collectHiddenGemsFromValue(parsed);
+                        if (fromJson.length) return fromJson;
+                    } catch (error) {
+                        console.warn('[HIDDEN_GEMS_JSON_PARSE_SKIPPED]', error.message);
+                    }
+                }
+
+                return parseHiddenGemsFromText(/^hidden[\s_-]*gems\s*:/i.test(trimmed) ? trimmed : `HIDDEN_GEMS:\n${trimmed}`);
+            }
+
+            if (typeof value === 'object') {
+                const nested = value.hidden_gems || value.hiddenGems || value.gems || value.items;
+                if (nested) {
+                    return collectHiddenGemsFromValue(nested);
+                }
+
+                const normalized = normalizeHiddenGemEntry(value);
+                return normalized ? [normalized] : [];
+            }
+
+            return [];
+        }
+
+        function getHiddenGems(data, raw) {
+            const directKeys = [
+                data.hidden_gems,
+                data.hiddenGems,
+                data.hidden_gems_section,
+                data.hiddenGemsSection
+            ];
+
+            for (const source of directKeys) {
+                const gems = collectHiddenGemsFromValue(source);
+                if (gems.length) {
+                    return gems;
+                }
+            }
+
+            return parseHiddenGemsFromText(raw).slice(0, 3);
+        }
+
+        function buildHiddenGemsSection(hiddenGems) {
+            const gems = (hiddenGems || []).filter(gem => gem && gem.name).slice(0, 3);
+            if (!gems.length) return '';
+
+            const cards = gems.map((gem, index) => `
+                <article class="hidden-gem-card">
+                    <span class="hidden-gem-index">0${index + 1}</span>
+                    <div class="hidden-gem-body">
+                        <strong>${escapeHtml(gem.name)}</strong>
+                        <p>${escapeHtml(gem.description || 'A lesser-known local stop selected for a more original route.')}</p>
+                        ${gem.tip ? `<span class="hidden-gem-tip"><i class="fa-solid fa-lightbulb"></i>${escapeHtml(gem.tip)}</span>` : ''}
+                    </div>
+                </article>
+            `).join('');
+
+            return `
+                <div id="hidden-gems-section" class="hidden-gems-section" aria-label="TripGen Secrets Local Hidden Gems">
+                    <div class="hidden-gems-head">
+                        <h3 class="hidden-gems-title">&#128142; TripGen Secrets: Local Hidden Gems</h3>
+                        <span class="hidden-gems-kicker">Local-first picks</span>
+                    </div>
+                    <div class="hidden-gems-grid">${cards}</div>
+                </div>
+            `;
+        }
+
         function renderTripPlan(data) {
             const raw = data.itineraryRaw || '';
             const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
@@ -1644,6 +1855,7 @@
             const dayLines = lines.filter(line => dayPattern.test(line));
             const metaLines = lines.filter(line => !dayPattern.test(line)).slice(0, 3);
             const planImages = getPlanImages(data);
+            const hiddenGems = getHiddenGems(data, raw);
 
             if (dayLines.length === 0) {
                 resetGoogleMap();
@@ -1688,6 +1900,7 @@
                     <div style="margin-top:8px;">${metaLines.map(escapeHtml).join('<br>')}</div>
                 </div>
                 ${buildGoogleMapPanel(mapDestination)}
+                ${buildHiddenGemsSection(hiddenGems)}
                 <div class="itinerary-grid">${cards}</div>
             `;
             initializeItineraryCarousels();

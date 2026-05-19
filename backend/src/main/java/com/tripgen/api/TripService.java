@@ -100,13 +100,45 @@ public class TripService {
     }
 
     private TripResponse toResponse(TripPlan tripPlan) {
+        String itineraryRaw = ensureHiddenGemsBlock(
+                tripPlan.getItineraryRaw(),
+                tripPlan.getDestination()
+        );
+
         return new TripResponse(
                 tripPlan.getId(),
                 tripPlan.getDestination(),
                 tripPlan.getDays(),
-                tripPlan.getItineraryRaw(),
+                itineraryRaw,
                 fromImageUrlsJson(tripPlan.getImageUrlsJson())
         );
+    }
+
+    private String ensureHiddenGemsBlock(String itineraryRaw, String destination) {
+        String cleanItinerary = itineraryRaw == null ? "" : itineraryRaw.trim();
+        if (cleanItinerary.toUpperCase(Locale.ROOT).contains("HIDDEN_GEMS:")) {
+            return cleanItinerary;
+        }
+
+        String hiddenGemsBlock = buildDefaultHiddenGemsBlock(destination);
+        if (cleanItinerary.isBlank()) {
+            return hiddenGemsBlock;
+        }
+
+        return cleanItinerary + "\n\n" + hiddenGemsBlock;
+    }
+
+    private String buildDefaultHiddenGemsBlock(String destination) {
+        String safeDestination = destination == null || destination.isBlank()
+                ? "the destination"
+                : destination.trim();
+
+        return """
+                HIDDEN_GEMS:
+                1. %s backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.
+                2. %s hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.
+                3. %s artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.
+                """.formatted(safeDestination, safeDestination, safeDestination).trim();
     }
 
     private List<String> fetchTargetedImages(TripRequestContext context, List<String> imageKeywords) {

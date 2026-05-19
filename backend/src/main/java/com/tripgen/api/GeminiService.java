@@ -25,6 +25,13 @@ public class GeminiService implements TripPlanProvider {
         return generateAzerbaijani(context);
     }
 
+    private void appendHiddenGemsBlock(StringBuilder itinerary, String destination) {
+        itinerary.append("\nHIDDEN_GEMS:\n")
+                .append("1. ").append(destination).append(" backstreet cafe - A quiet local stop away from the main tourist route. Local tip: ask for the house dessert and sit where locals gather.\n")
+                .append("2. ").append(destination).append(" hidden viewpoint - A calm angle for golden-hour photos without the crowded main square. Local tip: arrive before sunset and bring comfortable shoes.\n")
+                .append("3. ").append(destination).append(" artisan lane - Small workshops and independent makers with more local character than souvenir streets. Local tip: ask makers which nearby street they personally recommend.\n");
+    }
+
     private String generateAzerbaijani(TripRequestContext context) {
         String destination = context.getDestination();
         String[] istanbulDays = {
@@ -63,6 +70,8 @@ public class GeminiService implements TripPlanProvider {
                     .append(dayPool[i])
                     .append("\n");
         }
+
+        appendHiddenGemsBlock(itinerary, destination);
 
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)
@@ -104,6 +113,8 @@ public class GeminiService implements TripPlanProvider {
                     .append("\n");
         }
 
+        appendHiddenGemsBlock(itinerary, destination);
+
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)
                 .append(" landmark, ")
@@ -143,6 +154,8 @@ public class GeminiService implements TripPlanProvider {
                     .append(dayPool[i])
                     .append("\n");
         }
+
+        appendHiddenGemsBlock(itinerary, destination);
 
         itinerary.append("\nIMAGE_KEYWORDS: ")
                 .append(destination)

@@ -46,6 +46,12 @@ public class OpenAiService implements TripPlanProvider {
 
                 Return one line per day in this format:
                 Day 1: hotel/check-in, breakfast, historic place, dinner, transfer note.
+                Before IMAGE_KEYWORDS, add a separate block titled exactly HIDDEN_GEMS:
+                HIDDEN_GEMS:
+                1. Place name - why this lesser-known local spot is special. Local tip: what to taste or do there.
+                2. Place name - why this lesser-known local spot is special. Local tip: what to taste or do there.
+                3. Place name - why this lesser-known local spot is special. Local tip: what to taste or do there.
+                Choose 3 genuinely local hidden gems such as a quiet cafe, hidden street, underrated viewpoint, artisan corner, or secret cultural stop.
                 At the end, add exactly one line with 3-4 English Pexels search keywords:
                 IMAGE_KEYWORDS: Paris cafe, Eiffel Tower night, Louvre museum, Seine river
 
