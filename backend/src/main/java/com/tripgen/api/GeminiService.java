@@ -78,7 +78,7 @@ public class GeminiService implements TripPlanProvider {
                 + context.getSelectedTypes()
                 + ". You MUST transform the entire itinerary configuration based on these styles. For example, if \"Romantik turizm\" is selected, the daily schedule must strictly prioritize romantic viewpoints, elegant dining, scenic walks, and couples' activities in "
                 + context.getDestination()
-                + ", completely shifting the tone away from standard mass tourism. Use specific real places when possible, such as romantic gardens, hidden viewpoints, elegant restaurants, river walks, concert venues, jazz clubs, local markets, and tasting routes that match the selected styles. Do not treat these styles as optional metadata; make them the main itinerary logic.";
+                + ", completely shifting the tone away from standard mass tourism. Use specific real places when possible, such as Giardino degli Aranci, Bar San Calisto, romantic gardens, hidden viewpoints, elegant restaurants, river walks, concert venues, Alexanderplatz Jazz Club-style venues, local markets, and tasting routes that match the selected styles. Do not treat these styles as optional metadata; make them the main itinerary logic.";
     }
 
     private String buildTourismStylePromptDirective(TripRequestContext context) {

@@ -50,23 +50,26 @@ public class DestinationController {
     public Map<String, String> analyzeTrip(
             @RequestParam String city,
             @RequestParam String status,
-            @RequestParam(defaultValue = "AZN") String currency) {
-        return callGemini(city, status, currency);
+            @RequestParam(defaultValue = "AZN") String currency,
+            @RequestParam(defaultValue = "") String selectedTypes) {
+        return callGemini(city, status, currency, selectedTypes);
     }
 
     @GetMapping
     public Map<String, String> getTripPlan(
             @RequestParam String destination,
             @RequestParam(defaultValue = "3") int days,
-            @RequestParam(defaultValue = "AZN") String currency) {
-        return callGemini(destination, "Tələbə", currency);
+            @RequestParam(defaultValue = "AZN") String currency,
+            @RequestParam(defaultValue = "") String selectedTypes) {
+        return callGemini(destination, "Tələbə", currency, selectedTypes);
     }
 
-    private Map<String, String> callGemini(String city, String status, String currency) {
+    private Map<String, String> callGemini(String city, String status, String currency, String selectedTypes) {
         String cleanCity = cleanInput(city);
         String cleanStatus = cleanInput(status);
         String cleanCurrency = cleanCurrency(currency);
-        String cacheKey = buildCacheKey(cleanCity, cleanStatus, cleanCurrency);
+        String cleanSelectedTypes = cleanSelectedTypes(selectedTypes);
+        String cacheKey = buildCacheKey(cleanCity, cleanStatus, cleanCurrency, cleanSelectedTypes);
 
         Map<String, String> cachedResponse = getCachedResponse(cacheKey);
         if (cachedResponse != null) {
@@ -76,13 +79,14 @@ public class DestinationController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("city", cleanCity);
         responseMap.put("currency", cleanCurrency);
+        responseMap.put("selectedTypes", cleanSelectedTypes);
 
         if (apiKey == null || apiKey.trim().isEmpty()) {
             return errorResponse(cleanCity, "API açarı tapılmadı. Server konfiqurasiyasını yoxlayın.");
         }
 
         try {
-            String prompt = buildPrompt(cleanCity, cleanStatus, cleanCurrency);
+            String prompt = buildPrompt(cleanCity, cleanStatus, cleanCurrency, cleanSelectedTypes);
             String rawResponse = restTemplate.postForObject(
                     URI.create(GEMINI_URL),
                     new HttpEntity<>(buildGeminiRequest(prompt), buildHeaders()),
@@ -130,18 +134,31 @@ public class DestinationController {
         tripCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now));
     }
 
-    private String buildPrompt(String city, String status, String currency) {
+    private String buildPrompt(String city, String status, String currency, String selectedTypes) {
         return """
                 Azərbaycanlı səyahətçi üçün qısa plan hazırla.
                 Şəhər: %s. Status: %s.
                 Bütün otel, viza, yemək və nəqliyyat qiymətlərini tam olaraq %s valyutası ilə hesabla və cavabda qiymətlərin yanına bu valyutanı yaz.
+                %s
                 Yalnız bu formatda cavab ver, əlavə mətn yazma:
                 HOTEL: 2-3 uyğun otel/ərazi tövsiyəsi
                 VISA: viza/e-viza/vizasız məlumatı
                 TICKET: təxmini bilet qiyməti və məsləhət
                 HACKS: 3 qısa səyahət məsləhəti
                 PACKING: 5 vacib əşya
-                """.formatted(city, status, currency);
+                """.formatted(city, status, currency, buildSelectedTypesInstruction(city, selectedTypes));
+    }
+
+    private String buildSelectedTypesInstruction(String city, String selectedTypes) {
+        if (selectedTypes == null || selectedTypes.isBlank()) {
+            return "Səyahət stili seçilməyib: balanslı, ümumi faydalı plan hazırla.";
+        }
+
+        return "CRITICAL INSTRUCTION: The user has strictly customized this trip for the following travel styles: "
+                + selectedTypes
+                + ". You MUST transform HOTEL, HACKS, food, area and experience recommendations based on these styles. If \"Romantik turizm\" is selected for "
+                + city
+                + ", prioritize romantic viewpoints, elegant dining, scenic walks, couples' activities and specific real local places such as Giardino degli Aranci, Bar San Calisto, river/sunset promenades, hidden gardens, candlelit restaurants and intimate viewpoints where relevant to the destination. If \"Konsert turizmi\" is selected, include real concert halls, live music venues and jazz clubs such as Alexanderplatz Jazz Club-style places where relevant. If \"Qastronomik turizm\" is selected, include local markets, tasting routes, neighborhood restaurants and signature dishes. Do not return generic mass-tourism advice.";
     }
 
     private HttpHeaders buildHeaders() {
@@ -210,8 +227,11 @@ public class DestinationController {
         }
     }
 
-    private String buildCacheKey(String city, String status, String currency) {
-        return normalizeForCache(city) + "::" + normalizeForCache(status) + "::" + normalizeForCache(currency);
+    private String buildCacheKey(String city, String status, String currency, String selectedTypes) {
+        return normalizeForCache(city)
+                + "::" + normalizeForCache(status)
+                + "::" + normalizeForCache(currency)
+                + "::" + normalizeForCache(selectedTypes);
     }
 
     private String normalizeForCache(String value) {
@@ -225,6 +245,13 @@ public class DestinationController {
         }
 
         return value.trim().replaceAll("\\s+", " ");
+    }
+
+    private String cleanSelectedTypes(String value) {
+        String cleaned = cleanInput(value)
+                .replaceAll("[\\r\\n]+", " ")
+                .replaceAll("\\s+", " ");
+        return cleaned.length() > 600 ? cleaned.substring(0, 600).trim() : cleaned;
     }
 
     private String cleanCurrency(String value) {

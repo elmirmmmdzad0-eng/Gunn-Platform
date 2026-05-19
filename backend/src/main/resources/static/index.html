@@ -2569,7 +2569,7 @@
                 renderTripPlan(tripData);
 
                 try {
-                    const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
+                    const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}&selectedTypes=${encodeURIComponent(selectedTypes)}`);
                     if (!response.ok) {
                         throw new Error(t('httpError', { status: response.status }));
                     }
