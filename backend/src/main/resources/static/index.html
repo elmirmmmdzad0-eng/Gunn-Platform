@@ -114,6 +114,10 @@
         .tourism-type-card.is-selected { border-color: rgba(254, 187, 2, 0.92); background: rgba(254, 187, 2, 0.16); box-shadow: 0 0 0 1px rgba(254, 187, 2, 0.34), 0 0 22px rgba(254, 187, 2, 0.28); }
         .tourism-type-emoji { flex: 0 0 auto; font-size: 19px; line-height: 1; }
         .tourism-type-label { font-size: 12px; }
+        .mobile-ai-companion,
+        .mobile-showcase {
+            display: none;
+        }
 
         /* Cards & Cards Content */
         .side-card, .content-card, .hotel-card, .ticket-card, .visa-alert, .toast-error { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
@@ -175,6 +179,9 @@
         body.dark-mode .skeleton-line.title { background: #33445f; }
         body.dark-mode .skeleton-card::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
         @keyframes wave { 100% { transform: translateX(100%); } }
+        @keyframes premiumGlow { 0%, 100% { box-shadow: 0 0 0 rgba(254, 187, 2, 0), 0 14px 36px rgba(0, 53, 128, 0.28); } 50% { box-shadow: 0 0 24px rgba(254, 187, 2, 0.46), 0 18px 50px rgba(0, 53, 128, 0.42); } }
+        @keyframes companionPulse { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.74; } 50% { transform: translate3d(8px, -6px, 0) scale(1.04); opacity: 1; } }
+        @keyframes routeLineFlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
         /* Auth Modal */
         .auth-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -318,7 +325,10 @@
 
         @media (max-width: 768px) {
             .hero {
-                background: #071326;
+                background:
+                    radial-gradient(circle at 18% 12%, rgba(254, 187, 2, 0.18), transparent 28%),
+                    radial-gradient(circle at 90% 8%, rgba(37, 99, 235, 0.22), transparent 32%),
+                    linear-gradient(155deg, #050b16 0%, #0a1527 48%, #141923 100%);
                 padding: 22px 16px 34px;
             }
 
@@ -334,7 +344,7 @@
             }
 
             .ambient-video-overlay {
-                background: rgba(7, 19, 38, 0.86);
+                background: linear-gradient(180deg, rgba(5, 11, 22, 0.78), rgba(7, 19, 38, 0.9));
             }
 
             .hero-inner {
@@ -401,6 +411,7 @@
                 font-size: 1.6rem;
                 line-height: 1.16;
                 max-width: 100%;
+                letter-spacing: 0;
             }
 
             .hero p {
@@ -410,37 +421,164 @@
                 line-height: 1.55;
             }
 
+            .mobile-ai-companion {
+                display: block;
+                position: relative;
+                margin: 18px 0 16px;
+                padding: 16px;
+                border: 1px solid rgba(254, 187, 2, 0.28);
+                border-radius: 18px;
+                background: linear-gradient(145deg, rgba(9, 20, 38, 0.78), rgba(17, 24, 39, 0.62));
+                box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                backdrop-filter: blur(16px);
+                overflow: hidden;
+            }
+
+            .mobile-ai-companion::before {
+                content: "";
+                position: absolute;
+                width: 160px;
+                height: 160px;
+                right: -72px;
+                top: -70px;
+                border-radius: 999px;
+                background: radial-gradient(circle, rgba(254, 187, 2, 0.32), transparent 68%);
+                animation: companionPulse 5s ease-in-out infinite;
+            }
+
+            .companion-kicker,
+            .mobile-section-kicker {
+                color: #febb02;
+                font-size: 10px;
+                font-weight: 900;
+                letter-spacing: 0;
+                text-transform: uppercase;
+            }
+
+            .companion-title {
+                margin: 6px 0 6px;
+                color: #ffffff;
+                font-size: 20px;
+                line-height: 1.18;
+                font-weight: 900;
+            }
+
+            .companion-subtitle {
+                margin: 0;
+                color: rgba(226, 232, 240, 0.78);
+                font-size: 12px;
+                line-height: 1.45;
+            }
+
+            .companion-route {
+                position: relative;
+                display: grid;
+                gap: 10px;
+                margin-top: 14px;
+            }
+
+            .companion-route::before {
+                content: "";
+                position: absolute;
+                left: 24px;
+                top: 18px;
+                bottom: 18px;
+                width: 2px;
+                background: linear-gradient(180deg, rgba(254, 187, 2, 0.1), rgba(254, 187, 2, 0.86), rgba(59, 130, 246, 0.7));
+            }
+
+            .companion-stop {
+                position: relative;
+                display: grid;
+                grid-template-columns: 48px 1fr;
+                gap: 10px;
+                align-items: center;
+                min-height: 68px;
+                padding: 9px;
+                border: 1px solid rgba(255, 255, 255, 0.11);
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.07);
+                backdrop-filter: blur(12px);
+            }
+
+            .companion-stop img {
+                width: 48px;
+                height: 48px;
+                object-fit: cover;
+                border-radius: 12px;
+                box-shadow: 0 0 0 1px rgba(254, 187, 2, 0.3), 0 8px 22px rgba(0, 0, 0, 0.25);
+            }
+
+            .companion-stop small {
+                display: block;
+                color: #fbbf24;
+                font-size: 10px;
+                font-weight: 900;
+                text-transform: uppercase;
+            }
+
+            .companion-stop strong {
+                display: block;
+                color: #ffffff;
+                font-size: 13px;
+                line-height: 1.25;
+            }
+
+            .companion-stop span {
+                display: block;
+                margin-top: 2px;
+                color: rgba(226, 232, 240, 0.72);
+                font-size: 11px;
+                line-height: 1.3;
+            }
+
             .search-panel {
                 display: flex;
                 flex-direction: column;
-                gap: 3px;
-                margin-top: 22px;
-                border-width: 3px;
-                border-radius: 8px;
+                gap: 10px;
+                margin-top: 14px;
+                border: 1px solid rgba(254, 187, 2, 0.28);
+                background: rgba(8, 17, 31, 0.7);
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                backdrop-filter: blur(18px);
                 overflow: visible;
             }
 
             .search-field {
                 min-height: 60px;
-                padding: 10px 12px;
+                padding: 11px 12px;
                 gap: 10px;
+                background: rgba(255, 255, 255, 0.08);
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
                 border-right: 0;
-                border-bottom: 3px solid var(--accent);
-                border-radius: 5px;
+                border-bottom: 1px solid rgba(254, 187, 2, 0.16);
+                border-radius: 14px;
+                backdrop-filter: blur(12px);
             }
 
             .search-field i {
                 font-size: 17px;
+                color: #febb02;
             }
 
             .search-field small {
                 font-size: 10px;
                 margin-bottom: 1px;
+                color: rgba(226, 232, 240, 0.64);
             }
 
             .search-field input,
             .search-field select {
                 font-size: 14px;
+                color: #ffffff;
+            }
+
+            .search-field select option {
+                color: #162033;
+                background: #ffffff;
             }
 
             .budget-search-field {
@@ -453,6 +591,7 @@
 
             .budget-amount {
                 font-size: 15px;
+                color: #ffffff;
             }
 
             .budget-range {
@@ -462,18 +601,26 @@
             .search-button {
                 min-height: 52px;
                 padding: 0 16px;
-                border-radius: 5px;
+                border-radius: 14px;
                 justify-content: center;
+                background: linear-gradient(135deg, #febb02, #2563eb);
+                color: #06101f;
+                box-shadow: 0 18px 40px rgba(37, 99, 235, 0.28);
+                animation: premiumGlow 3.8s ease-in-out infinite;
             }
 
             .tourism-style-panel {
                 margin-top: 12px;
-                border-radius: 12px;
+                border-radius: 18px;
+                border-color: rgba(254, 187, 2, 0.26);
+                background: rgba(8, 17, 31, 0.72);
+                box-shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
             }
 
             .tourism-style-toggle {
                 min-height: 54px;
                 padding: 12px;
+                background: rgba(255, 255, 255, 0.06);
             }
 
             .tourism-style-toggle strong {
@@ -496,6 +643,36 @@
                 padding: 10px;
             }
 
+            .selected-style-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 7px;
+                padding: 10px 0 12px;
+            }
+
+            .selected-style-tag,
+            .selected-style-placeholder {
+                display: inline-flex;
+                align-items: center;
+                min-height: 28px;
+                border-radius: 999px;
+                padding: 0 10px;
+                font-size: 11px;
+                font-weight: 900;
+            }
+
+            .selected-style-tag {
+                border: 1px solid rgba(254, 187, 2, 0.54);
+                background: rgba(254, 187, 2, 0.16);
+                color: #fff7d6;
+                box-shadow: 0 0 18px rgba(254, 187, 2, 0.14);
+            }
+
+            .selected-style-placeholder {
+                border: 1px dashed rgba(255, 255, 255, 0.2);
+                color: rgba(226, 232, 240, 0.68);
+            }
+
             .tourism-types-grid {
                 grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
                 gap: 8px;
@@ -504,6 +681,7 @@
             .tourism-type-card {
                 min-height: 50px;
                 padding: 9px;
+                background: rgba(255, 255, 255, 0.07);
             }
 
             .tourism-type-label {
@@ -511,9 +689,175 @@
             }
 
             .layout {
-                margin-top: 24px;
+                background: linear-gradient(180deg, #090f1b 0%, #101827 100%);
+                margin-top: 0;
                 padding: 0 16px 34px;
                 gap: 16px;
+            }
+
+            .mobile-showcase {
+                display: grid;
+                gap: 18px;
+                padding: 22px 16px 26px;
+                background: linear-gradient(180deg, #071326 0%, #0b1220 100%);
+                color: #ffffff;
+            }
+
+            .mobile-section-head h2,
+            .mobile-cta h2 {
+                margin: 5px 0 6px;
+                color: #ffffff;
+                font-size: 22px;
+                line-height: 1.15;
+                font-weight: 900;
+            }
+
+            .mobile-section-head p,
+            .mobile-cta p {
+                margin: 0;
+                color: rgba(226, 232, 240, 0.72);
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            .destination-scroll {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: 78%;
+                gap: 12px;
+                overflow-x: auto;
+                padding: 4px 2px 8px;
+                scroll-snap-type: x mandatory;
+            }
+
+            .destination-card {
+                position: relative;
+                min-height: 210px;
+                border-radius: 20px;
+                overflow: hidden;
+                scroll-snap-align: start;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+            }
+
+            .destination-card img {
+                width: 100%;
+                height: 100%;
+                min-height: 210px;
+                object-fit: cover;
+                display: block;
+            }
+
+            .destination-card::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg, transparent 30%, rgba(5, 11, 22, 0.9) 100%);
+            }
+
+            .destination-info {
+                position: absolute;
+                left: 14px;
+                right: 14px;
+                bottom: 14px;
+                z-index: 1;
+            }
+
+            .destination-info strong,
+            .feature-card strong,
+            .stat-card strong {
+                display: block;
+                color: #ffffff;
+                font-weight: 900;
+            }
+
+            .destination-info span {
+                display: inline-flex;
+                margin-top: 6px;
+                color: #ffe8a3;
+                font-size: 12px;
+                font-weight: 900;
+            }
+
+            .feature-grid,
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .feature-card,
+            .stat-card,
+            .mobile-cta {
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.07);
+                backdrop-filter: blur(14px);
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+            }
+
+            .feature-card {
+                display: grid;
+                grid-template-columns: 42px 1fr;
+                gap: 12px;
+                align-items: center;
+                padding: 13px;
+            }
+
+            .feature-card i {
+                width: 42px;
+                height: 42px;
+                border-radius: 14px;
+                display: grid;
+                place-items: center;
+                color: #071326;
+                background: linear-gradient(135deg, #febb02, #60a5fa);
+            }
+
+            .feature-card span {
+                display: block;
+                margin-top: 3px;
+                color: rgba(226, 232, 240, 0.7);
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-card strong {
+                color: #febb02;
+                font-size: 22px;
+            }
+
+            .stat-card span {
+                color: rgba(226, 232, 240, 0.74);
+                font-size: 12px;
+                font-weight: 800;
+            }
+
+            .mobile-cta {
+                padding: 18px;
+                background: linear-gradient(145deg, rgba(254, 187, 2, 0.14), rgba(37, 99, 235, 0.14));
+            }
+
+            .mobile-cta a {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 14px;
+                min-height: 44px;
+                width: 100%;
+                border-radius: 999px;
+                color: #071326;
+                background: linear-gradient(135deg, #febb02, #ffffff);
+                text-decoration: none;
+                font-weight: 900;
             }
 
             .sidebar,
@@ -666,6 +1010,13 @@
                 <h1 data-i18n="heroTitle">Ağıllı səyahət planını bir ekranda qur.</h1>
                 <p data-i18n="heroSubtitle">Otel, viza, bilet və çamadan siyahısını süni intellektlə premium nəticə panelində gör.</p>
 
+                <section class="mobile-ai-companion" aria-label="Xəyali səyahət yoldaşı">
+                    <span class="companion-kicker">Canlı AI marşrut önizləməsi</span>
+                    <h2 class="companion-title" id="companionTitle">Roma üçün fərdi səyahət xəritəsi</h2>
+                    <p class="companion-subtitle" id="companionSubtitle">Stilləri seçdikcə TripGen marşrutu romantik, mədəni və qastronomik dayanacaqlarla yenidən qurur.</p>
+                    <div class="companion-route" id="companionRoute"></div>
+                </section>
+
                 <form class="search-panel" id="searchForm">
                     <div class="search-field">
                         <i class="fa-solid fa-location-dot"></i>
@@ -729,9 +1080,65 @@
                         </span>
                     </button>
                     <div class="tourism-style-content" id="tourismTypesContent">
+                        <div class="selected-style-tags" id="selectedStyleTags" aria-label="Çoxseçimli stillər">
+                            <span class="selected-style-placeholder">Çoxseçimli stillər: hələ seçim edilməyib</span>
+                        </div>
                         <div class="tourism-types-grid" id="tourismTypesGrid"></div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section class="mobile-showcase" aria-label="Mobil premium səyahət bölmələri">
+            <div class="mobile-section-head">
+                <span class="mobile-section-kicker">Kəşf xəritəsi</span>
+                <h2>Möhtəşəm məkanları kəşf edin</h2>
+                <p>TripGen ən çox sevilən istiqamətləri foto, reytinq və ağıllı marşrut hissi ilə təqdim edir.</p>
+            </div>
+            <div class="destination-scroll">
+                <article class="destination-card">
+                    <img src="https://images.pexels.com/photos/2474690/pexels-photo-2474690.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Balı">
+                    <div class="destination-info"><strong>Balı</strong><span>4.9 reytinq</span></div>
+                </article>
+                <article class="destination-card">
+                    <img src="https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Santorini">
+                    <div class="destination-info"><strong>Santorini</strong><span>4.8 reytinq</span></div>
+                </article>
+                <article class="destination-card">
+                    <img src="https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=900" alt="İsveçrə Alpları">
+                    <div class="destination-info"><strong>İsveçrə Alpları</strong><span>4.9 reytinq</span></div>
+                </article>
+                <article class="destination-card">
+                    <img src="https://images.pexels.com/photos/402028/pexels-photo-402028.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Kyoto">
+                    <div class="destination-info"><strong>Kyoto</strong><span>4.7 reytinq</span></div>
+                </article>
+            </div>
+
+            <div class="mobile-section-head">
+                <span class="mobile-section-kicker">Ağıllı sistem</span>
+                <h2>Səyahət təcrübəniz üçün hər şey</h2>
+                <p>Plan, büdcə, yerli məsləhət və marşrut optimizasiyası bir mobil axında birləşir.</p>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card"><i class="fa-solid fa-wand-magic-sparkles"></i><div><strong>AI Planlayıcı</strong><span>Günlük marşrutu seçdiyiniz stillərə görə qurur.</span></div></article>
+                <article class="feature-card"><i class="fa-solid fa-compass"></i><div><strong>Ağıllı Tövsiyələr</strong><span>Gizli məkanları və yerli seçimləri önə çıxarır.</span></div></article>
+                <article class="feature-card"><i class="fa-solid fa-bolt"></i><div><strong>Canlı Yenilənmələr</strong><span>Axtarış nəticələrini sürətli və canlı göstərir.</span></div></article>
+                <article class="feature-card"><i class="fa-solid fa-wallet"></i><div><strong>Büdcə Optimizeri</strong><span>Təxmini büdcəyə uyğun seçimləri prioritetləşdirir.</span></div></article>
+                <article class="feature-card"><i class="fa-solid fa-users"></i><div><strong>Qrup Səyahəti</strong><span>Ailə, cütlük və dost qrupları üçün çevik axın yaradır.</span></div></article>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card"><strong>50K+</strong><span>Səyahətçi</span></article>
+                <article class="stat-card"><strong>100+</strong><span>Ölkə</span></article>
+                <article class="stat-card"><strong>46</strong><span>Səyahət stili</span></article>
+                <article class="stat-card"><strong>24/7</strong><span>AI marşrut dəstəyi</span></article>
+            </div>
+
+            <div class="mobile-cta">
+                <span class="mobile-section-kicker">Başlama vaxtıdır</span>
+                <h2>Xəyalındakı səyahəti yaratmağa hazırsan?</h2>
+                <p>Şəhəri yaz, stilləri seç və TripGen-in fərdi marşrutunu saniyələr içində gör.</p>
+                <a href="#searchForm">Planımı yarat</a>
             </div>
         </section>
 
@@ -968,6 +1375,10 @@
         const tourismStylePanel = document.getElementById('tourismStylePanel');
         const tourismStyleToggle = document.getElementById('tourismStyleToggle');
         const tourismTypesGrid = document.getElementById('tourismTypesGrid');
+        const selectedStyleTags = document.getElementById('selectedStyleTags');
+        const companionTitle = document.getElementById('companionTitle');
+        const companionSubtitle = document.getElementById('companionSubtitle');
+        const companionRoute = document.getElementById('companionRoute');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
         const tourismTypeDefinitions = [
             { key: 'mountain', emoji: '🏔' },
@@ -1550,12 +1961,93 @@
                 : [...selectedTourismTypes, typeKey];
 
             renderTourismTypeCards();
+            renderSelectedStyleTags();
+            renderMobileTravelCompanion();
         }
 
         function getSelectedTourismTypeLabels() {
             return tourismTypeDefinitions
                 .filter(type => selectedTourismTypes.includes(type.key))
                 .map(type => getTourismTypeLabel(type.key));
+        }
+
+        function getSelectedTourismTypeDetails() {
+            return tourismTypeDefinitions
+                .filter(type => selectedTourismTypes.includes(type.key))
+                .map(type => ({ ...type, label: getTourismTypeLabel(type.key) }));
+        }
+
+        function renderSelectedStyleTags() {
+            if (!selectedStyleTags) return;
+
+            const selectedDetails = getSelectedTourismTypeDetails();
+            if (!selectedDetails.length) {
+                selectedStyleTags.innerHTML = '<span class="selected-style-placeholder">Çoxseçimli stillər: hələ seçim edilməyib</span>';
+                return;
+            }
+
+            selectedStyleTags.innerHTML = selectedDetails
+                .map(type => `<span class="selected-style-tag">${type.emoji} ${escapeHtml(type.label)}</span>`)
+                .join('');
+        }
+
+        function getCompanionStops(selectedKeys) {
+            const hasRomantic = selectedKeys.includes('romantic');
+            const hasCultural = selectedKeys.includes('cultural') || selectedKeys.includes('archaeological');
+            const hasGastronomic = selectedKeys.includes('gastronomic') || selectedKeys.includes('wine');
+            const hasConcert = selectedKeys.includes('concert') || selectedKeys.includes('festival');
+
+            if (hasRomantic) {
+                return [
+                    { day: '1-ci gün', title: 'Romantik kafe və gizli mənzərə', note: 'Sakit səhər, gün batımı və zərif axşam yeməyi.', image: 'https://images.pexels.com/photos/1267696/pexels-photo-1267696.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '2-ci gün', title: hasCultural ? 'Kolizey və tarixi axşam gəzintisi' : 'Çay kənarında axşam gəzintisi', note: 'Mədəni dayanacaq və cütlüklər üçün yumşaq marşrut.', image: 'https://images.pexels.com/photos/1797161/pexels-photo-1797161.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '3-cü gün', title: hasGastronomic ? 'Michelin üslublu restoran' : 'Şam işığında yerli restoran', note: 'Yerli dadlar, foto nöqtəsi və gecə işıqları.', image: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=300' }
+                ];
+            }
+
+            if (hasConcert) {
+                return [
+                    { day: '1-ci gün', title: 'Canlı musiqi məhəlləsi', note: 'Caz bar, akustik səhnə və gecə ritmi.', image: 'https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '2-ci gün', title: 'Konsert zalı və mədəni tur', note: 'Gündüz yüngül kəşf, axşam premium səhnə.', image: 'https://images.pexels.com/photos/167491/pexels-photo-167491.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '3-cü gün', title: 'Gec kafe və lokal performans', note: 'Yerli musiqiçilər və şəhərin gizli ritmi.', image: 'https://images.pexels.com/photos/2263436/pexels-photo-2263436.jpeg?auto=compress&cs=tinysrgb&w=300' }
+                ];
+            }
+
+            if (hasGastronomic) {
+                return [
+                    { day: '1-ci gün', title: 'Yerli bazar və səhər dadımı', note: 'Təzə ləzzətlər, çörəkçi və qəhvə dayanacağı.', image: 'https://images.pexels.com/photos/375897/pexels-photo-375897.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '2-ci gün', title: 'Şef restoranı və food hall', note: 'İmza yeməklər və seçilmiş məhəllə restoranları.', image: 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                    { day: '3-cü gün', title: 'Desert barı və gourmet suvenir', note: 'Şirin dayanacaq, yerli mağazalar və rahat transfer.', image: 'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg?auto=compress&cs=tinysrgb&w=300' }
+                ];
+            }
+
+            return [
+                { day: '1-ci gün', title: 'Roma - Romantik kafe', note: 'Fərdi companion seçiminə görə ilk dayanacaq.', image: 'https://images.pexels.com/photos/1267696/pexels-photo-1267696.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                { day: '2-ci gün', title: 'Kolizey və mədəni kəşf', note: 'Tarix, foto nöqtəsi və ağıllı marşrut axını.', image: 'https://images.pexels.com/photos/1797161/pexels-photo-1797161.jpeg?auto=compress&cs=tinysrgb&w=300' },
+                { day: '3-cü gün', title: 'Michelin üslublu restoran', note: 'Premium axşam, yerli dadlar və final xatirəsi.', image: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=300' }
+            ];
+        }
+
+        function renderMobileTravelCompanion() {
+            if (!companionTitle || !companionSubtitle || !companionRoute) return;
+
+            const city = document.getElementById('cityInput')?.value.trim() || 'Roma';
+            const labels = getSelectedTourismTypeLabels();
+            const selectedSummary = labels.length ? labels.slice(0, 3).join(' + ') : 'Romantik + Mədəni';
+            const stops = getCompanionStops(selectedTourismTypes);
+
+            companionTitle.textContent = `${city} üçün fərdi səyahət xəritəsi`;
+            companionSubtitle.textContent = `${selectedSummary} əsasında canlı marşrut önizləməsi qurulur.`;
+            companionRoute.innerHTML = stops.map(stop => `
+                <article class="companion-stop">
+                    <img src="${escapeHtml(stop.image)}" alt="${escapeHtml(stop.title)}" loading="lazy">
+                    <div>
+                        <small>${escapeHtml(stop.day)}</small>
+                        <strong>${escapeHtml(stop.title)}</strong>
+                        <span>${escapeHtml(stop.note)}</span>
+                    </div>
+                </article>
+            `).join('');
         }
 
         function changeLanguage(lang) {
@@ -1574,6 +2066,8 @@
             });
 
             renderTourismTypeCards();
+            renderSelectedStyleTags();
+            renderMobileTravelCompanion();
 
             if (!hasActivePlannerSession()) {
                 authButtonText.textContent = t('loginTop');
@@ -1688,6 +2182,7 @@
             budgetCurrencySymbol.textContent = currencySymbols[e.target.value] || '₼';
             document.getElementById('summaryCurrency').textContent = e.target.value;
         });
+        document.getElementById('cityInput')?.addEventListener('input', renderMobileTravelCompanion);
 
         const savedUser = localStorage.getItem('tripgen-user');
         const savedUserId = localStorage.getItem('tripgen-user-id');
