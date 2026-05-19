@@ -48,6 +48,40 @@ public class GeminiService implements TripPlanProvider {
                 .append("3. ").append(destination).append(" sənətkarlar keçidi - Kiçik emalatxanalar və yerli dizayn dükanları ilə daha orijinal küçə. Yerli məsləhət: ustalardan yaxınlıqdakı sakit küçə tövsiyəsini istəyin.\n");
     }
 
+    private void appendTourismStyleMeta(StringBuilder itinerary, TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return;
+        }
+
+        if (context.getLanguageCode().equals("ru")) {
+            itinerary.append("Выбранные стили путешествия: ").append(context.getSelectedTypes()).append("\n");
+            return;
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            itinerary.append("Selected tourism styles: ").append(context.getSelectedTypes()).append("\n");
+            return;
+        }
+
+        itinerary.append("Seçilən səyahət stilləri: ").append(context.getSelectedTypes()).append("\n");
+    }
+
+    private String tourismStyleNote(TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return "";
+        }
+
+        if (context.getLanguageCode().equals("ru")) {
+            return " Маршрут адаптирован под выбранные стили: " + context.getSelectedTypes() + ".";
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            return " The route is tailored around the selected tourism styles: " + context.getSelectedTypes() + ".";
+        }
+
+        return " Marşrut seçilən turizm stillərinə uyğunlaşdırılıb: " + context.getSelectedTypes() + ".";
+    }
+
     private String generateAzerbaijani(TripRequestContext context) {
         String destination = context.getDestination();
         String[] istanbulDays = {
@@ -73,17 +107,20 @@ public class GeminiService implements TripPlanProvider {
         boolean isIstanbul = context.getNormalizedDestination().contains("istanbul")
                 || destination.toLowerCase(Locale.ROOT).contains("i̇stanbul");
         String[] dayPool = isIstanbul ? istanbulDays : genericDays;
+        String tourismStyleNote = tourismStyleNote(context);
 
         StringBuilder itinerary = new StringBuilder();
         itinerary.append("TripGen AI Plan").append("\n");
         itinerary.append("İstiqamət: ").append(destination).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append("Mənbə: Gemini fallback generator").append("\n\n");
 
         for (int i = 0; i < context.getDays(); i++) {
             itinerary.append(i + 1)
                     .append("-ci gün: ")
                     .append(dayPool[i])
+                    .append(tourismStyleNote)
                     .append("\n");
         }
 
@@ -104,6 +141,7 @@ public class GeminiService implements TripPlanProvider {
 
     private String generateEnglish(TripRequestContext context) {
         String destination = context.getDestination();
+        String tourismStyleNote = tourismStyleNote(context);
         String[] dayPool = {
                 "Hotel check-in, the historic city center, landmark walk and a relaxed local dinner.",
                 "Breakfast at a local cafe, museum visit, scenic neighborhood walk and an evening viewpoint.",
@@ -118,6 +156,7 @@ public class GeminiService implements TripPlanProvider {
         itinerary.append("TripGen AI Plan").append("\n");
         itinerary.append("Destination: ").append(destination).append("\n");
         itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append("Source: Gemini fallback generator").append("\n");
         itinerary.append(context.getLanguageInstruction()).append("\n\n");
 
@@ -126,6 +165,7 @@ public class GeminiService implements TripPlanProvider {
                     .append(i + 1)
                     .append(": ")
                     .append(dayPool[i])
+                    .append(tourismStyleNote)
                     .append("\n");
         }
 
@@ -146,6 +186,7 @@ public class GeminiService implements TripPlanProvider {
 
     private String generateRussian(TripRequestContext context) {
         String destination = context.getDestination();
+        String tourismStyleNote = tourismStyleNote(context);
         String[] dayPool = {
                 "Заселение в отель, исторический центр, прогулка по главным достопримечательностям и спокойный ужин в местном ресторане.",
                 "Завтрак в местном кафе, музей, прогулка по атмосферному району и вечерняя смотровая площадка.",
@@ -160,6 +201,7 @@ public class GeminiService implements TripPlanProvider {
         itinerary.append("План TripGen AI").append("\n");
         itinerary.append("Направление: ").append(destination).append("\n");
         itinerary.append("Тип бюджета: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append("Источник: резервный генератор Gemini").append("\n");
         itinerary.append(context.getLanguageInstruction()).append("\n\n");
 
@@ -168,6 +210,7 @@ public class GeminiService implements TripPlanProvider {
                     .append(i + 1)
                     .append(": ")
                     .append(dayPool[i])
+                    .append(tourismStyleNote)
                     .append("\n");
         }
 

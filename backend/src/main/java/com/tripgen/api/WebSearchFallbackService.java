@@ -28,6 +28,40 @@ public class WebSearchFallbackService {
                 .append("3. ").append(destination).append(" sənətkarlar keçidi - Kiçik emalatxanalar və yerli dizayn dükanları ilə daha orijinal küçə. Yerli məsləhət: ustalardan yaxınlıqdakı sakit küçə tövsiyəsini istəyin.\n");
     }
 
+    private void appendTourismStyleMeta(StringBuilder itinerary, TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return;
+        }
+
+        if (context.getLanguageCode().equals("ru")) {
+            itinerary.append("Выбранные стили путешествия: ").append(context.getSelectedTypes()).append("\n");
+            return;
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            itinerary.append("Selected tourism styles: ").append(context.getSelectedTypes()).append("\n");
+            return;
+        }
+
+        itinerary.append("Seçilən səyahət stilləri: ").append(context.getSelectedTypes()).append("\n");
+    }
+
+    private String tourismStyleNote(TripRequestContext context) {
+        if (!context.hasSelectedTypes()) {
+            return "";
+        }
+
+        if (context.getLanguageCode().equals("ru")) {
+            return " Маршрут адаптирован под выбранные стили: " + context.getSelectedTypes() + ".";
+        }
+
+        if (context.getLanguageCode().equals("en")) {
+            return " The route is tailored around the selected tourism styles: " + context.getSelectedTypes() + ".";
+        }
+
+        return " Marşrut seçilən turizm stillərinə uyğunlaşdırılıb: " + context.getSelectedTypes() + ".";
+    }
+
     public String generateFromStaticSearch(TripRequestContext context) {
         if (context.getLanguageCode().equals("en")) {
             return generateEnglishFallback(context);
@@ -41,6 +75,7 @@ public class WebSearchFallbackService {
         itinerary.append("TripGen Web Search Fallback").append("\n");
         itinerary.append("İstiqamət: ").append(context.getDestination()).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append("Mənbə: Statik axtarış simulyatoru").append("\n\n");
 
         for (int i = 1; i <= context.getDays(); i++) {
@@ -48,6 +83,7 @@ public class WebSearchFallbackService {
                     .append("-ci gün: ")
                     .append(context.getDestination())
                     .append(" üçün mərkəzi görməli yerlər, yerli mətbəx dayanacağı, ictimai nəqliyyatla rahat marşrut və axşam üçün sakit gəzinti planı.")
+                    .append(tourismStyleNote(context))
                     .append("\n");
         }
 
@@ -69,6 +105,7 @@ public class WebSearchFallbackService {
         itinerary.append("TripGen Web Search Fallback").append("\n");
         itinerary.append("Destination: ").append(context.getDestination()).append("\n");
         itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append(context.getLanguageInstruction()).append("\n\n");
 
         for (int i = 1; i <= context.getDays(); i++) {
@@ -77,6 +114,7 @@ public class WebSearchFallbackService {
                     .append(": Central sights in ")
                     .append(context.getDestination())
                     .append(", local food stop, easy public transport route and a calm evening walk.")
+                    .append(tourismStyleNote(context))
                     .append("\n");
         }
 
@@ -98,6 +136,7 @@ public class WebSearchFallbackService {
         itinerary.append("Резервный поиск TripGen").append("\n");
         itinerary.append("Направление: ").append(context.getDestination()).append("\n");
         itinerary.append("Тип бюджета: ").append(context.getBudgetType()).append("\n");
+        appendTourismStyleMeta(itinerary, context);
         itinerary.append(context.getLanguageInstruction()).append("\n\n");
 
         for (int i = 1; i <= context.getDays(); i++) {
@@ -106,6 +145,7 @@ public class WebSearchFallbackService {
                     .append(": Главные места в ")
                     .append(context.getDestination())
                     .append(", остановка для местной кухни, удобный маршрут на транспорте и спокойная вечерняя прогулка.")
+                    .append(tourismStyleNote(context))
                     .append("\n");
         }
 

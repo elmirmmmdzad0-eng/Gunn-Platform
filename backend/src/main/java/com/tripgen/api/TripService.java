@@ -44,6 +44,9 @@ public class TripService {
     @Transactional
     public TripResponse generateTrip(TripRequest request) {
         TripRequestContext context = normalizeRequest(request);
+        if (context.hasSelectedTypes()) {
+            return generateWithoutCache(context);
+        }
 
         return tripPlanRepository
                 .findFirstByNormalizedDestinationAndDaysAndBudgetTypeAndLanguageCodeOrderByCreatedAtDesc(
@@ -54,6 +57,26 @@ public class TripService {
                 )
                 .map(this::toResponse)
                 .orElseGet(() -> generateAndCache(context));
+    }
+
+    private TripResponse generateWithoutCache(TripRequestContext context) {
+        ProviderResult providerResult = generateWithFallbacks(context);
+        List<String> imageKeywords = extractImageKeywords(providerResult.itineraryRaw(), context);
+        List<String> imageUrls = fetchTargetedImages(context, imageKeywords);
+        String cleanItinerary = removeImageKeywordLine(providerResult.itineraryRaw());
+
+        TripPlan tripPlan = new TripPlan();
+        tripPlan.setId(UUID.randomUUID().toString());
+        tripPlan.setDestination(context.getDestination());
+        tripPlan.setNormalizedDestination(context.getNormalizedDestination());
+        tripPlan.setDays(context.getDays());
+        tripPlan.setBudgetType(context.getBudgetType());
+        tripPlan.setLanguageCode(context.getLanguageCode());
+        tripPlan.setItineraryRaw(cleanItinerary);
+        tripPlan.setImageUrlsJson(toImageUrlsJson(imageUrls));
+        tripPlan.setSource(providerResult.source());
+
+        return toResponse(tripPlan);
     }
 
     private TripResponse generateAndCache(TripRequestContext context) {
@@ -196,6 +219,9 @@ public class TripService {
             }
         }
 
+        if (context.hasSelectedTypes()) {
+            queries.add(context.getDestination() + " " + context.getSelectedTypes());
+        }
         queries.add(context.getDestination() + " travel landmarks");
         queries.add(context.getDestination() + " cafe street");
 
@@ -286,9 +312,10 @@ public class TripService {
         int days = normalizeDays(request == null ? 0 : request.getDays());
         String budgetType = cleanBudgetType(request == null ? null : request.getBudgetType());
         String languageCode = cleanLanguage(request == null ? null : request.getLang());
+        String selectedTypes = cleanSelectedTypes(request == null ? null : request.getSelectedTypes());
         String normalizedDestination = normalizeForLookup(destination);
 
-        return new TripRequestContext(destination, normalizedDestination, days, budgetType, languageCode);
+        return new TripRequestContext(destination, normalizedDestination, days, budgetType, languageCode, selectedTypes);
     }
 
     private String cleanDestination(String destination) {
@@ -322,6 +349,19 @@ public class TripService {
         }
 
         return "Orta";
+    }
+
+    private String cleanSelectedTypes(String selectedTypes) {
+        if (selectedTypes == null || selectedTypes.trim().isBlank()) {
+            return "";
+        }
+
+        String cleaned = selectedTypes
+                .replaceAll("[\\r\\n]+", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        return cleaned.length() > 600 ? cleaned.substring(0, 600).trim() : cleaned;
     }
 
     private String normalizeForLookup(String value) {

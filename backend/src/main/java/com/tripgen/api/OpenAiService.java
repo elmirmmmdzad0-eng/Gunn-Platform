@@ -43,6 +43,8 @@ public class OpenAiService implements TripPlanProvider {
                 Destination: %s
                 Days: %d
                 Budget type: %s
+                Tourism style input: %s
+                If tourism style input contains selected types, use those specific tourism types as the main basis and personalize the daily route in the synergy of those concepts.
 
                 Return one line per day in this format:
                 Day 1: hotel/check-in, breakfast, historic place, dinner, transfer note.
@@ -61,6 +63,7 @@ public class OpenAiService implements TripPlanProvider {
                 context.getDestination(),
                 context.getDays(),
                 context.getBudgetType(),
+                context.getSelectedTypesInstruction(),
                 context.getLanguageCode().toUpperCase(),
                 context.getLanguageInstruction()
         );

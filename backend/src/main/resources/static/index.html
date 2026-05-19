@@ -96,6 +96,20 @@
         .search-button { border: 0; background: var(--primary-strong); color: white; font-weight: 800; font-size: 16px; padding: 0 32px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .search-button:hover { background: #002254; }
         .search-button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .tourism-style-panel { margin-top: 14px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18); overflow: hidden; }
+        .tourism-style-toggle { width: 100%; min-height: 56px; border: 0; background: rgba(10, 25, 47, 0.34); color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 13px 16px; text-align: left; }
+        .tourism-style-toggle strong { display: block; font-size: 14px; font-weight: 900; line-height: 1.35; }
+        .tourism-style-toggle span { display: block; color: rgba(255, 255, 255, 0.72); font-size: 12px; font-weight: 700; margin-top: 2px; }
+        .tourism-style-chevron { width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); color: var(--accent); flex: 0 0 auto; transition: transform 0.25s ease, background 0.25s ease; }
+        .tourism-style-panel.is-open .tourism-style-chevron { transform: rotate(180deg); background: rgba(254, 187, 2, 0.18); }
+        .tourism-style-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; }
+        .tourism-style-panel.is-open .tourism-style-content { max-height: 900px; overflow-y: auto; padding: 12px; }
+        .tourism-types-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+        .tourism-type-card { min-height: 54px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px); color: white; cursor: pointer; display: flex; align-items: center; gap: 9px; padding: 10px 11px; font-weight: 800; line-height: 1.3; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
+        .tourism-type-card:hover { transform: translateY(-2px) scale(1.02); border-color: rgba(254, 187, 2, 0.46); background: rgba(255, 255, 255, 0.12); }
+        .tourism-type-card.is-selected { border-color: rgba(254, 187, 2, 0.92); background: rgba(254, 187, 2, 0.16); box-shadow: 0 0 0 1px rgba(254, 187, 2, 0.34), 0 0 22px rgba(254, 187, 2, 0.28); }
+        .tourism-type-emoji { flex: 0 0 auto; font-size: 19px; line-height: 1; }
+        .tourism-type-label { font-size: 12px; }
 
         /* Cards & Cards Content */
         .side-card, .content-card, .hotel-card, .ticket-card, .visa-alert, .toast-error { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
@@ -445,6 +459,43 @@
                 justify-content: center;
             }
 
+            .tourism-style-panel {
+                margin-top: 12px;
+                border-radius: 12px;
+            }
+
+            .tourism-style-toggle {
+                min-height: 54px;
+                padding: 12px;
+            }
+
+            .tourism-style-toggle strong {
+                font-size: 13px;
+            }
+
+            .tourism-style-toggle span {
+                font-size: 11px;
+            }
+
+            .tourism-style-panel.is-open .tourism-style-content {
+                max-height: 520px;
+                padding: 10px;
+            }
+
+            .tourism-types-grid {
+                grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+                gap: 8px;
+            }
+
+            .tourism-type-card {
+                min-height: 50px;
+                padding: 9px;
+            }
+
+            .tourism-type-label {
+                font-size: 11px;
+            }
+
             .layout {
                 margin-top: 24px;
                 padding: 0 16px 34px;
@@ -652,6 +703,18 @@
                         <span id="btnText" data-i18n="searchButton">Plan hazırla</span>
                     </button>
                 </form>
+                <div class="tourism-style-panel" id="tourismStylePanel">
+                    <button type="button" class="tourism-style-toggle" id="tourismStyleToggle" aria-expanded="false" aria-controls="tourismTypesContent">
+                        <div>
+                            <strong data-i18n="tourismSelectorTitle">SÉ™yahÉ™t Stilini SeÃ§in (Ã‡oxlu SeÃ§im Aktivdir)</strong>
+                            <span data-i18n="tourismSelectorSubtitle">46 turizm nÃ¶vÃ¼ndÉ™n bir neÃ§É™sini seÃ§ib AI marÅŸrutu fÉ™rdilÉ™ÅŸdirin.</span>
+                        </div>
+                        <span class="tourism-style-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                    </button>
+                    <div class="tourism-style-content" id="tourismTypesContent">
+                        <div class="tourism-types-grid" id="tourismTypesGrid"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -676,7 +739,7 @@
                     </div>
                 </div>
 
-                <section class="trip-planner is-locked" id="tripPlannerSection">
+                <section class="trip-planner" id="tripPlannerSection">
                     <div class="planner-content">
                         <div class="planner-head">
                             <div>
@@ -684,7 +747,7 @@
                                 <h2 data-i18n="plannerTitle">Səyahət Planlayıcısı</h2>
                                 <p data-i18n="plannerSubtitle">İstiqaməti seçin, gün sayını və büdcə tipini verin. TripGen planı premium gün kartlarına bölüb göstərəcək.</p>
                             </div>
-                            <span class="planner-badge" id="plannerStatusBadge"><i class="fa-solid fa-lock"></i> Giriş tələb olunur</span>
+                            <span class="planner-badge" id="plannerStatusBadge"><i class="fa-solid fa-unlock"></i> Qonaq rejimi aktiv</span>
                         </div>
 
                         <form class="planner-form" id="tripPlannerForm">
@@ -723,7 +786,7 @@
                         </div>
                     </div>
 
-                    <div class="planner-gate" id="plannerGateOverlay" aria-hidden="false">
+                    <div class="planner-gate" id="plannerGateOverlay" aria-hidden="true">
                         <div class="planner-gate-card">
                             <span class="planner-gate-icon"><i class="fa-solid fa-lock"></i></span>
                             <strong data-i18n="gateTitle">Süni İntellektlə fərdiləşdirilmiş səyahət planı hazırlamaq üçün qeydiyyatdan keçin! 🌟</strong>
@@ -885,7 +948,60 @@
         const plannerGateOverlay = document.getElementById('plannerGateOverlay');
         const plannerGateButton = document.getElementById('plannerGateButton');
         const plannerStatusBadge = document.getElementById('plannerStatusBadge');
+        const tourismStylePanel = document.getElementById('tourismStylePanel');
+        const tourismStyleToggle = document.getElementById('tourismStyleToggle');
+        const tourismTypesGrid = document.getElementById('tourismTypesGrid');
         const currencySymbols = { AZN: '₼', USD: '$', EUR: '€' };
+        const GUEST_TRIP_GENERATION_ENABLED = true;
+        const tourismTypeDefinitions = [
+            { key: 'mountain', emoji: '🏔' },
+            { key: 'eco', emoji: '🌿' },
+            { key: 'cultural', emoji: '🏛' },
+            { key: 'religious', emoji: '🕌' },
+            { key: 'beach', emoji: '🏖' },
+            { key: 'resort', emoji: '🏝' },
+            { key: 'adventure', emoji: '🧗' },
+            { key: 'trekking', emoji: '🥾' },
+            { key: 'cycling', emoji: '🚴' },
+            { key: 'winter', emoji: '🏂' },
+            { key: 'ski', emoji: '⛷' },
+            { key: 'sports', emoji: '⚽' },
+            { key: 'fitnessWellness', emoji: '🏋️' },
+            { key: 'health', emoji: '💆' },
+            { key: 'medical', emoji: '🏥' },
+            { key: 'gastronomic', emoji: '🍽' },
+            { key: 'wine', emoji: '🍷' },
+            { key: 'safari', emoji: '🐪' },
+            { key: 'cruise', emoji: '🚢' },
+            { key: 'backpacking', emoji: '🎒' },
+            { key: 'luxury', emoji: '💎' },
+            { key: 'romantic', emoji: '❤️' },
+            { key: 'family', emoji: '👨‍👩‍👧' },
+            { key: 'solo', emoji: '👤' },
+            { key: 'entertainment', emoji: '🎉' },
+            { key: 'festival', emoji: '🎭' },
+            { key: 'concert', emoji: '🎤' },
+            { key: 'shopping', emoji: '🛍' },
+            { key: 'urban', emoji: '🏙' },
+            { key: 'rural', emoji: '🌄' },
+            { key: 'geotourism', emoji: '🌋' },
+            { key: 'wildlife', emoji: '🐾' },
+            { key: 'photography', emoji: '📸' },
+            { key: 'filmLocation', emoji: '🎬' },
+            { key: 'business', emoji: '💼' },
+            { key: 'digitalNomad', emoji: '🧑‍💻' },
+            { key: 'educational', emoji: '🏫' },
+            { key: 'mice', emoji: '🤝' },
+            { key: 'militaryHistory', emoji: '🪖' },
+            { key: 'archaeological', emoji: '🏺' },
+            { key: 'astronomy', emoji: '🌌' },
+            { key: 'roadTrip', emoji: '🚗' },
+            { key: 'waterSports', emoji: '🛶' },
+            { key: 'extreme', emoji: '🪂' },
+            { key: 'yogaRetreat', emoji: '🧘' },
+            { key: 'sustainable', emoji: '🌱' }
+        ];
+        let selectedTourismTypes = [];
         const translations = {
             az: {
                 pageTitle: 'TripGen Pro - Ağıllı Səyahət Planı',
@@ -908,6 +1024,57 @@
                 durationSummary: 'Müddət:',
                 currencySummary: 'Valyuta:',
                 budgetTitle: 'Təxmini Büdcə',
+                tourismSelectorTitle: 'Səyahət Stilini Seçin (Çoxlu Seçim Aktivdir)',
+                tourismSelectorSubtitle: '46 turizm növündən bir neçəsini seçib AI marşrutu fərdiləşdirin.',
+                guestBadge: 'Qonaq rejimi aktiv',
+                tourismTypes: {
+                    mountain: 'Dağ turizmi',
+                    eco: 'Ekoturizm',
+                    cultural: 'Mədəni turizm',
+                    religious: 'Dini turizm',
+                    beach: 'Dəniz turizmi',
+                    resort: 'Kurort turizmi',
+                    adventure: 'Macəra turizmi',
+                    trekking: 'Trekking / Hiking turizmi',
+                    cycling: 'Velosiped turizmi',
+                    winter: 'Qış turizmi',
+                    ski: 'Xizək turizmi',
+                    sports: 'İdman turizmi',
+                    fitnessWellness: 'Fitness / Wellness turizmi',
+                    health: 'Sağlamlıq turizmi',
+                    medical: 'Tibbi turizm',
+                    gastronomic: 'Qastronomik turizm',
+                    wine: 'Şərab turizmi',
+                    safari: 'Safari turizmi',
+                    cruise: 'Kruiz turizmi',
+                    backpacking: 'Backpacking',
+                    luxury: 'Lüks turizm',
+                    romantic: 'Romantik turizm',
+                    family: 'Ailə turizmi',
+                    solo: 'Solo travel',
+                    entertainment: 'Əyləncə turizmi',
+                    festival: 'Festival turizmi',
+                    concert: 'Konsert turizmi',
+                    shopping: 'Shopping turizmi',
+                    urban: 'Şəhər turizmi',
+                    rural: 'Kənd turizmi',
+                    geotourism: 'Geoturizm',
+                    wildlife: 'Vəhşi təbiət turizmi',
+                    photography: 'Fotoqrafiya turizmi',
+                    filmLocation: 'Film location turizmi',
+                    business: 'Biznes turizmi',
+                    digitalNomad: 'Digital nomad travel',
+                    educational: 'Təhsil turizmi',
+                    mice: 'MICE turizmi',
+                    militaryHistory: 'Hərbi tarix turizmi',
+                    archaeological: 'Arxeoloji turizm',
+                    astronomy: 'Astronomiya turizmi',
+                    roadTrip: 'Road trip',
+                    waterSports: 'Su idmanı turizmi',
+                    extreme: 'Extreme turizmi',
+                    yogaRetreat: 'Yoga retreat',
+                    sustainable: 'Sustainable tourism'
+                },
                 systemError: 'Sistem Xətası',
                 errorMessage: 'Xəta mesajı',
                 plannerEyebrow: 'AI Trip Builder',
@@ -1017,6 +1184,57 @@
                 durationSummary: 'Duration:',
                 currencySummary: 'Currency:',
                 budgetTitle: 'Estimated Budget',
+                tourismSelectorTitle: 'Choose Travel Style (Multi-Select Active)',
+                tourismSelectorSubtitle: 'Pick several of 46 tourism types to personalize the AI route.',
+                guestBadge: 'Guest access active',
+                tourismTypes: {
+                    mountain: 'Mountain Tourism',
+                    eco: 'Ecotourism',
+                    cultural: 'Cultural Tourism',
+                    religious: 'Religious Tourism',
+                    beach: 'Beach Tourism',
+                    resort: 'Resort Tourism',
+                    adventure: 'Adventure Tourism',
+                    trekking: 'Trekking / Hiking',
+                    cycling: 'Cycling Tourism',
+                    winter: 'Winter Tourism',
+                    ski: 'Ski Tourism',
+                    sports: 'Sports Tourism',
+                    fitnessWellness: 'Fitness / Wellness',
+                    health: 'Health Tourism',
+                    medical: 'Medical Tourism',
+                    gastronomic: 'Gastronomic Tourism',
+                    wine: 'Wine Tourism',
+                    safari: 'Safari Tourism',
+                    cruise: 'Cruise Tourism',
+                    backpacking: 'Backpacking',
+                    luxury: 'Luxury Tourism',
+                    romantic: 'Romantic Tourism',
+                    family: 'Family Tourism',
+                    solo: 'Solo Travel',
+                    entertainment: 'Entertainment Tourism',
+                    festival: 'Festival Tourism',
+                    concert: 'Concert Tourism',
+                    shopping: 'Shopping Tourism',
+                    urban: 'Urban Tourism',
+                    rural: 'Rural Tourism',
+                    geotourism: 'Geotourism',
+                    wildlife: 'Wildlife Tourism',
+                    photography: 'Photography Tourism',
+                    filmLocation: 'Film Location Tourism',
+                    business: 'Business Tourism',
+                    digitalNomad: 'Digital Nomad',
+                    educational: 'Educational Tourism',
+                    mice: 'MICE Tourism',
+                    militaryHistory: 'Military History',
+                    archaeological: 'Archaeological Tourism',
+                    astronomy: 'Astronomy Tourism',
+                    roadTrip: 'Road Trip',
+                    waterSports: 'Water Sports',
+                    extreme: 'Extreme Tourism',
+                    yogaRetreat: 'Yoga Retreat',
+                    sustainable: 'Sustainable Tourism'
+                },
                 systemError: 'System Error',
                 errorMessage: 'Error message',
                 plannerEyebrow: 'AI Trip Builder',
@@ -1126,6 +1344,57 @@
                 durationSummary: 'Срок:',
                 currencySummary: 'Валюта:',
                 budgetTitle: 'Примерный бюджет',
+                tourismSelectorTitle: 'Выберите стиль путешествия (мультивыбор активен)',
+                tourismSelectorSubtitle: 'Выберите несколько из 46 типов туризма, чтобы персонализировать AI-маршрут.',
+                guestBadge: 'Гостевой доступ активен',
+                tourismTypes: {
+                    mountain: 'Горный туризм',
+                    eco: 'Экотуризм',
+                    cultural: 'Культурный туризм',
+                    religious: 'Религиозный туризм',
+                    beach: 'Пляжный туризм',
+                    resort: 'Курортный туризм',
+                    adventure: 'Приключенческий туризм',
+                    trekking: 'Треккинг / Хайкинг',
+                    cycling: 'Велотуризм',
+                    winter: 'Зимний туризм',
+                    ski: 'Лыжный туризм',
+                    sports: 'Спортивный туризм',
+                    fitnessWellness: 'Фитнес / Велнес туризм',
+                    health: 'Оздоровительный туризм',
+                    medical: 'Медицинский туризм',
+                    gastronomic: 'Гастрономический туризм',
+                    wine: 'Винный туризм',
+                    safari: 'Сафари туризм',
+                    cruise: 'Круизный туризм',
+                    backpacking: 'Бэкпэкинг',
+                    luxury: 'Люкс туризм',
+                    romantic: 'Романтический туризм',
+                    family: 'Семейный туризм',
+                    solo: 'Соло путешествия',
+                    entertainment: 'Развлекательный туризм',
+                    festival: 'Фестивальный туризм',
+                    concert: 'Концертный туризм',
+                    shopping: 'Шопинг туризм',
+                    urban: 'Городской туризм',
+                    rural: 'Сельский туризм',
+                    geotourism: 'Геотуризм',
+                    wildlife: 'Туризм дикой природы',
+                    photography: 'Фототуризм',
+                    filmLocation: 'Кинотуризм',
+                    business: 'Бизнес-туризм',
+                    digitalNomad: 'Цифровые кочевники',
+                    educational: 'Образовательный туризм',
+                    mice: 'MICE туризм',
+                    militaryHistory: 'Военно-исторический туризм',
+                    archaeological: 'Археологический туризм',
+                    astronomy: 'Астрономический туризм',
+                    roadTrip: 'Автопутешествие',
+                    waterSports: 'Водный спорт',
+                    extreme: 'Экстремальный туризм',
+                    yogaRetreat: 'Йога-ретрит',
+                    sustainable: 'Устойчивый туризм'
+                },
                 systemError: 'Ошибка системы',
                 errorMessage: 'Сообщение об ошибке',
                 plannerEyebrow: 'AI Trip Builder',
@@ -1233,6 +1502,43 @@
             return value;
         }
 
+        function getTourismTypeLabel(key) {
+            const dictionary = translations[currentLang] || translations.az;
+            const labels = dictionary.tourismTypes || translations.az.tourismTypes || {};
+            return labels[key] || translations.az.tourismTypes[key] || key;
+        }
+
+        function renderTourismTypeCards() {
+            if (!tourismTypesGrid) return;
+
+            tourismTypesGrid.innerHTML = tourismTypeDefinitions.map(type => {
+                const isSelected = selectedTourismTypes.includes(type.key);
+                const label = getTourismTypeLabel(type.key);
+                return `
+                    <button type="button" class="tourism-type-card ${isSelected ? 'is-selected' : ''}" data-tourism-type="${escapeHtml(type.key)}" aria-pressed="${isSelected}">
+                        <span class="tourism-type-emoji">${type.emoji}</span>
+                        <span class="tourism-type-label">${escapeHtml(label)}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleTourismType(typeKey) {
+            if (!typeKey) return;
+
+            selectedTourismTypes = selectedTourismTypes.includes(typeKey)
+                ? selectedTourismTypes.filter(key => key !== typeKey)
+                : [...selectedTourismTypes, typeKey];
+
+            renderTourismTypeCards();
+        }
+
+        function getSelectedTourismTypeLabels() {
+            return tourismTypeDefinitions
+                .filter(type => selectedTourismTypes.includes(type.key))
+                .map(type => `${type.emoji} ${getTourismTypeLabel(type.key)}`);
+        }
+
         function changeLanguage(lang) {
             currentLang = translations[lang] ? lang : 'az';
             localStorage.setItem('selectedLang', currentLang);
@@ -1247,6 +1553,8 @@
             document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
                 element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
             });
+
+            renderTourismTypeCards();
 
             if (!hasActivePlannerSession()) {
                 authButtonText.textContent = t('loginTop');
@@ -1336,6 +1644,19 @@
             await toggleAuraAudio();
         });
         languageSelect.addEventListener('change', (event) => changeLanguage(event.target.value));
+        if (tourismStyleToggle && tourismStylePanel) {
+            tourismStyleToggle.addEventListener('click', () => {
+                const isOpen = tourismStylePanel.classList.toggle('is-open');
+                tourismStyleToggle.setAttribute('aria-expanded', String(isOpen));
+            });
+        }
+        if (tourismTypesGrid) {
+            tourismTypesGrid.addEventListener('click', (event) => {
+                const card = event.target.closest('[data-tourism-type]');
+                if (!card) return;
+                toggleTourismType(card.dataset.tourismType);
+            });
+        }
 
         themeToggle.addEventListener('click', () => {
             const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
@@ -1504,18 +1825,19 @@
             }
 
             const isUnlocked = hasActivePlannerSession();
-            tripPlannerSection.classList.toggle('is-locked', !isUnlocked);
-            plannerGateOverlay.setAttribute('aria-hidden', String(isUnlocked));
+            const canUsePlanner = GUEST_TRIP_GENERATION_ENABLED || isUnlocked;
+            tripPlannerSection.classList.toggle('is-locked', !canUsePlanner);
+            plannerGateOverlay.setAttribute('aria-hidden', String(canUsePlanner));
 
             if (plannerStatusBadge) {
                 plannerStatusBadge.innerHTML = isUnlocked
                     ? `<i class="fa-solid fa-lock-open"></i> ${escapeHtml(t('unlockedBadge'))}`
-                    : `<i class="fa-solid fa-lock"></i> ${escapeHtml(t('lockedBadge'))}`;
+                    : `<i class="fa-solid fa-unlock"></i> ${escapeHtml(t('guestBadge'))}`;
             }
 
-            if (tripPlannerSubmit && !isUnlocked) {
+            if (tripPlannerSubmit && !canUsePlanner) {
                 tripPlannerSubmit.disabled = true;
-            } else if (tripPlannerSubmit && username) {
+            } else if (tripPlannerSubmit) {
                 tripPlannerSubmit.disabled = false;
             }
         }
@@ -2030,12 +2352,13 @@
                 destination: document.getElementById('tripDestinationInput').value.trim(),
                 days: Number(document.getElementById('tripDaysSelect').value),
                 budgetType: document.getElementById('tripBudgetSelect').value,
+                selectedTypes: getSelectedTourismTypeLabels().join(', '),
                 userId: getCurrentUserId(),
                 authToken: getCurrentAuthToken(),
                 lang: currentLang
             };
 
-            if (!payload.userId || !payload.authToken) {
+            if (!GUEST_TRIP_GENERATION_ENABLED && (!payload.userId || !payload.authToken)) {
                 resetGoogleMap();
                 tripPlannerOutput.innerHTML = `<div class="planner-empty" style="border-left:5px solid #dc2626;">${escapeHtml(t('authRequired'))}</div>`;
                 openAuthModal('login');

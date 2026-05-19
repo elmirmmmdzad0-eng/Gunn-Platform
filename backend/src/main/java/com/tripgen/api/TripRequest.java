@@ -5,6 +5,7 @@ public class TripRequest {
     private String destination;
     private int days;
     private String budgetType;
+    private String selectedTypes;
     private Long userId;
     private String authToken;
     private String lang;
@@ -34,6 +35,14 @@ public class TripRequest {
 
     public void setBudgetType(String budgetType) {
         this.budgetType = budgetType;
+    }
+
+    public String getSelectedTypes() {
+        return selectedTypes;
+    }
+
+    public void setSelectedTypes(String selectedTypes) {
+        this.selectedTypes = selectedTypes;
     }
 
     public Long getUserId() {
