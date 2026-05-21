@@ -164,7 +164,7 @@ public class TripService {
     }
 
     private boolean shouldRefreshHiddenGemsBlock(String itineraryRaw, String languageCode) {
-        if (languageCode == null || languageCode.equals("en")) {
+        if (languageCode == null) {
             return false;
         }
 
@@ -179,6 +179,18 @@ public class TripService {
     }
 
     private String buildDefaultHiddenGemsBlock(String destination, String languageCode) {
+        if (destination != null || destination == null) {
+            TripRequestContext context = new TripRequestContext(
+                    destination == null || destination.isBlank() ? "the destination" : destination.trim(),
+                    "",
+                    3,
+                    "Orta",
+                    languageCode == null || languageCode.isBlank() ? "az" : languageCode,
+                    ""
+            );
+            return ConcretePlaceCatalog.hiddenGemsBlock(context);
+        }
+
         String safeDestination = destination == null || destination.isBlank()
                 ? "the destination"
                 : destination.trim();

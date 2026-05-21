@@ -2678,6 +2678,7 @@
                 .filter((line) => {
                     if (!line) return false;
                     if (/^IMAGE_KEYWORDS\s*:/i.test(line)) return false;
+                    if (/^MAP_POINTS\s*:/i.test(line)) return false;
                     if (/^(source|mənbə|m[əeé]nb[əeé]|qeyd|note|примечание)\s*:/i.test(line)
                         && /(fallback|mock|generator|gemini|static|simulyator|simulator|резерв|генератор)/i.test(line)) {
                         return false;
@@ -2754,13 +2755,30 @@
             };
         }
 
+        function extractMapQuery(rawText, destination) {
+            const match = (rawText || "").match(/^MAP_POINTS\s*:\s*(.+)$/im);
+            if (!match || !match[1]) {
+                return destination;
+            }
+
+            const points = match[1]
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+                .slice(0, 7)
+                .join(", ");
+            return points ? `${destination || ""} ${points}`.trim() : destination;
+        }
+
         function renderTripResponse(data, fallbackCity) {
             if (!tripResults) return;
-            const raw = sanitizeItineraryText(data && (data.itineraryRaw || data.itinerary || data.plan || ""));
+            const rawOriginal = data && (data.itineraryRaw || data.itinerary || data.plan || "");
+            const raw = sanitizeItineraryText(rawOriginal);
             const split = splitHiddenGems(raw);
             const dayClusters = parseDayClusters(split.routeText);
             const hiddenLines = splitItineraryLines(split.hiddenText).map(cleanClusterLine).filter(Boolean);
             const destination = (data && data.destination) || fallbackCity;
+            const mapQuery = extractMapQuery(rawOriginal, destination);
             const imageUrls = Array.isArray(data && data.imageUrls) ? data.imageUrls.slice(0, 3) : [];
             const labels = getClusterLabels();
             const selectedStyleValue = getSelectedStylesValue() || labels.balanced;
@@ -2795,7 +2813,7 @@
             const galleryMarkup = imageUrls.length
                 ? `<div class="result-gallery">${imageUrls.map((url) => `<img src="${escapeHtml(url)}" alt="${escapeHtml(destination)}">`).join("")}</div>`
                 : "";
-            const mapLinks = buildMapLinks(destination);
+            const mapLinks = buildMapLinks(mapQuery);
             const mapMarkup = `
                 <article class="map-cluster-card">
                     <div class="map-cluster-head">

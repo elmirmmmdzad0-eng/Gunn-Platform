@@ -146,7 +146,13 @@ public class DestinationController {
                 TICKET: təxmini bilet qiyməti və məsləhət
                 HACKS: 3 qısa səyahət məsləhəti
                 PACKING: 5 vacib əşya
-                """.formatted(city, status, currency, buildSelectedTypesInstruction(city, selectedTypes));
+                """.formatted(
+                city,
+                status,
+                currency,
+                buildSelectedTypesInstruction(city, selectedTypes)
+                        + "\n" + ConcretePlaceCatalog.promptRules(city, currency)
+        );
     }
 
     private String buildSelectedTypesInstruction(String city, String selectedTypes) {
@@ -158,7 +164,7 @@ public class DestinationController {
                 + selectedTypes
                 + ". You MUST transform HOTEL, HACKS, food, area and experience recommendations based on these styles. If \"Romantik turizm\" is selected for "
                 + city
-                + ", prioritize romantic viewpoints, elegant dining, scenic walks, couples' activities and specific real local places such as Giardino degli Aranci, Bar San Calisto, river/sunset promenades, hidden gardens, candlelit restaurants and intimate viewpoints where relevant to the destination. If \"Konsert turizmi\" is selected, include real concert halls, live music venues and jazz clubs such as Alexanderplatz Jazz Club-style places where relevant. If \"Qastronomik turizm\" is selected, include local markets, tasting routes, neighborhood restaurants and signature dishes. Do not return generic mass-tourism advice.";
+                + ", prioritize romantic viewpoints, elegant dining, scenic walks and couples' activities through exact real names such as Giardino degli Aranci, Bar San Calisto, or exact local equivalents. If \"Konsert turizmi\" is selected, include real concert halls, live music venues and jazz clubs such as Royal Albert Hall or Alexanderplatz Jazz Club where relevant. If \"Qastronomik turizm\" is selected, include named markets, tasting routes, restaurants and signature dishes. Do not return generic mass-tourism advice.";
     }
 
     private HttpHeaders buildHeaders() {
