@@ -889,6 +889,7 @@
 
         .trip-meta-card,
         .day-cluster-card,
+        .map-cluster-card,
         .hidden-gems-card {
             padding: 20px;
             border: 1px solid var(--line);
@@ -931,6 +932,7 @@
         }
 
         .day-cluster-card h3,
+        .map-cluster-card h3,
         .hidden-gems-card h3 {
             display: flex;
             align-items: center;
@@ -941,11 +943,72 @@
         }
 
         .day-cluster-card p,
+        .map-cluster-card p,
         .hidden-gems-card p {
             margin: 0;
             color: var(--muted);
             font-size: 14px;
             line-height: 1.75;
+        }
+
+        .map-cluster-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .map-cluster-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .map-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .map-action {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.055);
+            color: var(--platinum);
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .map-action:hover {
+            background: var(--platinum);
+            color: #050505;
+            transform: translateY(-1px);
+        }
+
+        .map-frame-wrap {
+            position: relative;
+            min-height: 360px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+                var(--graphite);
+        }
+
+        .map-frame-wrap iframe {
+            width: 100%;
+            height: 360px;
+            display: block;
+            border: 0;
+            filter: saturate(0.82) contrast(0.96) brightness(0.9);
         }
 
         .hidden-gems-card {
@@ -1585,6 +1648,24 @@
 
             .trip-meta-card {
                 grid-template-columns: 1fr;
+            }
+
+            .map-cluster-head {
+                display: grid;
+            }
+
+            .map-actions {
+                justify-content: stretch;
+            }
+
+            .map-action {
+                flex: 1;
+            }
+
+            .map-frame-wrap,
+            .map-frame-wrap iframe {
+                min-height: 300px;
+                height: 300px;
             }
         }
     </style>
@@ -2550,6 +2631,10 @@
                     day: "День",
                     hiddenGems: "Скрытые места",
                     hiddenKicker: "Private recommendation",
+                    mapTitle: "Route map",
+                    mapCopy: "Open this destination on Google Maps or explore it in Google Earth.",
+                    openMaps: "Google Maps",
+                    openEarth: "3D Earth",
                     balanced: "Balanced premium route"
                 };
             }
@@ -2562,6 +2647,10 @@
                     day: "Day",
                     hiddenGems: "Hidden Gems",
                     hiddenKicker: "Private recommendation",
+                    mapTitle: "Route map",
+                    mapCopy: "Open this destination on Google Maps or explore it in Google Earth.",
+                    openMaps: "Google Maps",
+                    openEarth: "3D Earth",
                     balanced: "Balanced premium route"
                 };
             }
@@ -2573,6 +2662,10 @@
                 day: "Gün",
                 hiddenGems: "Gizli məkanlar",
                 hiddenKicker: "Premium tövsiyə",
+                mapTitle: "Marşrut xəritəsi",
+                mapCopy: "İstiqaməti Google Maps-də açın və ya Google Earth ilə 3D baxın.",
+                openMaps: "Google Maps",
+                openEarth: "3D Earth",
                 balanced: "Balanslı premium marşrut"
             };
         }
@@ -2652,6 +2745,15 @@
             }));
         }
 
+        function buildMapLinks(destination) {
+            const query = encodeURIComponent(destination || "Azerbaijan");
+            return {
+                embedUrl: `https://maps.google.com/maps?q=${query}&t=k&z=12&output=embed`,
+                mapsUrl: `https://www.google.com/maps/search/?api=1&query=${query}`,
+                earthUrl: `https://earth.google.com/web/search/${query}`
+            };
+        }
+
         function renderTripResponse(data, fallbackCity) {
             if (!tripResults) return;
             const raw = sanitizeItineraryText(data && (data.itineraryRaw || data.itinerary || data.plan || ""));
@@ -2693,6 +2795,35 @@
             const galleryMarkup = imageUrls.length
                 ? `<div class="result-gallery">${imageUrls.map((url) => `<img src="${escapeHtml(url)}" alt="${escapeHtml(destination)}">`).join("")}</div>`
                 : "";
+            const mapLinks = buildMapLinks(destination);
+            const mapMarkup = `
+                <article class="map-cluster-card">
+                    <div class="map-cluster-head">
+                        <div>
+                            <span class="cluster-kicker">Google Maps / Earth</span>
+                            <h3><i class="fa-solid fa-earth-americas"></i>${escapeHtml(labels.mapTitle)}</h3>
+                            <p>${escapeHtml(labels.mapCopy)}</p>
+                        </div>
+                        <div class="map-actions">
+                            <a class="map-action" href="${escapeHtml(mapLinks.mapsUrl)}" target="_blank" rel="noopener noreferrer">
+                                <i class="fa-solid fa-map-location-dot"></i>${escapeHtml(labels.openMaps)}
+                            </a>
+                            <a class="map-action" href="${escapeHtml(mapLinks.earthUrl)}" target="_blank" rel="noopener noreferrer">
+                                <i class="fa-solid fa-cube"></i>${escapeHtml(labels.openEarth)}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="map-frame-wrap">
+                        <iframe
+                            title="${escapeHtml(destination)} map"
+                            src="${escapeHtml(mapLinks.embedUrl)}"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </article>
+            `;
 
             tripResults.classList.remove("hidden");
             tripResults.innerHTML = `
@@ -2702,6 +2833,7 @@
                     <div class="trip-meta-item"><small>${escapeHtml(labels.styles)}</small><strong>${escapeHtml(selectedStyleValue)}</strong></div>
                 </article>
                 ${dayMarkup}
+                ${mapMarkup}
                 ${hiddenMarkup}
                 ${galleryMarkup}
             `;
