@@ -887,6 +887,86 @@
             font-size: 16px;
         }
 
+        .trip-meta-card,
+        .day-cluster-card,
+        .hidden-gems-card {
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.028));
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: var(--blur);
+        }
+
+        .trip-meta-card {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .trip-meta-item {
+            min-height: 66px;
+            display: grid;
+            align-content: center;
+            gap: 6px;
+            padding: 12px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .trip-meta-item small,
+        .cluster-kicker {
+            color: var(--muted-2);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .trip-meta-item strong,
+        .cluster-title {
+            color: var(--platinum);
+            font-size: 15px;
+            line-height: 1.45;
+        }
+
+        .day-cluster-card h3,
+        .hidden-gems-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 12px;
+            color: var(--platinum);
+            font-size: 16px;
+        }
+
+        .day-cluster-card p,
+        .hidden-gems-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .hidden-gems-card {
+            border-color: rgba(244, 244, 240, 0.24);
+            background:
+                linear-gradient(135deg, rgba(244, 244, 240, 0.09), rgba(255, 255, 255, 0.03)),
+                rgba(17, 17, 17, 0.74);
+        }
+
+        .hidden-gems-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .hidden-gems-list p {
+            padding: 12px 14px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
         .itinerary-card p,
         .itinerary-line {
             color: var(--muted);
@@ -1500,6 +1580,10 @@
             }
 
             .result-gallery {
+                grid-template-columns: 1fr;
+            }
+
+            .trip-meta-card {
                 grid-template-columns: 1fr;
             }
         }
@@ -2456,12 +2540,129 @@
                 .slice(0, 12);
         }
 
+        function getClusterLabels() {
+            if (currentLanguage === "ru") {
+                return {
+                    destination: "Направление",
+                    budget: "Бюджет",
+                    styles: "Стили",
+                    dailyRoutes: "Маршруты по дням",
+                    day: "День",
+                    hiddenGems: "Скрытые места",
+                    hiddenKicker: "Private recommendation",
+                    balanced: "Balanced premium route"
+                };
+            }
+            if (currentLanguage === "en") {
+                return {
+                    destination: "Destination",
+                    budget: "Budget",
+                    styles: "Styles",
+                    dailyRoutes: "Daily routes",
+                    day: "Day",
+                    hiddenGems: "Hidden Gems",
+                    hiddenKicker: "Private recommendation",
+                    balanced: "Balanced premium route"
+                };
+            }
+            return {
+                destination: "İstiqamət",
+                budget: "Büdcə",
+                styles: "Stillər",
+                dailyRoutes: "Günlük marşrutlar",
+                day: "Gün",
+                hiddenGems: "Gizli məkanlar",
+                hiddenKicker: "Premium tövsiyə",
+                balanced: "Balanslı premium marşrut"
+            };
+        }
+
+        function sanitizeItineraryText(text) {
+            return (text || "")
+                .replace(/\r/g, "")
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => {
+                    if (!line) return false;
+                    if (/^IMAGE_KEYWORDS\s*:/i.test(line)) return false;
+                    if (/^(source|mənbə|m[əeé]nb[əeé]|qeyd|note|примечание)\s*:/i.test(line)
+                        && /(fallback|mock|generator|gemini|static|simulyator|simulator|резерв|генератор)/i.test(line)) {
+                        return false;
+                    }
+                    return !/(gemini\s+fallback|fallback\/mock|mock\s+generator|mock.*gemini|gemini.*generator|static\s+search\s+fallback|statik\s+axtarış|statik axtaris|static.*fallback|fallback.*plan|резервн|mock генератор|Ð³ÐµÐ½ÐµÑ€Ð°Ñ‚Ð¾Ñ€.*gemini|gemini.*Ð³ÐµÐ½ÐµÑ€Ð°Ñ‚Ð¾Ñ€)/i.test(line);
+                })
+                .join("\n")
+                .replace(/\n{3,}/g, "\n\n")
+                .trim();
+        }
+
+        function cleanClusterLine(line) {
+            return (line || "")
+                .replace(/^HIDDEN_GEMS\s*:\s*/i, "")
+                .replace(/^(?:day|gün|gun|день)\s*\d+\s*[:.)-]?\s*/i, "")
+                .replace(/^\d+\s*[.)-]\s*/, "")
+                .replace(/^\d+\s*(?:-?ci|-?cı|-?cu|-?cü|st|nd|rd|th)?\s*(?:gün|gun|day|день)\s*[:.)-]?\s*/i, "")
+                .trim();
+        }
+
+        function splitHiddenGems(text) {
+            const hiddenMatch = text.match(/(?:^|\n)HIDDEN_GEMS\s*:\s*/i);
+            if (!hiddenMatch) {
+                return { routeText: text, hiddenText: "" };
+            }
+
+            const hiddenStart = hiddenMatch.index + hiddenMatch[0].length;
+            return {
+                routeText: text.slice(0, hiddenMatch.index).trim(),
+                hiddenText: text.slice(hiddenStart).trim()
+            };
+        }
+
+        function parseDayClusters(routeText) {
+            const lines = splitItineraryLines(routeText).map(cleanClusterLine).filter(Boolean);
+            if (lines.length === 0) return [];
+
+            const dayClusters = [];
+            let current = null;
+            routeText.split("\n").map((line) => line.trim()).filter(Boolean).forEach((line) => {
+                const dayMatch = line.match(/^(?:day|gün|gun|день)\s*(\d+)\s*[:.)-]?\s*(.*)$/i)
+                    || line.match(/^(\d+)\s*(?:-?ci|-?cı|-?cu|-?cü|st|nd|rd|th)?\s*(?:gün|gun|day|день)\s*[:.)-]?\s*(.*)$/i);
+                if (dayMatch) {
+                    current = { number: Number(dayMatch[1]) || dayClusters.length + 1, lines: [] };
+                    const rest = cleanClusterLine(dayMatch[2] || "");
+                    if (rest) current.lines.push(rest);
+                    dayClusters.push(current);
+                    return;
+                }
+                if (current) {
+                    current.lines.push(cleanClusterLine(line));
+                }
+            });
+
+            if (dayClusters.length > 0) {
+                return dayClusters.map((cluster) => ({
+                    number: cluster.number,
+                    text: cluster.lines.filter(Boolean).join(" ")
+                })).filter((cluster) => cluster.text);
+            }
+
+            return lines.slice(0, 7).map((line, index) => ({
+                number: index + 1,
+                text: line
+            }));
+        }
+
         function renderTripResponse(data, fallbackCity) {
             if (!tripResults) return;
-            const raw = data && (data.itineraryRaw || data.itinerary || data.plan || "");
-            const lines = splitItineraryLines(raw);
+            const raw = sanitizeItineraryText(data && (data.itineraryRaw || data.itinerary || data.plan || ""));
+            const split = splitHiddenGems(raw);
+            const dayClusters = parseDayClusters(split.routeText);
+            const hiddenLines = splitItineraryLines(split.hiddenText).map(cleanClusterLine).filter(Boolean);
             const destination = (data && data.destination) || fallbackCity;
             const imageUrls = Array.isArray(data && data.imageUrls) ? data.imageUrls.slice(0, 3) : [];
+            const labels = getClusterLabels();
+            const selectedStyleValue = getSelectedStylesValue() || labels.balanced;
+            const budgetValueText = `${document.getElementById("budgetValue").textContent} ${document.getElementById("currencyInput").value}`;
 
             if (!raw && imageUrls.length === 0) {
                 tripResults.classList.add("hidden");
@@ -2469,20 +2670,40 @@
                 return;
             }
 
-            const lineMarkup = lines.length
-                ? lines.map((line, index) => `<div class="itinerary-line"><span>${index + 1}</span><div>${escapeHtml(line)}</div></div>`).join("")
+            const dayMarkup = dayClusters.length
+                ? dayClusters.map((cluster) => `
+                    <article class="day-cluster-card">
+                        <span class="cluster-kicker">${escapeHtml(labels.dailyRoutes)}</span>
+                        <h3><i class="fa-solid fa-route"></i>${escapeHtml(labels.day)} ${cluster.number}</h3>
+                        <p>${escapeHtml(cluster.text)}</p>
+                    </article>
+                `).join("")
                 : `<p>${escapeHtml(raw || t("noData"))}</p>`;
+            const hiddenMarkup = hiddenLines.length
+                ? `
+                    <article class="hidden-gems-card">
+                        <span class="cluster-kicker">${escapeHtml(labels.hiddenKicker)}</span>
+                        <h3><i class="fa-solid fa-gem"></i>${escapeHtml(labels.hiddenGems)}</h3>
+                        <div class="hidden-gems-list">
+                            ${hiddenLines.slice(0, 5).map((line) => `<p>${escapeHtml(line)}</p>`).join("")}
+                        </div>
+                    </article>
+                `
+                : "";
             const galleryMarkup = imageUrls.length
                 ? `<div class="result-gallery">${imageUrls.map((url) => `<img src="${escapeHtml(url)}" alt="${escapeHtml(destination)}">`).join("")}</div>`
                 : "";
 
             tripResults.classList.remove("hidden");
             tripResults.innerHTML = `
-                <article class="itinerary-card">
-                    <h3>${escapeHtml(destination)} · AI itinerary</h3>
-                    ${lineMarkup}
-                    ${galleryMarkup}
+                <article class="trip-meta-card">
+                    <div class="trip-meta-item"><small>${escapeHtml(labels.destination)}</small><strong>${escapeHtml(destination)}</strong></div>
+                    <div class="trip-meta-item"><small>${escapeHtml(labels.budget)}</small><strong>${escapeHtml(budgetValueText)}</strong></div>
+                    <div class="trip-meta-item"><small>${escapeHtml(labels.styles)}</small><strong>${escapeHtml(selectedStyleValue)}</strong></div>
                 </article>
+                ${dayMarkup}
+                ${hiddenMarkup}
+                ${galleryMarkup}
             `;
         }
 

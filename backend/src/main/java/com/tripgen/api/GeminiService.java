@@ -271,7 +271,7 @@ public class GeminiService implements TripPlanProvider {
         itinerary.append("İstiqamət: ").append(destination).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
-        itinerary.append("Mənbə: Gemini fallback generator").append("\n\n");
+        itinerary.append("\n");
 
         for (int i = 0; i < context.getDays(); i++) {
             itinerary.append(i + 1)
@@ -292,7 +292,6 @@ public class GeminiService implements TripPlanProvider {
                 .append(" old town, ")
                 .append(destination)
                 .append(" travel view");
-        itinerary.append("\nQeyd: Bu cavab hazırda Gemini fallback/mock generatorundan gəlir. Real AI qoşulanda eyni service zənciri saxlanacaq.");
         return itinerary.toString();
     }
 
@@ -315,7 +314,6 @@ public class GeminiService implements TripPlanProvider {
         itinerary.append("Destination: ").append(destination).append("\n");
         itinerary.append("Budget type: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
-        itinerary.append("Source: Gemini fallback generator").append("\n");
         itinerary.append(context.getLanguageInstruction()).append("\n\n");
 
         for (int i = 0; i < context.getDays(); i++) {
@@ -338,7 +336,6 @@ public class GeminiService implements TripPlanProvider {
                 .append(" old town, ")
                 .append(destination)
                 .append(" travel view");
-        itinerary.append("\nNote: This response currently comes from the Gemini fallback/mock generator.");
         return itinerary.toString();
     }
 
@@ -385,7 +382,6 @@ public class GeminiService implements TripPlanProvider {
                 .append(" old town, ")
                 .append(destination)
                 .append(" travel view");
-        itinerary.append("\nПримечание: Сейчас этот ответ создан резервным/mock генератором Gemini.");
         return itinerary.toString();
     }
 }

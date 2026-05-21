@@ -76,7 +76,7 @@ public class WebSearchFallbackService {
         itinerary.append("İstiqamət: ").append(context.getDestination()).append("\n");
         itinerary.append("Büdcə tipi: ").append(context.getBudgetType()).append("\n");
         appendTourismStyleMeta(itinerary, context);
-        itinerary.append("Mənbə: Statik axtarış simulyatoru").append("\n\n");
+        itinerary.append("\n");
 
         for (int i = 1; i <= context.getDays(); i++) {
             itinerary.append(i)
@@ -96,7 +96,6 @@ public class WebSearchFallbackService {
                 .append(" street, ")
                 .append(context.getDestination())
                 .append(" city view");
-        itinerary.append("\nQeyd: AI provayderləri müvəqqəti əlçatan olmadı. Sistem xəta verməmək üçün statik axtarış fallback planı qaytardı.");
         return itinerary.toString();
     }
 
@@ -127,7 +126,6 @@ public class WebSearchFallbackService {
                 .append(" street, ")
                 .append(context.getDestination())
                 .append(" city view");
-        itinerary.append("\nNote: AI providers were temporarily unavailable, so GUNN returned a static search fallback plan.");
         return itinerary.toString();
     }
 
@@ -158,7 +156,6 @@ public class WebSearchFallbackService {
                 .append(" street, ")
                 .append(context.getDestination())
                 .append(" city view");
-        itinerary.append("\nПримечание: AI-провайдеры временно недоступны, поэтому GUNN вернул статический резервный план.");
         return itinerary.toString();
     }
 }
