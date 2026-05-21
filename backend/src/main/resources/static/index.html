@@ -434,6 +434,73 @@
             padding: 0 30px;
         }
 
+        .style-panel {
+            width: min(1120px, 100%);
+            margin-top: 18px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028));
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: var(--blur);
+        }
+
+        .style-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .style-panel-head strong {
+            color: var(--platinum);
+            font-size: 13px;
+        }
+
+        .style-panel-head span,
+        .selected-style-strip {
+            color: var(--muted-2);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .style-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 170px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .style-chip {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            border: 1px solid var(--line-soft);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.045);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .style-chip:hover,
+        .style-chip.active {
+            border-color: rgba(244, 244, 240, 0.52);
+            background: var(--platinum);
+            color: #050505;
+            transform: translateY(-1px);
+        }
+
+        .selected-style-strip {
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
         .search-button:hover,
         .auth-submit:hover,
         .waitlist-button:hover {
@@ -793,6 +860,78 @@
 
         .two-column {
             grid-template-columns: 1fr 1fr;
+        }
+
+        .trip-results {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .trip-results.hidden {
+            display: none !important;
+        }
+
+        .itinerary-card {
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.048);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--blur);
+        }
+
+        .itinerary-card h3 {
+            margin: 0 0 12px;
+            color: var(--platinum);
+            font-size: 16px;
+        }
+
+        .itinerary-card p,
+        .itinerary-line {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .itinerary-line {
+            display: grid;
+            grid-template-columns: 28px minmax(0, 1fr);
+            gap: 10px;
+            padding: 12px 0;
+            border-top: 1px solid var(--line-soft);
+        }
+
+        .itinerary-line:first-of-type {
+            border-top: 0;
+        }
+
+        .itinerary-line span {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--platinum);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .result-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .result-gallery img {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 1px solid var(--line-soft);
+            background: var(--graphite);
         }
 
         .list-item {
@@ -1284,6 +1423,19 @@
                 border-radius: 12px;
             }
 
+            .style-panel {
+                margin-top: 16px;
+                text-align: left;
+            }
+
+            .style-panel-head {
+                display: grid;
+            }
+
+            .style-grid {
+                max-height: 210px;
+            }
+
             .search-field {
                 min-height: 70px;
                 border-right: 0;
@@ -1345,6 +1497,10 @@
 
             .waitlist-button {
                 width: 100%;
+            }
+
+            .result-gallery {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1442,6 +1598,15 @@
                                 <span id="btnText" data-i18n="searchButton">Plan hazırla</span>
                             </button>
                         </form>
+
+                        <div class="style-panel" aria-labelledby="stylePanelTitle">
+                            <div class="style-panel-head">
+                                <strong id="stylePanelTitle" data-i18n="stylePanelTitle">46 travel styles</strong>
+                                <span data-i18n="stylePanelHint">Select one or more styles. GUNN adapts every result to that taste.</span>
+                            </div>
+                            <div class="style-grid" id="tourismStyleGrid" aria-label="Tourism styles"></div>
+                            <div class="selected-style-strip" id="selectedStylesText" data-i18n="selectedStylesEmpty">No styles selected.</div>
+                        </div>
                     </div>
 
                     <div class="visual-wrap" aria-hidden="true">
@@ -1503,6 +1668,8 @@
                         </div>
                         <span class="quality-badge"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="qualityBadge">Pro nəticə</span></span>
                     </div>
+
+                    <div class="trip-results hidden" id="tripResults" aria-live="polite"></div>
 
                     <article class="hotel-card">
                         <div class="hotel-image"><i class="fa-solid fa-hotel"></i></div>
@@ -1879,7 +2046,21 @@
         const waitlistForm = document.getElementById("waitlistForm");
         const waitlistMessage = document.getElementById("waitlistMessage");
         const waitlistSubmit = document.getElementById("waitlistSubmit");
+        const tourismStyleGrid = document.getElementById("tourismStyleGrid");
+        const selectedStylesText = document.getElementById("selectedStylesText");
+        const tripResults = document.getElementById("tripResults");
         const currencySymbols = { AZN: "₼", USD: "$", EUR: "€" };
+        const tourismStyles = [
+            "Romantik turizm", "Qastronomik turizm", "Konsert turizmi", "Macera turizmi", "Luks istirahet", "Aile turizmi",
+            "Solo travel", "Bal ayi", "Wellness turizmi", "Spa retreat", "Tarixi turizm", "Muzey turizmi",
+            "Memarliq turizmi", "Foto turizm", "Tebiet turizmi", "Dag turizmi", "Deniz turizmi", "Ada turizmi",
+            "Qis turizmi", "Yay istiraheti", "Festival turizmi", "Gece heyati", "Shopping turizmi", "Moda turizmi",
+            "Biznes travel", "Digital nomad", "Sakit retreat", "Meditasiya turizmi", "Eko turizm", "Kend turizmi",
+            "Yol seyaheti", "Qatar seyaheti", "Kruiz turizmi", "Safari", "Ekstremal idman", "Velosiped turizmi",
+            "Piyada marsrutlar", "Yeralti seher", "Serab turizmi", "Qehve medeniyyeti", "Street food", "Hidden gems",
+            "Luxury shopping", "Usaqla seyahet", "Budceli seyahet", "Premium city break"
+        ];
+        const selectedStyles = new Set();
         let currentLanguage = localStorage.getItem("tripgen-language") || "az";
 
         function t(key) {
@@ -1916,11 +2097,68 @@
 
             themeToggle.setAttribute("aria-label", t("themeLabel"));
             refreshSummaryLabels();
+            updateSelectedStylesText();
         }
 
         function refreshSummaryLabels() {
             const days = document.getElementById("daysInput").value || "3";
             document.getElementById("summaryDays").textContent = days + t("daysSuffix");
+        }
+
+        function getSelectedStylesValue() {
+            return Array.from(selectedStyles).join(", ");
+        }
+
+        function updateSelectedStylesText() {
+            if (!selectedStylesText) return;
+            const styles = Array.from(selectedStyles);
+            if (styles.length === 0) {
+                selectedStylesText.textContent = currentLanguage === "az"
+                    ? "Stil secilmeyib."
+                    : currentLanguage === "ru"
+                        ? "Стили не выбраны."
+                        : "No styles selected.";
+                return;
+            }
+
+            const prefix = currentLanguage === "az"
+                ? "Secilen stiller"
+                : currentLanguage === "ru"
+                    ? "Выбранные стили"
+                    : "Selected styles";
+            selectedStylesText.textContent = `${prefix}: ${styles.join(", ")}`;
+        }
+
+        function renderTourismStyles() {
+            if (!tourismStyleGrid) return;
+            tourismStyleGrid.innerHTML = "";
+            tourismStyles.forEach((style, index) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "style-chip";
+                button.dataset.style = style;
+                button.innerHTML = `<i class="fa-solid fa-sparkles"></i><span>${escapeHtml(style)}</span>`;
+                button.setAttribute("aria-pressed", "false");
+                button.addEventListener("click", () => {
+                    if (selectedStyles.has(style)) {
+                        selectedStyles.delete(style);
+                    } else {
+                        selectedStyles.add(style);
+                    }
+                    button.classList.toggle("active", selectedStyles.has(style));
+                    button.setAttribute("aria-pressed", String(selectedStyles.has(style)));
+                    updateSelectedStylesText();
+
+                    const city = document.getElementById("cityInput").value.trim();
+                    if (city) {
+                        runSearch({ auto: true });
+                    } else if (index < 6) {
+                        renderLocalStylePreview(style);
+                    }
+                });
+                tourismStyleGrid.appendChild(button);
+            });
+            updateSelectedStylesText();
         }
 
         function applyTheme() {
@@ -1931,6 +2169,7 @@
 
         applyTheme();
         applyLanguage(currentLanguage);
+        renderTourismStyles();
 
         document.querySelectorAll("[data-lang]").forEach((button) => {
             button.addEventListener("click", () => applyLanguage(button.dataset.lang));
@@ -2197,12 +2436,102 @@
             });
         }
 
-        document.getElementById("searchForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        function renderLocalStylePreview(style) {
+            if (!tripResults) return;
+            tripResults.classList.remove("hidden");
+            tripResults.innerHTML = `
+                <article class="itinerary-card">
+                    <h3>${escapeHtml(style)}</h3>
+                    <p>${escapeHtml(style)} secildi. Seher yazib Generate edin, GUNN backend bu stile uygun otel, fendtler, rota ve camadan siyahisini quracaq.</p>
+                </article>
+            `;
+        }
+
+        function splitItineraryLines(text) {
+            return (text || "")
+                .replace(/\r/g, "")
+                .split(/\n+/)
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .slice(0, 12);
+        }
+
+        function renderTripResponse(data, fallbackCity) {
+            if (!tripResults) return;
+            const raw = data && (data.itineraryRaw || data.itinerary || data.plan || "");
+            const lines = splitItineraryLines(raw);
+            const destination = (data && data.destination) || fallbackCity;
+            const imageUrls = Array.isArray(data && data.imageUrls) ? data.imageUrls.slice(0, 3) : [];
+
+            if (!raw && imageUrls.length === 0) {
+                tripResults.classList.add("hidden");
+                tripResults.innerHTML = "";
+                return;
+            }
+
+            const lineMarkup = lines.length
+                ? lines.map((line, index) => `<div class="itinerary-line"><span>${index + 1}</span><div>${escapeHtml(line)}</div></div>`).join("")
+                : `<p>${escapeHtml(raw || t("noData"))}</p>`;
+            const galleryMarkup = imageUrls.length
+                ? `<div class="result-gallery">${imageUrls.map((url) => `<img src="${escapeHtml(url)}" alt="${escapeHtml(destination)}">`).join("")}</div>`
+                : "";
+
+            tripResults.classList.remove("hidden");
+            tripResults.innerHTML = `
+                <article class="itinerary-card">
+                    <h3>${escapeHtml(destination)} · AI itinerary</h3>
+                    ${lineMarkup}
+                    ${galleryMarkup}
+                </article>
+            `;
+        }
+
+        async function generateTripPlan(city, days) {
+            const payload = {
+                destination: city,
+                days: Number(days) || 3,
+                budgetType: document.getElementById("currencyInput").value,
+                selectedTypes: getSelectedStylesValue(),
+                lang: currentLanguage
+            };
+
+            const response = await fetch("/api/trips/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error. Status: ${response.status}`);
+            }
+            return data;
+        }
+
+        async function analyzeDestination(city, status, currency) {
+            const params = new URLSearchParams({
+                city,
+                status,
+                currency,
+                selectedTypes: getSelectedStylesValue()
+            });
+            const response = await fetch(`/api/destinations/analyze?${params.toString()}`);
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error. Status: ${response.status}`);
+            }
+            return data;
+        }
+
+        async function runSearch(options = {}) {
             const city = document.getElementById("cityInput").value.trim();
             const status = document.getElementById("statusInput").value;
             const days = document.getElementById("daysInput").value;
             const currency = document.getElementById("currencyInput").value;
+            if (!city) {
+                document.getElementById("cityInput").focus();
+                return;
+            }
 
             document.getElementById("summaryCity").textContent = city;
             document.getElementById("summaryStatus").textContent = status;
@@ -2223,11 +2552,16 @@
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch(`/api/destinations/analyze?city=${encodeURIComponent(city)}&status=${encodeURIComponent(status)}&currency=${encodeURIComponent(currency)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error. Status: ${response.status}`);
+                const [destinationResult, tripResult] = await Promise.allSettled([
+                    analyzeDestination(city, status, currency),
+                    generateTripPlan(city, days)
+                ]);
+
+                if (destinationResult.status === "rejected" && tripResult.status === "rejected") {
+                    throw destinationResult.reason || tripResult.reason;
                 }
-                const data = await response.json();
+
+                const data = destinationResult.status === "fulfilled" ? destinationResult.value : {};
 
                 document.getElementById("hotelText").innerText = data.hotel || t("noData");
                 document.getElementById("visaText").innerText = data.visa || t("noData");
@@ -2236,6 +2570,14 @@
                 checkVisaStatus(data.visa);
                 renderHacksList(data.hacks);
                 renderPackingList(data.packingList);
+                if (tripResult.status === "fulfilled") {
+                    renderTripResponse(tripResult.value, city);
+                } else {
+                    renderTripResponse({
+                        destination: city,
+                        itineraryRaw: `${getSelectedStylesValue() || status}: ${data.hacks || data.hotel || t("noData")}`
+                    }, city);
+                }
 
                 document.getElementById("realContent").classList.remove("hidden");
             } catch (error) {
@@ -2248,6 +2590,11 @@
                 btnText.textContent = t("searchButton");
                 submitBtn.disabled = false;
             }
+        }
+
+        document.getElementById("searchForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await runSearch();
         });
 
         waitlistForm.addEventListener("submit", async (e) => {
